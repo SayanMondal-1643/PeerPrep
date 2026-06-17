@@ -33,7 +33,7 @@ function LoginForm() {
       }
 
       await login(email, password)
-      const destination = redirectTo || (searchParams.get('redirect') ?? '/dashboard')
+      const destination = redirectTo || (searchParams.get('redirect') ?? '/exams')
       setRedirectTo(null)
       router.push(destination)
     } catch (err) {

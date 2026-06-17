@@ -185,10 +185,10 @@ export default function MaterialsPage() {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: examName, href: `/dashboard/${examId}/branches` },
-            { label: branchName, href: `/dashboard/${examId}/${branchId}` },
-            { label: subjectName, href: `/dashboard/${examId}/${branchId}/${subjectId}` },
-            { label: topicName, href: `/dashboard/${examId}/${branchId}/${subjectId}/${topicId}` },
+            { label: examName, href: `/exams/${examId}/branches` },
+            { label: branchName, href: `/exams/${examId}/${branchId}` },
+            { label: subjectName, href: `/exams/${examId}/${branchId}/${subjectId}` },
+            { label: topicName, href: `/exams/${examId}/${branchId}/${subjectId}/${topicId}` },
           ]}
         />
 
@@ -206,7 +206,7 @@ export default function MaterialsPage() {
                 const userRating = userRatings[material.id] || 0
 
                 return (
-                  <Card key={material.id} className="p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = `/dashboard/${examId}/${branchId}/${subjectId}/${topicId}/${material.id}`}>
+                  <Card key={material.id} className="p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => window.location.href = `/exams/${examId}/${branchId}/${subjectId}/${topicId}/${material.id}`}>
                     <div className="flex items-start gap-4">
                       <div className="p-3 rounded-lg bg-primary/10 flex-shrink-0">
                         <FileText className="h-6 w-6 text-primary" />

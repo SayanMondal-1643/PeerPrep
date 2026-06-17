@@ -37,7 +37,7 @@ export default function UniversitiesPage() {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: "Dashboard", href: "/dashboard" },
+            { label: "Dashboard", href: "/exams" },
             { label: "University Examinations", href: "/universities" },
           ]}
         />

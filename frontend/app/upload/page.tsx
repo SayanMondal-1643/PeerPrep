@@ -393,7 +393,7 @@ export default function UploadPage() {
                 {isSubmitting ? "Uploading..." : "Upload Material"}
               </Button>
               <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard">Cancel</Link>
+                <Link href="/exams">Cancel</Link>
               </Button>
             </div>
           </form>

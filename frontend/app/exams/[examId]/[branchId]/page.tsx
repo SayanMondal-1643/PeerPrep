@@ -56,7 +56,7 @@ export default function SubjectsPage() {
   // If branchId is "branches", redirect to the branches page
   useEffect(() => {
     if (branchId === "branches") {
-      router.push(`/dashboard/${examId}/branches`)
+      router.push(`/exams/${examId}/branches`)
     }
   }, [branchId, examId, router])
 
@@ -76,8 +76,8 @@ export default function SubjectsPage() {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: examName, href: `/dashboard/${examId}/branches` },
-            { label: branchName, href: `/dashboard/${examId}/${branchId}` },
+            { label: examName, href: `/exams/${examId}/branches` },
+            { label: branchName, href: `/exams/${examId}/${branchId}` },
           ]}
         />
 
@@ -89,7 +89,7 @@ export default function SubjectsPage() {
         {/* Subjects Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {subjects.map((subject) => (
-            <Link key={subject.id} href={`/dashboard/${examId}/${branchId}/${subject.id}`}>
+            <Link key={subject.id} href={`/exams/${examId}/${branchId}/${subject.id}`}>
               <Card className="p-6 h-full hover:bg-accent hover:border-accent-foreground/20 transition-all group">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">{subject.name}</h3>

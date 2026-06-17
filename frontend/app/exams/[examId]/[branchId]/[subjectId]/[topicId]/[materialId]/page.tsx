@@ -47,7 +47,7 @@ interface MaterialViewerPageProps {
 export default async function MaterialViewerPage({ params }: MaterialViewerPageProps) {
   const { examId, branchId, subjectId, topicId, materialId } = await params
   const material = mockMaterials.find(m => m.id === materialId) || mockMaterials[0]
-  const backUrl = `/dashboard/${examId}/${branchId}/${subjectId}/${topicId}`
+  const backUrl = `/exams/${examId}/${branchId}/${subjectId}/${topicId}`
 
   return (
     <MaterialViewerContent material={material} backUrl={backUrl} />

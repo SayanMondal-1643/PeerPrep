@@ -4,37 +4,25 @@ import { Card } from "@/components/ui/card"
 import { Breadcrumbs } from "@/components/breadcrumbs"
 
 // Mock data - will be replaced with database queries
-const branchesData: Record<string, { name: string; branches: Array<{ id: string; name: string; subjectCount?: number }> }> = {
-  gate: {
-    name: "GATE (Graduate Aptitude Test in Engineering)",
-    branches: [
-      { id: "gate-cse", name: "Computer Science & IT", subjectCount: 12 },
-      { id: "gate-ece", name: "Electronics & Communication", subjectCount: 10 },
-      { id: "gate-civil", name: "Civil Engineering", subjectCount: 8 },
-      { id: "gate-mech", name: "Mechanical Engineering", subjectCount: 9 },
-      { id: "gate-electrical", name: "Electrical Engineering", subjectCount: 11 },
-      { id: "gate-chemical", name: "Chemical Engineering", subjectCount: 7 },
-      { id: "gate-instrumentation", name: "Instrumentation Engineering", subjectCount: 6 },
-    ],
-  },
-  university: {
-    name: "University Examinations",
-    branches: [
-      { id: "makaut", name: "Maulana Abul Kalam Azad University of Technology (MAKAUT)" },
-      { id: "jadavpur", name: "Jadavpur University" },
-      { id: "calcutta", name: "University of Calcutta" },
-      { id: "kalyani", name: "University of Kalyani" },
-    ],
-  },
-}
+const branchesData: Array<{ id: string; name: string;}> = 
+[
+      { id: "gate-cse", name: "Computer Science & IT"},
+      { id: "gate-ece", name: "Electronics & Communication"},
+      { id: "gate-civil", name: "Civil Engineering",},
+      { id: "gate-mech", name: "Mechanical Engineering"},
+      { id: "gate-electrical", name: "Electrical Engineering"},
+      { id: "gate-chemical", name: "Chemical Engineering"},
+      { id: "gate-instrumentation", name: "Instrumentation Engineering"},
+    ]
 
-interface Params {
+
+interface Params { 
   params: Promise<{ examId: string }>
 }
 
 export default async function BranchesPage({ params }: Params) {
   const { examId } = await params
-  const data = branchesData[examId]
+  const data = branchesData[0]
 
   if (!data) {
     return (
@@ -53,7 +41,7 @@ export default async function BranchesPage({ params }: Params) {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: data.name, href: `/dashboard/${examId}/branches` },
+            { label: data.name, href: `/exams/${examId}/branches` },
           ]}
         />
 
@@ -75,7 +63,7 @@ export default async function BranchesPage({ params }: Params) {
               href={
                 examId === "university"
                   ? `/universities/${branch.id}`
-                  : `/dashboard/${examId}/${branch.id}`
+                  : `/exams/${examId}/${branch.id}`
               }
             >
               <Card className="p-6 h-full cursor-pointer group hover:shadow-md hover:border-primary/50 transition-all duration-300">

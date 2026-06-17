@@ -85,7 +85,7 @@ export default async function UniversityBranchesPage({ params }: Params) {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: "Dashboard", href: "/dashboard" },
+            { label: "Dashboard", href: "/exams" },
             { label: "University Examinations", href: "/universities" },
             { label: data.name, href: `/universities/${universityId}` },
           ]}

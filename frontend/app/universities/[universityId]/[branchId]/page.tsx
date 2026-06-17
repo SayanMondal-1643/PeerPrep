@@ -126,7 +126,7 @@ export default async function BranchSubjectsPage({ params }: Params) {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: "Dashboard", href: "/dashboard" },
+            { label: "Dashboard", href: "/exams" },
             { label: "University Examinations", href: "/universities" },
             { label: universityNames[universityId] || "University", href: `/universities/${universityId}` },
             { label: branchName, href: `/universities/${universityId}/${branchId}` },
@@ -144,7 +144,7 @@ export default async function BranchSubjectsPage({ params }: Params) {
           {subjects.map((subject) => (
             <Link
               key={subject.id}
-              href={`/dashboard/university/${universityId}/${branchId}/${subject.id}`}
+              href={`/exams/university/${universityId}/${branchId}/${subject.id}`}
             >
               <Card className="p-6 h-full hover:bg-accent hover:border-accent-foreground/20 transition-all group">
                 <div className="flex items-start justify-between mb-3">

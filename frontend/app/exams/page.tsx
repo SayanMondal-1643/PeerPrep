@@ -2,26 +2,35 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 
-// Mock data - will be replaced with database queries
 const exams = [
   {
-    id: "gate",
+    id: 0,
     name: "GATE",
-    description: "Graduate Aptitude Test in Engineering",
+    description: "Graduate Aptitude Test in Engineering"
   },
   {
-    id: "university",
-    name: "University Examinations",
-    description: "Prepare for your university semester exams",
+    id: 1,
+    name: "MAKAUT",
+    description: "Maulana Abul Kalam Azad University of Technology"
   },
+  {
+    id: 2,
+    name: "JU",
+    description: "Jadavpur University"
+  },
+  {
+    id: 3,
+    name: "CU",
+    description: "Calcutta University"
+  }
 ]
 
-export default function DashboardPage() {
+export default function ExamsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-12">
         <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-3">Dashboard</h1>
+          <h1 className="text-4xl font-bold mb-3">Exams</h1>
           <p className="text-lg text-muted-foreground">
             Select an exam to explore branches, subjects, topics and access topic-wise study materials.
           </p>
@@ -30,13 +39,8 @@ export default function DashboardPage() {
         {/* Exams Grid */}
         <div className="grid md:grid-cols-2 gap-6">
           {exams.map((exam) => {
-            // Route to different pages based on exam type
-            const href = exam.id === "university" 
-              ? "/universities" 
-              : `/dashboard/${exam.id}/branches`
-            
             return (
-              <Link key={exam.id} href={href}>
+              <Link key={exam.id} href={`/exams/${exam.id}/branches`}>
                 <Card className="p-8 h-full cursor-pointer group hover:shadow-lg hover:border-primary/50 transition-all duration-300">
                   <div className="flex flex-col h-full">
                     <div className="flex-1">

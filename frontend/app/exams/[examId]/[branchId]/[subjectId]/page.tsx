@@ -66,9 +66,9 @@ export default function TopicsPage() {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: examName, href: `/dashboard/${examId}/branches` },
-            { label: branchName, href: `/dashboard/${examId}/${branchId}` },
-            { label: subjectName, href: `/dashboard/${examId}/${branchId}/${subjectId}` },
+            { label: examName, href: `/exams/${examId}/branches` },
+            { label: branchName, href: `/exams/${examId}/${branchId}` },
+            { label: subjectName, href: `/exams/${examId}/${branchId}/${subjectId}` },
           ]}
         />
 
@@ -82,7 +82,7 @@ export default function TopicsPage() {
           {topics.map((topic) => (
             <Link
               key={topic.id}
-              href={`/dashboard/${examId}/${branchId}/${subjectId}/${topic.id}`}
+              href={`/exams/${examId}/${branchId}/${subjectId}/${topic.id}`}
             >
               <Card className="p-5 h-full hover:bg-accent hover:border-accent-foreground/20 transition-all group">
                 <div className="flex items-start justify-between mb-3">

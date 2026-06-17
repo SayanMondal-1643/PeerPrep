@@ -86,7 +86,7 @@ function SignupForm() {
         researchgateProfile: formData.researchgateProfile,
       })
 
-      const destination = redirectTo || (searchParams.get('redirect') ?? '/dashboard')
+      const destination = redirectTo || (searchParams.get('redirect') ?? '/exams')
       setRedirectTo(null)
       router.push(destination)
     } catch (err) {
