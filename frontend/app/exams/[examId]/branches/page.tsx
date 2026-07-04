@@ -3,17 +3,73 @@ import { BookOpen, ChevronLeft } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Breadcrumbs } from "@/components/breadcrumbs"
 
+// UNCOMMENT THE CODE BELOW TO FETCH FROM API:
+// async function fetchBranches() {
+//   try {
+//     const response = await fetch(`http://localhost:5000/api/v1/exams/${examId}/branches`);
+//     const result = await response.json()
+//     if (result.status === "success") {
+//       return result.data
+//     }
+//   } catch (error) {
+//     console.error("Failed to fetch branches:", error)
+//   }
+// return [];
+// }
+
 // Mock data - will be replaced with database queries
-const branchesData: Array<{ id: string; name: string;}> = 
-[
-      { id: "gate-cse", name: "Computer Science & IT"},
-      { id: "gate-ece", name: "Electronics & Communication"},
-      { id: "gate-civil", name: "Civil Engineering",},
-      { id: "gate-mech", name: "Mechanical Engineering"},
-      { id: "gate-electrical", name: "Electrical Engineering"},
-      { id: "gate-chemical", name: "Chemical Engineering"},
-      { id: "gate-instrumentation", name: "Instrumentation Engineering"},
-    ]
+const MockBranches: Array<{ _id: string; name: string; examId: number }> = [
+  {
+    "_id": "1",
+    "name": "Computer Science Engineering",
+    "examId": 1
+  },
+  {
+    "_id": "2",
+    "name": "Information Technology",
+    "examId": 1
+  },
+  {
+    "_id": "3",
+    "name": "Electronics and Communication Engineering",
+    "examId": 1
+  },
+  {
+    "_id": "4",
+    "name": "Electrical Engineering",
+    "examId": 1
+  },
+  {
+    "_id": "5",
+    "name": "Mechanical Engineering",
+    "examId": 1
+  },
+  {
+    "_id": "6",
+    "name": "Civil Engineering",
+    "examId": 1
+  },
+  {
+    "_id": "7",
+    "name": "Chemical Engineering",
+    "examId": 1
+  },
+  {
+    "_id": "8",
+    "name": "Biotechnology",
+    "examId": 1
+  },
+  {
+    "_id": "9",
+    "name": "Aerospace Engineering",
+    "examId": 1
+  },
+  {
+    "_id": "10",
+    "name": "Artificial Intelligence and Data Science",
+    "examId": 1
+  }
+]
 
 
 interface Params { 
@@ -21,18 +77,10 @@ interface Params {
 }
 
 export default async function BranchesPage({ params }: Params) {
-  const { examId } = await params
-  const data = branchesData[0]
+  // UNCOMMENT THE LINE TO FETCH FROM API:
+  // const branches = await fetchBranches();
 
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 text-center">
-          <p className="text-muted-foreground">Exam not found</p>
-        </div>
-      </div>
-    )
-  }
+  const { examId } = await params
 
   return (
     <div className="min-h-screen bg-background">

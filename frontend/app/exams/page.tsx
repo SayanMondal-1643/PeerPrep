@@ -16,6 +16,8 @@ import { Card } from "@/components/ui/card";
 // return [];
 // }
 
+
+// MOCK DATA - to be removed
 const mockExams = [
   {
     id: 0,
