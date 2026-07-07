@@ -18,118 +18,51 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// MOCK DATA - to be removed
-const mockMaterials: Array<{
+// UNCOMMENT THE CODE BELOW TO FETCH FROM API:
+// async function fetchMaterials(topicId: string) {
+//   try {
+//     const response = await fetch(`http://localhost:5000/api/v1/topics/${topicId}/materials`);
+//     const result = await response.json()
+//     if (result.status === "success") {
+//       return result
+//     }
+//   } catch (error) {
+//     console.error("Failed to fetch materials:", error)
+//   }
+// return null;
+// }
+
+interface UploaderInfo {
+  _id: string;
+  name: string;
+  role: "student" | "teacher";
+}
+
+interface Material {
   _id: string;
   title: string;
   description: string;
   fileUrl: string;
   uploadDate: string;
-  status: string;
-  userId: { _id: string; name: string; role: string };
+  status: "pending" | "approved" | "rejected";
+  userId: UploaderInfo;
   topicId: string;
   isBestMaterial: boolean;
   isTopperMaterial: boolean;
   isAIPicked: boolean;
   ratingsAverage: number;
   ratingsQuantity: number;
-}> = [
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c0d",
-    title: "Arrays - Basics and Operations",
-    description: "Covers array declaration, traversal, insertion, and deletion",
-    fileUrl: "https://cdn.example.com/files/array-basics.pdf",
-    uploadDate: "2026-06-15T10:30:00.000Z",
-    status: "approved",
-    userId: {
-      _id: "665e0a1b2c3d4e5f6a7b8c9d",
-      name: "Ananya Roy",
-      role: "teacher",
-    },
-    topicId: "665d9f8e7c6b5a4938271605",
-    isBestMaterial: true,
-    isAIPicked: false,
-    isTopperMaterial: false,
-    ratingsAverage: 4.7,
-    ratingsQuantity: 132,
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c1e",
-    title: "Two Pointer Technique on Arrays",
-    description: "Solving array problems using two pointers with examples",
-    fileUrl: "https://cdn.example.com/files/array-two-pointer.pdf",
-    uploadDate: "2026-06-18T09:15:00.000Z",
-    status: "approved",
-    userId: {
-      _id: "665e0a1b2c3d4e5f6a7b8c1a",
-      name: "Riya Sen",
-      role: "student",
-    },
-    topicId: "665d9f8e7c6b5a4938271605",
-    isBestMaterial: false,
-    isAIPicked: false,
-    isTopperMaterial: true,
-    ratingsAverage: 4.2,
-    ratingsQuantity: 18,
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c2f",
-    title: "Array Sorting Algorithms - Quick Revision",
-    description: "Summary sheet covering bubble, selection, and merge sort",
-    fileUrl: "https://cdn.example.com/files/array-sorting-revision.pdf",
-    uploadDate: "2026-06-20T14:45:00.000Z",
-    status: "approved",
-    userId: {
-      _id: "665e0a1b2c3d4e5f6a7b8c2b",
-      name: "Sourav Ghosh",
-      role: "student",
-    },
-    topicId: "665d9f8e7c6b5a4938271605",
-    isBestMaterial: false,
-    isAIPicked: true,
-    isTopperMaterial: false,
-    ratingsAverage: 0,
-    ratingsQuantity: 2,
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c3a",
-    title: "Multidimensional Arrays - Notes",
-    description: "2D and 3D array representation with diagrams",
-    fileUrl: "https://cdn.example.com/files/array-multidimensional.pdf",
-    uploadDate: "2026-06-22T11:00:00.000Z",
-    status: "pending",
-    userId: {
-      _id: "665e0a1b2c3d4e5f6a7b8c3c",
-      name: "Meghna Das",
-      role: "teacher",
-    },
-    topicId: "665d9f8e7c6b5a4938271605",
-    isBestMaterial: false,
-    isAIPicked: false,
-    isTopperMaterial: false,
-    ratingsAverage: 0,
-    ratingsQuantity: 0,
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c4b",
-    title: "Array-Based Sliding Window Problems",
-    description: "Concepts and solved problems using sliding window on arrays",
-    fileUrl: "https://cdn.example.com/files/array-sliding-window.pdf",
-    uploadDate: "2026-06-25T16:30:00.000Z",
-    status: "approved",
-    userId: {
-      _id: "665e0a1b2c3d4e5f6a7b8c4d",
-      name: "Arjun Mehta",
-      role: "student",
-    },
-    topicId: "665d9f8e7c6b5a4938271605",
-    isBestMaterial: true,
-    isAIPicked: false,
-    isTopperMaterial: true,
-    ratingsAverage: 4.9,
-    ratingsQuantity: 210,
-  },
-];
+}
+
+interface MaterialsResponse {
+  status: string;
+  exam: string;
+  branch: string;
+  subject: string;
+  topic: string;
+  results: number;
+  materials: Material[];
+}
 
 interface Params {
   params: Promise<{
@@ -140,34 +73,135 @@ interface Params {
   }>;
 }
 
+// MOCK DATA - TO BE REMOVED
+const mockData: MaterialsResponse = {
+  status: "success",
+  exam: "MAKAUT",
+  branch: "Computer Science Engineering",
+  subject: "Data Structures & Algorithms",
+  topic: "Array",
+  results: 5,
+  materials: [
+    {
+      _id: "1",
+      title: "Complete Array Problems Guide",
+      description:
+        "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
+      fileUrl: "https://example.com/file1.pdf",
+      uploadDate: "2026-06-05",
+      status: "approved",
+      userId: { _id: "1", name: "Sayan Mondal", role: "student" },
+      topicId: "1",
+      isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 4.8,
+      ratingsQuantity: 245,
+    },
+    {
+      _id: "2",
+      title: "Array Rotation and Sliding Window Notes",
+      description:
+        "Handwritten notes covering array rotation techniques and the sliding window pattern with worked examples.",
+      fileUrl: "https://example.com/file2.pdf",
+      uploadDate: "2026-06-08",
+      status: "approved",
+      userId: { _id: "2", name: "Runa Mukherjee", role: "teacher" },
+      topicId: "1",
+      isBestMaterial: true,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 4.9,
+      ratingsQuantity: 312,
+    },
+    {
+      _id: "3",
+      title: "Two Pointer Technique Cheat Sheet",
+      description:
+        "Quick reference sheet summarizing two-pointer approaches for common array problems.",
+      fileUrl: "https://example.com/file3.pdf",
+      uploadDate: "2026-06-10",
+      status: "approved",
+      userId: { _id: "1", name: "Sayan Mondal", role: "student" },
+      topicId: "1",
+      isBestMaterial: false,
+      isTopperMaterial: true,
+      isAIPicked: false,
+      ratingsAverage: 4.6,
+      ratingsQuantity: 98,
+    },
+    {
+      _id: "4",
+      title: "Prefix Sum and Difference Array Explained",
+      description:
+        "Step-by-step explanation of prefix sum and difference array techniques with diagrams.",
+      fileUrl: "https://example.com/file4.pdf",
+      uploadDate: "2026-06-14",
+      status: "approved",
+      userId: { _id: "3", name: "Arka Das", role: "teacher" },
+      topicId: "1",
+      isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: true,
+      ratingsAverage: 4.2,
+      ratingsQuantity: 41,
+    },
+    {
+      _id: "5",
+      title: "Array Problem Set - MAKAUT Previous Years",
+      description:
+        "Compilation of array-related questions from past MAKAUT semester exams with solutions.",
+      fileUrl: "https://example.com/file5.pdf",
+      uploadDate: "2026-06-16",
+      status: "pending",
+      userId: { _id: "2", name: "Runa Mukherjee", role: "teacher" },
+      topicId: "1",
+      isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 0,
+      ratingsQuantity: 0,
+    },
+  ],
+};
+
 export default async function MaterialsPage({ params }: Params) {
   const { examId, branchId, subjectId, topicId } = await params;
   // UNCOMMENT THE LINE TO FETCH FROM API:
-  // const topics = await fetchTopics();
+  // const data = await fetchMaterials(topicId);
+
+  // if (!data) return <p>Failed to load materials.</p>;
+  // if (data.materials.length === 0) return <p>No materials found.</p>;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        {/* <Breadcrumbs
+        <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: examName, href: `/exams/${examId}/branches` },
-            { label: branchName, href: `/exams/${examId}/${branchId}` },
+            { label: "Exams", href: "/exams" },
+            /* USE `data` INSTEAD OF `mockData` WHEN FETCHING FROM API */
+            { label: mockData.exam, href: `/exams/${examId}/branches` },
             {
-              label: subjectName,
-              href: `/exams/${examId}/${branchId}/${subjectId}`,
+              label: mockData.branch,
+              href: `/exams/${examId}/branches/${branchId}/subjects`,
             },
             {
-              label: topicName,
-              href: `/exams/${examId}/${branchId}/${subjectId}/${topicId}`,
+              label: mockData.subject,
+              href: `/exams/${examId}/branches/${branchId}/subjects/${subjectId}/topics`,
+            },
+            {
+              label: mockData.topic,
+              href: `/exams/${examId}/branches/${branchId}/subjects/${subjectId}/topics/${topicId}/materials`,
             },
           ]}
-        /> */}
+        />
 
         <div>
           <div className="mb-8">
-            {/* <h1 className="text-3xl font-bold mb-2">{topicName}</h1> */}
+            {/* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */}
+            <h1 className="text-3xl font-bold mb-2">{mockData.topic}</h1>
             <p className="text-muted-foreground">
               Browse and download study materials. Rate materials to help fellow
               students find the best content.
@@ -176,8 +210,8 @@ export default async function MaterialsPage({ params }: Params) {
 
           {/* Materials List */}
           <div className="space-y-4">
-            {/* USE materials INSTEAD OF mockMaterials WHEN FETCHING FROM API */}
-            {mockMaterials.map((material) => {
+            {/* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */}
+            {mockData.materials.map((material) => {
               // const userRating = userRatings[material._id] || 0;
 
               return (
@@ -186,7 +220,7 @@ export default async function MaterialsPage({ params }: Params) {
                   className="relative rounded-lg border p-6 transition-shadow hover:shadow-lg"
                 >
                   <Link
-                    href={`/exams/${examId}/${branchId}/${subjectId}/${topicId}/${material._id}`}
+                    href={`/exams/${examId}/branches/${branchId}/subjects/${subjectId}/topics/${topicId}/materials/${material._id}`}
                     className="block"
                   >
                     <div className="flex items-start gap-4 pr-24">

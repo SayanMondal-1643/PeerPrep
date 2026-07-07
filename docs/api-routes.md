@@ -1,20 +1,21 @@
-
 # PeerPrep API Documentation
 
 # Exams
 
 ## GET `/api/v1/exams`
+
 Get all exams.
 
 ### Response
+
 ```json
 {
   "status": "success",
   "results": 1,
-  "data": [
+  "exams": [
     {
       "_id": "1",
-      "name": "MAKAUT"
+      "name": "Maulana Abul Kalam Azad University of Technology"
     }
   ]
 }
@@ -23,9 +24,11 @@ Get all exams.
 ---
 
 ## POST `/api/v1/exams`
+
 Create an exam.
 
 ### Request Body
+
 ```json
 {
   "name": "Jadavpur University"
@@ -33,12 +36,14 @@ Create an exam.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
   "data": {
     "_id": "2",
-    "name": "Jadavpur University"
+    "name": "JU",
+    "description": "Jadavpur Univeristy"
   }
 }
 ```
@@ -46,9 +51,11 @@ Create an exam.
 ---
 
 ## PATCH `/api/v1/exams/:examID`
+
 Update an exam.
 
 ### Request Body
+
 ```json
 {
   "name": "MAKAUT Updated"
@@ -56,6 +63,7 @@ Update an exam.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -69,9 +77,11 @@ Update an exam.
 ---
 
 ## DELETE `/api/v1/exams/:examID`
+
 Delete an exam.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -84,29 +94,35 @@ Delete an exam.
 # Branches
 
 ## GET `/api/v1/exams/:examID/branches`
+
 Get all branches under an exam.
 
 ### Response
+
 ```json
 {
   "status": "success",
+  "exam": "MAKAUT",
   "results": 1,
-  "data": [
+  "branches": [
     {
       "_id": "1",
-      "name": "Computer Science Engineering",
-      "examId": 1
+      "name": "Computer Science Engineering"
     }
   ]
 }
 ```
 
+> `exam` is the parent exam's name, included so the frontend can build a breadcrumb without an extra call.
+
 ---
 
 ## POST `/api/v1/exams/:examID/branches`
+
 Create a branch under an exam.
 
 ### Request Body
+
 ```json
 {
   "name": "Information Technology"
@@ -114,6 +130,7 @@ Create a branch under an exam.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -128,9 +145,11 @@ Create a branch under an exam.
 ---
 
 ## PATCH `/api/v1/branches/:branchID`
+
 Update a branch.
 
 ### Request Body
+
 ```json
 {
   "name": "Computer Science Engineering Updated"
@@ -138,6 +157,7 @@ Update a branch.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -152,9 +172,11 @@ Update a branch.
 ---
 
 ## DELETE `/api/v1/branches/:branchID`
+
 Delete a branch.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -167,29 +189,36 @@ Delete a branch.
 # Subjects
 
 ## GET `/api/v1/branches/:branchID/subjects`
+
 Get all subjects under a branch.
 
 ### Response
+
 ```json
 {
   "status": "success",
+  "exam": "MAKAUT",
+  "branch": "Computer Science Engineering",
   "results": 1,
-  "data": [
+  "subjects": [
     {
       "_id": "1",
-      "name": "Data Structures & Algorithms",
-      "branchId": 1
+      "name": "Data Structures & Algorithms"
     }
   ]
 }
 ```
 
+> `exam` and `branch` are the parent exam/branch names (resolved via the branch's `examId`), included for breadcrumb use.
+
 ---
 
 ## POST `/api/v1/branches/:branchID/subjects`
+
 Create a subject under a branch.
 
 ### Request Body
+
 ```json
 {
   "name": "Database Management Systems"
@@ -197,6 +226,7 @@ Create a subject under a branch.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -211,9 +241,11 @@ Create a subject under a branch.
 ---
 
 ## PATCH `/api/v1/subjects/:subjectID`
+
 Update a subject.
 
 ### Request Body
+
 ```json
 {
   "name": "Data Structures & Algorithms Updated"
@@ -221,6 +253,7 @@ Update a subject.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -235,9 +268,11 @@ Update a subject.
 ---
 
 ## DELETE `/api/v1/subjects/:subjectID`
+
 Delete a subject.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -250,18 +285,22 @@ Delete a subject.
 # Topics
 
 ## GET `/api/v1/subjects/:subjectID/topics`
+
 Get all topics under a subject.
 
 ### Response
+
 ```json
 {
   "status": "success",
+  "exam": "Maulana Abul Kalam Azad University of Technology",
+  "branch": "Computer Science Engineering",
+  "subject": "Data Structures & Algorithms",
   "results": 1,
   "data": [
     {
       "_id": "1",
-      "name": "Array",
-      "subjectId": 1
+      "name": "Array"
     }
   ]
 }
@@ -270,9 +309,11 @@ Get all topics under a subject.
 ---
 
 ## POST `/api/v1/subjects/:subjectID/topics`
+
 Create a topic under a subject.
 
 ### Request Body
+
 ```json
 {
   "name": "Linked List"
@@ -280,6 +321,7 @@ Create a topic under a subject.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -294,9 +336,11 @@ Create a topic under a subject.
 ---
 
 ## PATCH `/api/v1/topics/:topicID`
+
 Update a topic.
 
 ### Request Body
+
 ```json
 {
   "name": "Array Updated"
@@ -304,6 +348,7 @@ Update a topic.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -318,9 +363,11 @@ Update a topic.
 ---
 
 ## DELETE `/api/v1/topics/:topicID`
+
 Delete a topic.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -333,14 +380,20 @@ Delete a topic.
 # Materials
 
 ## GET `/api/v1/topics/:topicID/materials`
+
 Get all materials under a topic.
 
 ### Response
+
 ```json
 {
   "status": "success",
+  "exam": "MAKAUT",
+  "branch": "Computer Science Engineering",
+  "subject": "Data Structures & Algorithms",
+  "topic": "Array",
   "results": 1,
-  "data": [
+  "materials": [
     {
       "_id": "1",
       "title": "Complete Array Problems Guide",
@@ -351,6 +404,7 @@ Get all materials under a topic.
       "userId": "1",
       "topicId": "1",
       "isBestMaterial": false,
+      "isTopperMaterial": false,
       "isAIPicked": false,
       "ratingsAverage": 4.8,
       "ratingsQuantity": 245
@@ -362,9 +416,11 @@ Get all materials under a topic.
 ---
 
 ## GET `/api/v1/materials/:materialID`
+
 Get a single material.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -388,9 +444,11 @@ Get a single material.
 ---
 
 ## POST `/api/v1/topics/:topicID/materials`
+
 Create a material under a topic
 
 ### Request Body
+
 ```json
 {
   "title": "Array Algorithms Cheat Sheet",
@@ -400,6 +458,7 @@ Create a material under a topic
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -423,9 +482,11 @@ Create a material under a topic
 ---
 
 ## PATCH `/api/v1/materials/:materialID`
+
 Update a material.
 
 ### Request Body
+
 ```json
 {
   "status": "approved"
@@ -433,6 +494,7 @@ Update a material.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -456,9 +518,11 @@ Update a material.
 ---
 
 ## DELETE `/api/v1/materials/:materialID`
+
 Delete a material.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -471,9 +535,11 @@ Delete a material.
 # Ratings
 
 ## POST `/api/v1/materials/:materialID/ratings`
+
 Rate a material.
 
 ### Request Body
+
 ```json
 {
   "ratingValue": 5
@@ -481,6 +547,7 @@ Rate a material.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -498,9 +565,11 @@ Rate a material.
 # Reports
 
 ## GET `/api/v1/reports`
+
 Get all reports.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -513,8 +582,7 @@ Get all reports.
       "reportDate": "2026-06-13",
       "status": "reviewed",
       "userId": "2",
-      "materialId": "1",
-      
+      "materialId": "1"
     }
   ]
 }
@@ -523,9 +591,11 @@ Get all reports.
 ---
 
 ## POST `/api/v1/materials/:materialID/reports`
+
 Report a material.
 
 ### Request Body
+
 ```json
 {
   "reportReason": "Incorrect content",
@@ -534,20 +604,22 @@ Report a material.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
   "message": "Report submitted successfully"
 }
-
 ```
 
 ---
 
 ## PATCH `/api/v1/reports/:reportID`
+
 Update report status.
 
 ### Request Body
+
 ```json
 {
   "status": "reviewed"
@@ -555,6 +627,7 @@ Update report status.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -565,9 +638,11 @@ Update report status.
 ---
 
 ## DELETE `/api/v1/reports/:reportID`
+
 Delete a report.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -580,9 +655,11 @@ Delete a report.
 # Comments
 
 ## GET `/api/v1/materials/:materialID/comments`
+
 Get all comments under a material.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -601,9 +678,11 @@ Get all comments under a material.
 ---
 
 ## POST `/api/v1/materials/:materialID/comments`
+
 Comment on a material.
 
 ### Request Body
+
 ```json
 {
   "comment": "Great resource for CSE semester exams. The prefix sum technique explanations are clear and the examples are well-chosen. Definitely helped me prepare better."
@@ -611,6 +690,7 @@ Comment on a material.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -624,9 +704,11 @@ Comment on a material.
 ---
 
 ## PATCH `/api/v1/comments/:commentID`
+
 Edit a comment.
 
 ### Request Body
+
 ```json
 {
   "comment": "Updated comment"
@@ -634,6 +716,7 @@ Edit a comment.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -647,9 +730,11 @@ Edit a comment.
 ---
 
 ## DELETE `/api/v1/comments/:commentID`
+
 Delete a comment.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -662,9 +747,11 @@ Delete a comment.
 # Users
 
 ## POST `/api/v1/users/signup`
+
 Create a new user account.
 
 ### Request Body
+
 ```json
 {
   "name": "Sayan Mondal",
@@ -676,6 +763,7 @@ Create a new user account.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success"
@@ -692,9 +780,11 @@ Create a new user account.
 ---
 
 ## POST `/api/v1/users/login`
+
 Login user.
 
 ### Request Body
+
 ```json
 {
   "email": "sayan@example.com",
@@ -703,6 +793,7 @@ Login user.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -719,21 +810,25 @@ Login user.
 ---
 
 ## POST `/api/v1/users/logout`
+
 Logout user.
 
 ### Response
+
 ```json
 {
-  "status": "success",
+  "status": "success"
 }
 ```
 
 ---
 
 ## POST `/api/v1/users/forgotPassword`
+
 Request password reset.
 
 ### Request Body
+
 ```json
 {
   "email": "sayan@example.com"
@@ -741,6 +836,7 @@ Request password reset.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -751,9 +847,11 @@ Request password reset.
 ---
 
 ## POST `/api/v1/users/resetPassword/:token`
+
 Reset password.
 
 ### Request Body
+
 ```json
 {
   "password": "newPassword123",
@@ -762,6 +860,7 @@ Reset password.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -778,9 +877,11 @@ Reset password.
 ---
 
 ## PATCH `/api/v1/users/updateMyPassword`
+
 Update logged-in user's password.
 
 ### Request Body
+
 ```json
 {
   "passwordCurrent": "oldPassword",
@@ -790,6 +891,7 @@ Update logged-in user's password.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -806,9 +908,11 @@ Update logged-in user's password.
 ---
 
 ## GET `/api/v1/users/me`
+
 Get logged-in user's profile.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -828,9 +932,11 @@ Get logged-in user's profile.
 ---
 
 ## PATCH `/api/v1/users/me`
+
 Update logged-in user's profile.
 
 ### Request Body
+
 ```json
 {
   "year": "4th"
@@ -838,6 +944,7 @@ Update logged-in user's profile.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -852,15 +959,16 @@ Update logged-in user's profile.
     "year": "4th"
   }
 }
-
 ```
 
 ---
 
 ## DELETE `/api/v1/users/me`
+
 Delete logged-in user's account.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -871,19 +979,21 @@ Delete logged-in user's account.
 ---
 
 ## GET `/api/v1/users`
+
 Get all users.
 
 ### Response
+
 ```json
 {
   "status": "success",
   "results": 2,
   "data": [
     {
-    "_id": "1",
-    "name": "Sayan Mondal",
-    "email": "sayan@example.com",
-    "role": "student",
+      "_id": "1",
+      "name": "Sayan Mondal",
+      "email": "sayan@example.com",
+      "role": "student"
     },
     {
       "_id": "2",
@@ -901,9 +1011,11 @@ Get all users.
 ---
 
 ## GET `/api/v1/users/:userID`
+
 Get a single user.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -923,9 +1035,11 @@ Get a single user.
 ---
 
 ## GET `/api/v1/users/:userID/materials`
+
 Get all materials uploaded by an user.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -950,9 +1064,11 @@ Get all materials uploaded by an user.
 ---
 
 ## PATCH `/api/v1/users/:userID`
+
 Update a user.
 
 ### Request Body
+
 ```json
 {
   "verificationStatus": "verified"
@@ -960,6 +1076,7 @@ Update a user.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -973,9 +1090,11 @@ Update a user.
 ---
 
 ## DELETE `/api/v1/users/:userID`
+
 Delete a user.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -988,9 +1107,11 @@ Delete a user.
 # Topper Badge Applications
 
 ## GET `/api/v1/topperBadgeApplications`
+
 Get all topper badge applications.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -1015,9 +1136,11 @@ Get all topper badge applications.
 ---
 
 ## GET `/api/v1/users/:userID/topperBadgeApplications`
+
 Get all topper badge applications of a user.
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -1038,9 +1161,11 @@ Get all topper badge applications of a user.
 ---
 
 ## POST `/api/v1/users/:userID/topperBadgeApplications`
+
 Create a topper badge application.
 
 ### Request Body
+
 ```json
 {
   "exam": "Jadavpur University",
@@ -1053,6 +1178,7 @@ Create a topper badge application.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -1071,9 +1197,11 @@ Create a topper badge application.
 ---
 
 ## PATCH `/api/v1/topperBadgeApplications/:applicationID`
+
 Update topper badge application status.
 
 ### Request Body
+
 ```json
 {
   "status": "approved"
@@ -1081,6 +1209,7 @@ Update topper badge application status.
 ```
 
 ### Response
+
 ```json
 {
   "status": "success",
@@ -1094,9 +1223,11 @@ Update topper badge application status.
 ---
 
 ## DELETE `/api/v1/topperBadgeApplications/:applicationID`
+
 Delete topper badge application.
 
 ### Response
+
 ```json
 {
   "status": "success",
