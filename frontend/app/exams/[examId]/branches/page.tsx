@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpen, ChevronLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { mockBranchesResponse } from "@/lib/mock-data";
 
 // UNCOMMENT THE CODE BELOW TO FETCH FROM API:
 // async function fetchBranches(examId: string) {
@@ -17,73 +18,17 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 // return null;
 // }
 
-interface BranchesResponse {
-  status: string;
-  exam: string;
-  results: number;
-  branches: {
-    _id: string;
-    name: string;
-  }[];
-}
-
 interface Params {
   params: Promise<{ examId: string }>;
 }
 
-// MOCK DATA - TO BE REMOVED
-const mockData: BranchesResponse = {
-  status: "success",
-  exam: "Maulana Abul Kalam Azad University of Technology",
-  results: 10,
-  branches: [
-    {
-      _id: "1",
-      name: "Computer Science Engineering",
-    },
-    {
-      _id: "2",
-      name: "Information Technology",
-    },
-    {
-      _id: "3",
-      name: "Electronics and Communication Engineering",
-    },
-    {
-      _id: "4",
-      name: "Electrical Engineering",
-    },
-    {
-      _id: "5",
-      name: "Mechanical Engineering",
-    },
-    {
-      _id: "6",
-      name: "Civil Engineering",
-    },
-    {
-      _id: "7",
-      name: "Chemical Engineering",
-    },
-    {
-      _id: "8",
-      name: "Biotechnology",
-    },
-    {
-      _id: "9",
-      name: "Aerospace Engineering",
-    },
-    {
-      _id: "10",
-      name: "Artificial Intelligence and Data Science",
-    },
-  ],
-};
-
 export default async function BranchesPage({ params }: Params) {
   const { examId } = await params;
   // UNCOMMENT THE LINE TO FETCH FROM API:
-  // const data = await fetchBranches(examId);
+  // const { data: branches, exam = "Exam" } = await fetchBranches(examId);
+
+  // MOCK DATA - TO BE REMOVED WHEN FETCHING FROM API:
+  const { data: branches, exam = "Exam" } = mockBranchesResponse;
 
   // if (!data) return <p>Failed to load branches.</p>;
   // if (data.branches.length === 0) return <p>No branches found.</p>;
@@ -96,14 +41,17 @@ export default async function BranchesPage({ params }: Params) {
           items={[
             { label: "Home", href: "/" },
             { label: "Exams", href: "/exams" },
-            /* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */
-            { label: mockData.exam, href: `/exams/${examId}/branches` },
+            /* USE 'data' INSTEAD OF 'mockBranchesResponse' WHEN FETCHING FROM API */
+            {
+              label: exam,
+              href: `/exams/${examId}/branches`,
+            },
           ]}
         />
 
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">{mockData.exam}</h1>
+          <h1 className="text-4xl font-bold mb-2">{exam}</h1>
           <p className="text-muted-foreground">
             Select a branch to explore subjects, topics and study materials.
           </p>
@@ -111,8 +59,8 @@ export default async function BranchesPage({ params }: Params) {
 
         {/* Branches/Universities Grid */}
         <div className="grid md:grid-cols-2 gap-4">
-          {/* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */}
-          {mockData.branches.map((branch) => (
+          {/* USE 'data' INSTEAD OF 'mockBranchesResponse' WHEN FETCHING FROM API */}
+          {branches.map((branch) => (
             <Link
               key={branch._id}
               href={`/exams/${examId}/branches/${branch._id}/subjects`}

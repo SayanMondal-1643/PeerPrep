@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { mockExamsResponse } from "@/lib/mock-data";
 
 // UNCOMMENT THE CODE BELOW TO FETCH FROM API:
 // async function fetchExams() {
@@ -17,42 +18,12 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 // return null;
 // }
 
-interface ExamsResponse {
-  status: string;
-  results: number;
-  exams: {
-    _id: string;
-    name: string;
-  }[];
-}
-
-// MOCK DATA - TO BE REMOVED
-const mockData: ExamsResponse = {
-  status: "success",
-  results: 4,
-  exams: [
-    {
-      _id: "0",
-      name: "Graduate Aptitude Test in Engineering",
-    },
-    {
-      _id: "1",
-      name: "Maulana Abul Kalam Azad University of Technology",
-    },
-    {
-      _id: "2",
-      name: "Jadavpur University",
-    },
-    {
-      _id: "3",
-      name: "Calcutta University",
-    },
-  ],
-};
-
 export default async function ExamsPage() {
   // UNCOMMENT THE LINE TO FETCH FROM API:
-  // const data = await fetchExams();
+  // const { data: exams} = await fetchExams();
+
+  // MOCK DATA - TO BE REMOVED WHEN FETCHING FROM API:
+  const { data: exams } = mockExamsResponse;
 
   // if (!data) return <p>Failed to load exams.</p>;
   // if (data.exams.length === 0) return <p>No exams found.</p>;
@@ -76,8 +47,7 @@ export default async function ExamsPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */}
-          {mockData.exams.map((exam) => {
+          {exams.map((exam) => {
             return (
               <Link key={exam._id} href={`/exams/${exam._id}/branches`}>
                 <Card className="p-8 h-full cursor-pointer group hover:shadow-lg hover:border-primary/50 transition-all duration-300">
