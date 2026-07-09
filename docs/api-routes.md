@@ -379,6 +379,26 @@ Delete a topic.
 
 # Materials
 
+## GET `/api/v1/materials`
+
+Get all materials
+
+### Response
+
+````json
+{
+  "status": "success",
+  "results": 1,
+  "data": [
+    {
+      "_id": "1",
+      "title": "Complete array problems guide",
+      "uploadDate": "2026-06-05",
+      "status": "approved",
+  }
+  ]
+}
+
 ## GET `/api/v1/topics/:topicID/materials`
 
 Get all materials under a topic.
@@ -411,7 +431,7 @@ Get all materials under a topic.
     }
   ]
 }
-```
+````
 
 ---
 

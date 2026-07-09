@@ -89,3 +89,80 @@ export const mockTopicsResponse: HierarchyResponse = {
   results: topics.length,
   data: topics,
 };
+
+export const mockMaterialsResponse = {
+  status: "success",
+  results: 0,
+  data: [
+    {
+      _id: "1",
+      title: "Complete Array Problems Guide",
+      uploadDate: "2026-06-05",
+      status: "approved",
+      isBestMaterial: true,
+    },
+    {
+      _id: "2",
+      title: "3NF vs BCNF",
+      uploadDate: "2026-07-10",
+      status: "pending",
+      isBestMaterial: false,
+    },
+    {
+      _id: "3",
+      title: "ACID Properties in Database Transactions",
+      uploadDate: "2025-05-25",
+      status: "pending",
+      isBestMaterial: false,
+    },
+    {
+      _id: "4",
+      title: "Two Pointer Technique Explained",
+      uploadDate: "2025-02-11",
+      status: "rejected",
+      isBestMaterial: false,
+    },
+    {
+      _id: "5",
+      title: "Array Algorithms Cheat Sheet",
+      uploadDate: "2025-01-02",
+      status: "approved",
+      isBestMaterial: false,
+    },
+    {
+      _id: "6",
+      title: "GATE Practice Problems on Deadlocks",
+      uploadDate: "2024-12-23",
+      status: "approved",
+      isBestMaterial: false,
+    },
+    {
+      _id: "7",
+      title: "Solved GATE PYQs on Binary Search and Time Complexity",
+      uploadDate: "2024-01-15",
+      status: "approved",
+      isBestMaterial: true,
+    },
+    {
+      _id: "8",
+      title: "Necessary Conditions for Deadlock",
+      uploadDate: "2024-11-06",
+      status: "approved",
+      isBestMaterial: true,
+    },
+    {
+      _id: "9",
+      title: "BFS vs DFS",
+      uploadDate: "2024-02-01",
+      status: "approved",
+      isBestMaterial: false,
+    },
+    {
+      _id: "10",
+      title: "Solved GATE Numericals on Pipelining",
+      uploadDate: "2023-10-21",
+      status: "rejected",
+      isBestMaterial: false,
+    },
+  ],
+};
