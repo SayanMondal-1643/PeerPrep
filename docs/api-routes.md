@@ -395,7 +395,7 @@ Get all materials
       "title": "Complete array problems guide",
       "uploadDate": "2026-06-05",
       "status": "approved",
-  }
+    }
   ]
 }
 
@@ -1141,9 +1141,9 @@ Get all topper badge applications.
       "_id": "1",
       "userId": "1",
       "userName": "Sayan Mondal",
-      "subject": "DBMS",
-      "exam": "MAKAUT",
-      "branch": "CSE",
+      "subject": "Database Management Systems",
+      "exam": "Maulana Abul Kalam Azad University of Technology",
+      "branch": "Computer Science & Engineering",
       "year": 2025,
       "cgpa": 9,
       "markSheetUrl": "https://resources/marksheet/1/1",
