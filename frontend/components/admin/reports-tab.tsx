@@ -1,7 +1,16 @@
 "use client";
 
-import { GraduationCap } from "lucide-react";
+import { ChevronDown, GraduationCap } from "lucide-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -16,35 +25,146 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { mockReportsResponse } from "@/lib/mock-data";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+
+interface Reporter {
+  _id: string;
+  name: string;
+  role: "student" | "teacher";
+  verificationStatus?: "pending" | "verified" | "rejected";
+}
 
 interface Report {
-  id: string;
+  _id: string;
+  materialId: string;
   materialTitle: string;
-  reportedBy: string;
-  isTeacher: boolean;
-  reason: string;
+  reporterId: Reporter;
+  reportReason: string;
   comment: string;
-  materialUploader: string;
-  dateReported: string;
+  reportDate: string;
+  status: "pending" | "resolved" | "dismissed";
+}
+
+interface ApiReportsResponse {
   status: string;
+  results: number;
+  data: Report[];
 }
 
-interface ReportsTabProps {
-  filteredReports: Report[];
-  reportStatusFilter: string;
-  setReportStatusFilter: (value: string) => void;
-  reports: Report[];
-  setReports: Dispatch<SetStateAction<Report[]>>;
-}
+export default function ReportsTab() {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [pendingStatusIds, setPendingStatusIds] = useState<
+    Record<string, boolean>
+  >({});
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
 
-export default function ReportsTab({
-  filteredReports,
-  reportStatusFilter,
-  setReportStatusFilter,
-  reports,
-  setReports,
-}: ReportsTabProps) {
+  const loadReports = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await new Promise((resolve) => window.setTimeout(resolve, 500));
+
+      // UNCOMMENT TO FETCH FROM API
+      // const response = await fetch(`${API_BASE_URL}/api/v1/reports`);
+      // if (!response.ok) {
+      //   throw new Error("Failed to load reports.");
+      // }
+      // const json: ApiReportsResponse = await response.json();
+
+      const json = mockReportsResponse as ApiReportsResponse;
+      setReports(json.data);
+    } catch (error) {
+      console.error("Failed to fetch reports:", error);
+      setError(
+        error instanceof Error ? error.message : "Unable to load reports.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadReports();
+  }, []);
+
+  const filteredReports = useMemo(() => {
+    return reports.filter((report) => {
+      return statusFilter === "all" || report.status === statusFilter;
+    });
+  }, [reports, statusFilter]);
+
+  const updateStatus = async (report: Report, nextStatus: Report["status"]) => {
+    const previousStatus = report.status;
+
+    setReports((prev) =>
+      prev.map((item) =>
+        item._id === report._id ? { ...item, status: nextStatus } : item,
+      ),
+    );
+    setPendingStatusIds((prev) => ({ ...prev, [report._id]: true }));
+    setRowErrors((prev) => ({ ...prev, [report._id]: "" }));
+
+    try {
+      // UNCOMMENT TO FETCH FROM API
+      // const response = await fetch(`${API_BASE_URL}/api/v1/reports/${report._id}`, {
+      //   method: "PATCH",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ status: nextStatus }),
+      // });
+      // if (!response.ok) {
+      //   throw new Error("Failed to update report status.");
+      // }
+    } catch {
+      setReports((prev) =>
+        prev.map((item) =>
+          item._id === report._id ? { ...item, status: previousStatus } : item,
+        ),
+      );
+      setRowErrors((prev) => ({
+        ...prev,
+        [report._id]: "Unable to update report status.",
+      }));
+    } finally {
+      setPendingStatusIds((prev) => ({ ...prev, [report._id]: false }));
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <div className="p-6 space-y-4">
+          <div className="h-6 w-40 animate-pulse rounded bg-muted" />
+          <div className="h-10 w-full animate-pulse rounded bg-muted" />
+          <div className="space-y-2">
+            <div className="h-10 animate-pulse rounded bg-muted" />
+            <div className="h-10 animate-pulse rounded bg-muted" />
+            <div className="h-10 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <div className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold">Report Management</h2>
+          <p className="text-sm text-red-600">{error}</p>
+          <Button onClick={() => void loadReports()}>Retry</Button>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <div className="p-6 border-b border-border">
@@ -52,13 +172,13 @@ export default function ReportsTab({
 
         <div className="w-48">
           <select
-            value={reportStatusFilter}
-            onChange={(e) => setReportStatusFilter(e.target.value)}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full h-9 px-3 rounded border border-input bg-background text-sm font-medium"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
-            <option value="reviewed">Reviewed</option>
+            <option value="resolved">Resolved</option>
             <option value="dismissed">Dismissed</option>
           </select>
         </div>
@@ -70,78 +190,158 @@ export default function ReportsTab({
               <TableHead>Material Title</TableHead>
               <TableHead>Reported By</TableHead>
               <TableHead className="text-center">Reason</TableHead>
-              <TableHead>Comment</TableHead>
-              <TableHead>Material Uploader</TableHead>
+              <TableHead className="text-center">Comment</TableHead>
               <TableHead className="text-center">Date Reported</TableHead>
               <TableHead className="text-center">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredReports.map((report) => (
-              <TableRow key={report.id}>
-                <TableCell className="font-medium text-sm">
-                  {report.materialTitle}
-                </TableCell>
-                <TableCell className="text-sm">
-                  <div className="flex items-center gap-2">
-                    <span>{report.reportedBy}</span>
-                    {report.isTeacher && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <GraduationCap className="h-4 w-4 text-blue-500" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Teacher</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="text-center text-muted-foreground text-sm">
-                  {report.reason}
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm max-w-xs truncate">
-                  {report.comment || "-"}
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {report.materialUploader}
-                </TableCell>
-                <TableCell className="text-center text-muted-foreground text-sm">
-                  {new Date(report.dateReported).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
-                </TableCell>
-                <TableCell className="text-center">
-                  <select
-                    value={report.status}
-                    onChange={(e) => {
-                      setReports(
-                        reports.map((r) =>
-                          r.id === report.id
-                            ? {
-                                ...r,
-                                status: e.target.value as
-                                  | "pending"
-                                  | "reviewed"
-                                  | "dismissed",
-                              }
-                            : r,
-                        ),
-                      );
-                    }}
-                    className="text-sm font-medium border-none bg-transparent cursor-pointer px-2 py-1 rounded hover:bg-secondary"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="reviewed">Reviewed</option>
-                    <option value="dismissed">Dismissed</option>
-                  </select>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredReports.map((report) => {
+              const isPendingStatus = Boolean(pendingStatusIds[report._id]);
+              const errorMessage = rowErrors[report._id];
+
+              return (
+                <TableRow key={report._id}>
+                  <TableCell className="font-medium text-sm">
+                    <Link
+                      href={`/materials/${report.materialId}`}
+                      className="block truncate text-primary hover:underline"
+                      title={report.materialTitle}
+                    >
+                      {report.materialTitle}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    <div className="flex items-center gap-2">
+                      <span>{report.reporterId.name}</span>
+                      {report.reporterId.role === "teacher" &&
+                        report.reporterId.verificationStatus === "verified" && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <GraduationCap className="h-4 w-4 text-blue-500" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Teacher</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center text-muted-foreground text-sm">
+                    {report.reportReason}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm max-w-xs">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="block truncate">
+                            {report.comment || "-"}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs whitespace-pre-wrap">
+                            {report.comment || "-"}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                  <TableCell className="text-center text-muted-foreground text-sm">
+                    {new Date(report.reportDate).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                    })}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      {report.status === "pending" ? (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:cursor-pointer"
+                            disabled={isPendingStatus}
+                            onClick={() =>
+                              void updateStatus(report, "resolved")
+                            }
+                          >
+                            Resolve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3 border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:cursor-pointer"
+                            disabled={isPendingStatus}
+                            onClick={() =>
+                              void updateStatus(report, "dismissed")
+                            }
+                          >
+                            Dismiss
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-1">
+                          <Badge
+                            variant="outline"
+                            className={
+                              report.status === "resolved"
+                                ? "border-green-200 bg-green-100 text-green-700"
+                                : "border-red-200 bg-red-100 text-red-700"
+                            }
+                          >
+                            {report.status === "resolved"
+                              ? "Resolved"
+                              : "Dismissed"}
+                          </Badge>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-6 w-6"
+                                disabled={isPendingStatus}
+                                aria-label={`Change status for ${report.reporterId.name}`}
+                              >
+                                <ChevronDown className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  void updateStatus(report, "pending")
+                                }
+                              >
+                                Pending
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  void updateStatus(report, "resolved")
+                                }
+                              >
+                                Resolved
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  void updateStatus(report, "dismissed")
+                                }
+                              >
+                                Dismissed
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
+                      {errorMessage ? (
+                        <p className="text-xs text-red-600">{errorMessage}</p>
+                      ) : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

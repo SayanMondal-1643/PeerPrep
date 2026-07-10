@@ -597,12 +597,13 @@ Get all reports.
   "data": [
     {
       "_id": "1",
+      "materialId": "1",
+      "materialTitle": "Sorting Techniques",
+      "reporter": { "_id": 1, "name": "Sayan Mondal", "role: "student" },
       "reportReason": "Incorrect content",
       "comment": "Binary search can't be done on unsorted arrays",
       "reportDate": "2026-06-13",
       "status": "reviewed",
-      "userId": "2",
-      "materialId": "1"
     }
   ]
 }
