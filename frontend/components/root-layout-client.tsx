@@ -1,10 +1,11 @@
-'use client'
+"use client";
 
-import { ReactNode } from 'react'
-import { Navbar } from '@/components/navbar'
+import { ReactNode } from "react";
+import { Navbar } from "@/components/navbar";
+import { Toaster } from "@/components/ui/toaster";
 
 interface RootLayoutClientProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export function RootLayoutClient({ children }: RootLayoutClientProps) {
@@ -12,6 +13,7 @@ export function RootLayoutClient({ children }: RootLayoutClientProps) {
     <>
       <Navbar />
       {children}
+      <Toaster />
     </>
-  )
+  );
 }

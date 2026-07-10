@@ -18,15 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  type HierarchyOption,
-  mockExamsResponse,
-  mockBranchesResponse,
-  mockSubjectsResponse,
-  mockTopicsResponse,
-} from "@/lib/mock-data";
+  fetchBranches,
+  fetchExams,
+  fetchSubjects,
+  fetchTopics,
+} from "@/lib/hierarchy-api";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+import type { HierarchyOption } from "@/lib/mock-data";
 
 export default function UploadPage() {
   const [exams, setExams] = useState<HierarchyOption[]>([]);
@@ -54,16 +52,8 @@ export default function UploadPage() {
       setErrorMessage("");
 
       try {
-        // const response = await fetch(`${API_BASE_URL}/api/v1/exams`);
-        // const json: ListResponse = await response.json();
-
-        // if (!response.ok) {
-        //   throw new Error(json?.message || "Failed to load exams");
-        // }
-
-        const json = mockExamsResponse;
-
-        setExams(json.data);
+        const exams = await fetchExams();
+        setExams(exams);
       } catch (error) {
         console.error("Failed to fetch exams:", error);
         setErrorMessage("Unable to load exams right now.");
@@ -91,19 +81,10 @@ export default function UploadPage() {
       setErrorMessage("");
 
       try {
-        // const response = await fetch(
-        //   `${API_BASE_URL}/api/v1/exams/${selectedExamId}/branches`,
-        // );
-        // const json: ListResponse = await response.json();
-
-        // if (!response.ok) {
-        //   throw new Error(json?.message || "Failed to load branches");
-        // }
-
-        const json = mockBranchesResponse;
+        const branches = await fetchBranches(selectedExamId);
 
         if (!isCancelled) {
-          setBranches(json.data);
+          setBranches(branches);
         }
       } catch (error) {
         console.error("Failed to fetch branches:", error);
@@ -140,19 +121,10 @@ export default function UploadPage() {
       setErrorMessage("");
 
       try {
-        // const response = await fetch(
-        //   `${API_BASE_URL}/api/v1/branches/${selectedBranchId}/subjects`,
-        // );
-        // const json: ListResponse = await response.json();
-
-        // if (!response.ok) {
-        //   throw new Error(json?.message || "Failed to load subjects");
-        // }
-
-        const json = mockSubjectsResponse;
+        const subjects = await fetchSubjects(selectedBranchId);
 
         if (!isCancelled) {
-          setSubjects(json.data);
+          setSubjects(subjects);
         }
       } catch (error) {
         console.error("Failed to fetch subjects:", error);
@@ -188,19 +160,10 @@ export default function UploadPage() {
       setErrorMessage("");
 
       try {
-        // const response = await fetch(
-        //   `${API_BASE_URL}/api/v1/subjects/${selectedSubjectId}/topics`,
-        // );
-        // const json: ListResponse = await response.json();
-
-        // if (!response.ok) {
-        //   throw new Error(json?.message || "Failed to load topics");
-        // }
-
-        const json = mockTopicsResponse;
+        const topics = await fetchTopics(selectedSubjectId);
 
         if (!isCancelled) {
-          setTopics(json.data);
+          setTopics(topics);
         }
       } catch (error) {
         console.error("Failed to fetch topics:", error);

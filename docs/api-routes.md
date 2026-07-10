@@ -12,7 +12,7 @@ Get all exams.
 {
   "status": "success",
   "results": 1,
-  "exams": [
+  "data": [
     {
       "_id": "1",
       "name": "Maulana Abul Kalam Azad University of Technology"
@@ -42,8 +42,7 @@ Create an exam.
   "status": "success",
   "data": {
     "_id": "2",
-    "name": "JU",
-    "description": "Jadavpur Univeristy"
+    "name": "Jadavpur Univerisity"
   }
 }
 ```
@@ -104,7 +103,7 @@ Get all branches under an exam.
   "status": "success",
   "exam": "MAKAUT",
   "results": 1,
-  "branches": [
+  "data": [
     {
       "_id": "1",
       "name": "Computer Science Engineering"
@@ -136,8 +135,7 @@ Create a branch under an exam.
   "status": "success",
   "data": {
     "_id": "2",
-    "name": "Information Technology",
-    "examId": 1
+    "name": "Information Technology"
   }
 }
 ```
@@ -163,8 +161,7 @@ Update a branch.
   "status": "success",
   "data": {
     "_id": "1",
-    "name": "Computer Science Engineering Updated",
-    "examId": 1
+    "name": "Computer Science Engineering Updated"
   }
 }
 ```
@@ -200,7 +197,7 @@ Get all subjects under a branch.
   "exam": "MAKAUT",
   "branch": "Computer Science Engineering",
   "results": 1,
-  "subjects": [
+  "data": [
     {
       "_id": "1",
       "name": "Data Structures & Algorithms"
@@ -208,8 +205,6 @@ Get all subjects under a branch.
   ]
 }
 ```
-
-> `exam` and `branch` are the parent exam/branch names (resolved via the branch's `examId`), included for breadcrumb use.
 
 ---
 
@@ -232,8 +227,7 @@ Create a subject under a branch.
   "status": "success",
   "data": {
     "_id": "2",
-    "name": "Database Management Systems",
-    "branchId": 1
+    "name": "Database Management Systems"
   }
 }
 ```
@@ -259,8 +253,7 @@ Update a subject.
   "status": "success",
   "data": {
     "_id": "1",
-    "name": "Data Structures & Algorithms Updated",
-    "branchId": 1
+    "name": "Data Structures & Algorithms Updated"
   }
 }
 ```
@@ -327,8 +320,7 @@ Create a topic under a subject.
   "status": "success",
   "data": {
     "_id": "2",
-    "name": "Linked List",
-    "subjectId": 1
+    "name": "Linked List"
   }
 }
 ```
@@ -354,8 +346,7 @@ Update a topic.
   "status": "success",
   "data": {
     "_id": "1",
-    "name": "Array Updated",
-    "subjectId": 1
+    "name": "Array Updated"
   }
 }
 ```
