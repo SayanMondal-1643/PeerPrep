@@ -295,7 +295,7 @@ export default function UsersTab() {
 
                 return (
                   <TableRow key={user._id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium text-primary">
                       <a
                         href="#"
                         className="inline-flex items-center gap-1.5 hover:underline"

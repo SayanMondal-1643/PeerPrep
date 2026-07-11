@@ -23,6 +23,8 @@ import {
   fetchSubjects,
   fetchTopics,
 } from "@/lib/hierarchy-api";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { useRequireAuth } from "@/lib/use-require-auth";
 
 import type { HierarchyOption } from "@/lib/mock-data";
 
@@ -45,6 +47,8 @@ export default function UploadPage() {
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
   const [isLoadingTopics, setIsLoadingTopics] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useRequireAuth();
 
   useEffect(() => {
     const loadExams = async () => {
@@ -185,31 +189,6 @@ export default function UploadPage() {
     };
   }, [selectedSubjectId]);
 
-  async function uploadToCloudinary(file: File): Promise<string> {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append(
-      "upload_preset",
-      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!,
-    );
-
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error("File upload failed");
-    }
-
-    const data = await response.json();
-    return data.secure_url; // this is the URL you'll send to your backend
-  }
-
   const handleExamChange = (examId: string) => {
     setSelectedExamId(examId);
     setSelectedBranchId("");
@@ -271,8 +250,6 @@ export default function UploadPage() {
       // if (!response.ok) {
       //   throw new Error(json?.message || "Failed to upload material");
       // }
-
-      console.log(fileUrl);
 
       alert("Material uploaded successfully!");
 

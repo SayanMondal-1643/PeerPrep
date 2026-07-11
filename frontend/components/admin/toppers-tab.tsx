@@ -238,7 +238,7 @@ export default function ToppersTab() {
 
                 return (
                   <TableRow key={application._id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium text-primary">
                       <Link
                         href={`/profile/${application.userId}`}
                         className="inline-flex items-center gap-1.5 hover:underline"

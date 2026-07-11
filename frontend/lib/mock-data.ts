@@ -1,3 +1,5 @@
+import { User, ApiAuthResponse } from "./user-types";
+
 export interface HierarchyOption {
   _id: string;
   name: string;
@@ -12,6 +14,81 @@ export interface HierarchyResponse {
   subject?: string;
   topic?: string;
   message?: string;
+}
+
+const mockLoginUsersByEmail: Record<string, User> = {
+  "admin@example.com": {
+    _id: "1",
+    name: "Admin User",
+    email: "admin@example.com",
+    role: "admin",
+    accountStatus: "active",
+  },
+  "runa@example.com": {
+    _id: "2",
+    name: "Runa Mukherjee",
+    email: "runa@example.com",
+    role: "teacher",
+    accountStatus: "active",
+    verificationStatus: "verified",
+  },
+  "subhajit@example.com": {
+    _id: "3",
+    name: "Subhajit Kundu",
+    email: "subhajit@example.com",
+    role: "student",
+    accountStatus: "active",
+  },
+  "sayan@example.com": {
+    _id: "4",
+    name: "Sayan Mondal",
+    email: "sayan@example.com",
+    role: "student",
+    accountStatus: "active",
+  },
+};
+
+export async function mockLoginResponse(
+  email: string,
+  password: string,
+): Promise<ApiAuthResponse> {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  const user = mockLoginUsersByEmail[email];
+  if (!user || password !== "password123") {
+    throw new Error("Invalid email or password");
+  }
+  return { status: "success", user };
+}
+
+export async function mockLogoutResponse(): Promise<{ status: string }> {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  return { status: "success" };
+}
+
+export async function mockSignupResponse(data: {
+  name: string;
+  email: string;
+  password: string;
+  role: "student" | "teacher" | "admin";
+  institutionName?: string;
+  idProofUrl?: string;
+}): Promise<ApiAuthResponse> {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+
+  const user: User = {
+    _id: `user-${Date.now()}`,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    accountStatus: "active",
+    ...(data.role === "teacher" && {
+      institutionName: data.institutionName,
+      idProofUrl: data.idProofUrl,
+      verificationStatus: "pending",
+    }),
+  };
+
+  return { status: "success", user };
 }
 
 const exams: HierarchyOption[] = [

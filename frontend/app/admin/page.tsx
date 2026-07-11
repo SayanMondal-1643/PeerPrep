@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// import OverviewTab from "@/components/admin/overview-tab";
 import MaterialsTab from "@/components/admin/materials-tab";
 import UsersTab from "@/components/admin/users-tab";
 import ToppersTab from "@/components/admin/toppers-tab";
@@ -12,7 +11,7 @@ import StructureTab from "@/components/admin/structure-tab";
 // TODO: move MarksheetViewerModal + its state into ToppersTab
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("materials");
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,17 +30,12 @@ export default function AdminPage() {
           className="space-y-6"
         >
           <TabsList>
-            {/* <TabsTrigger value="overview">Overview</TabsTrigger> */}
             <TabsTrigger value="materials">Materials</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="toppers">Toppers</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="structure">Structure</TabsTrigger>
           </TabsList>
-
-          {/* <TabsContent value="overview" className="space-y-6">
-            <OverviewTab />
-          </TabsContent> */}
 
           <TabsContent value="materials" className="space-y-6">
             <MaterialsTab />

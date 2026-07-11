@@ -285,7 +285,7 @@ export default function MaterialsTab() {
                     <TableCell className="max-w-xs py-3">
                       <Link
                         href={`/materials/${material._id}`}
-                        className="block truncate font-medium text-foreground hover:underline"
+                        className="block truncate font-medium text-primary hover:underline"
                         title={material.title}
                       >
                         {material.title}

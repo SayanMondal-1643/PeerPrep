@@ -1,105 +1,113 @@
-'use client'
+"use client";
 
-import { createContext, useContext, useState, ReactNode } from 'react'
-
-export type UserRole = 'student' | 'teacher' | 'admin'
-
-interface User {
-  id: string
-  email: string
-  fullName: string
-  role: UserRole
-  isVerifiedTeacher?: boolean
-  institutionName?: string
-  linkedinProfile?: string
-}
+import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  mockLoginResponse,
+  mockLogoutResponse,
+  mockSignupResponse,
+} from "@/lib/mock-data";
+import { User, UserRole } from "./user-types";
 
 interface AuthContextType {
-  user: User | null
-  isLoggedIn: boolean
-  login: (email: string, password: string) => Promise<void>
-  signup: (data: SignupData) => Promise<void>
-  logout: () => void
-  redirectTo: string | null
-  setRedirectTo: (path: string | null) => void
+  user: User | null;
+  isLoggedIn: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (data: SignupData) => Promise<void>;
+  logout: () => Promise<void>;
+  redirectTo: string | null;
+  setRedirectTo: (path: string | null) => void;
 }
 
 export interface SignupData {
-  fullName: string
-  email: string
-  password: string
-  role: UserRole
-  institutionName?: string
-  linkedinProfile?: string
-  researchgateProfile?: string
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  institutionName?: string;
+  idProofUrl?: string;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [redirectTo, setRedirectTo] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   const login = async (email: string, password: string) => {
-    // Email to name mapping
-    const emailToNameMap: Record<string, { name: string; role: UserRole }> = {
-      'admin@example.com': { name: 'Admin User', role: 'admin' },
-      'teacher@example.com': { name: 'Runa Mukherjee', role: 'teacher' },
-      'subhajit@example.com': { name: 'Subhajit Kundu', role: 'student' },
-      'sayan@example.com': { name: 'Sayan Mondal', role: 'student' },
-    }
+    // UNCOMMENT TO FETCH FROM API
+    // const res = await fetch('/api/v1/users/login', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   credentials: 'include',
+    //   body: JSON.stringify({ email, password }),
+    // })
+    // if (!res.ok) {
+    //   const errorData = await res.json()
+    //   throw new Error(errorData.message || 'Login failed')
+    // }
+    // const data = await res.json()
 
-    const userConfig = emailToNameMap[email]
+    // MOCK DATA - TO BE REMOVED LATER
+    const data = await mockLoginResponse(email, password);
 
-    if (userConfig) {
-      const isTeacher = userConfig.role === 'teacher'
-      setUser({
-        id: `user-${email}`,
-        email,
-        fullName: userConfig.name,
-        role: userConfig.role,
-        isVerifiedTeacher: isTeacher ? true : undefined,
-      })
-    } else {
-      // Simulate student login for any other credentials
-      setUser({
-        id: `user-${Date.now()}`,
-        email,
-        fullName: email.split('@')[0].replace(/[._]/g, ' '),
-        role: 'student',
-      })
-    }
-  }
+    setUser(data.user);
+  };
 
   const signup = async (data: SignupData) => {
-    // Mock signup logic
-    setUser({
-      id: `user-${Date.now()}`,
-      email: data.email,
-      fullName: data.fullName,
-      role: data.role,
-      isVerifiedTeacher: data.role === 'teacher' ? false : undefined,
-      institutionName: data.institutionName,
-      linkedinProfile: data.linkedinProfile,
-    })
-  }
+    // UNCOMMENT TO FETCH FROM API
+    // const res = await fetch('/api/v1/users/signup', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   credentials: 'include',
+    //   body: JSON.stringify(data),
+    // })
+    // if (!res.ok) {
+    //   const errorData = await res.json()
+    //   throw new Error(errorData.message || 'Signup failed')
+    // }
+    // const responseData = await res.json()
 
-  const logout = () => {
-    setUser(null)
-    setRedirectTo(null)
-  }
+    // MOCK DATA - TO BE REMOVED LATER
+    const responseData = await mockSignupResponse(data);
+
+    setUser(responseData.user);
+  };
+
+  const logout = async () => {
+    // UNCOMMENT TO FETCH FROM API
+    // await fetch('/api/v1/users/logout', {
+    //   method: 'POST',
+    //   credentials: 'include',
+    // })
+
+    // MOCK DATA - TO BE REMOVED LATER
+    await mockLogoutResponse();
+
+    setUser(null);
+    setRedirectTo(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, signup, logout, redirectTo, setRedirectTo }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoggedIn: !!user,
+        login,
+        signup,
+        logout,
+        redirectTo,
+        setRedirectTo,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within AuthProvider')
+    throw new Error("useAuth must be used within AuthProvider");
   }
-  return context
+  return context;
 }

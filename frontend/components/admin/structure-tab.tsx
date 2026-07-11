@@ -1026,7 +1026,7 @@ export default function StructureTab() {
                   onClick={() => toggleExamExpand(exam._id)}
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       {expandedExams.has(exam._id) ? (
                         <ChevronDown className="h-5 w-5" />
                       ) : (
@@ -1039,7 +1039,7 @@ export default function StructureTab() {
                   </div>
 
                   <div
-                    className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(event) => event.stopPropagation()}
                   >
                     <TooltipProvider>
@@ -1112,7 +1112,7 @@ export default function StructureTab() {
                             onClick={() => toggleBranchExpand(branch._id)}
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="flex-shrink-0">
+                              <div className="shrink-0">
                                 {expandedBranches.has(branch._id) ? (
                                   <ChevronDown className="h-5 w-5" />
                                 ) : (
@@ -1125,7 +1125,7 @@ export default function StructureTab() {
                             </div>
 
                             <div
-                              className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={(event) => event.stopPropagation()}
                             >
                               <TooltipProvider>
@@ -1214,7 +1214,7 @@ export default function StructureTab() {
                                         }
                                       >
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                                          <div className="flex-shrink-0">
+                                          <div className="shrink-0">
                                             {expandedSubjects.has(
                                               subject._id,
                                             ) ? (
@@ -1231,7 +1231,7 @@ export default function StructureTab() {
                                         </div>
 
                                         <div
-                                          className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                          className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                                           onClick={(event) =>
                                             event.stopPropagation()
                                           }
@@ -1338,7 +1338,7 @@ export default function StructureTab() {
                                                   </div>
 
                                                   <div
-                                                    className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                                                     onClick={(event) =>
                                                       event.stopPropagation()
                                                     }
