@@ -1,4 +1,10 @@
-import { User, ApiAuthResponse } from "./user-types";
+import { User, ApiAuthResponse, SignupData } from "./user-types";
+import {
+  ApiMaterialsResponse,
+  ApiUserMaterialsResponse,
+} from "./material-types";
+
+import { ApiTopperBadgesResponse } from "./topper-badge-types";
 
 export interface HierarchyOption {
   _id: string;
@@ -22,14 +28,12 @@ const mockLoginUsersByEmail: Record<string, User> = {
     name: "Admin User",
     email: "admin@example.com",
     role: "admin",
-    accountStatus: "active",
   },
   "runa@example.com": {
     _id: "2",
     name: "Runa Mukherjee",
     email: "runa@example.com",
     role: "teacher",
-    accountStatus: "active",
     verificationStatus: "verified",
   },
   "subhajit@example.com": {
@@ -37,14 +41,12 @@ const mockLoginUsersByEmail: Record<string, User> = {
     name: "Subhajit Kundu",
     email: "subhajit@example.com",
     role: "student",
-    accountStatus: "active",
   },
   "sayan@example.com": {
     _id: "4",
     name: "Sayan Mondal",
     email: "sayan@example.com",
     role: "student",
-    accountStatus: "active",
   },
 };
 
@@ -65,14 +67,9 @@ export async function mockLogoutResponse(): Promise<{ status: string }> {
   return { status: "success" };
 }
 
-export async function mockSignupResponse(data: {
-  name: string;
-  email: string;
-  password: string;
-  role: "student" | "teacher" | "admin";
-  institutionName?: string;
-  idProofUrl?: string;
-}): Promise<ApiAuthResponse> {
+export async function mockSignupResponse(
+  data: SignupData,
+): Promise<ApiAuthResponse> {
   await new Promise((resolve) => setTimeout(resolve, 600));
 
   const user: User = {
@@ -80,10 +77,7 @@ export async function mockSignupResponse(data: {
     name: data.name,
     email: data.email,
     role: data.role,
-    accountStatus: "active",
     ...(data.role === "teacher" && {
-      institutionName: data.institutionName,
-      idProofUrl: data.idProofUrl,
       verificationStatus: "pending",
     }),
   };
@@ -167,79 +161,173 @@ export const mockTopicsResponse: HierarchyResponse = {
   data: topics,
 };
 
-export const mockMaterialsResponse = {
+export const mockMaterialsResponse: ApiMaterialsResponse = {
   status: "success",
-  results: 0,
+  exam: "Graduate Aptitude Test in Engineering",
+  branch: "Computer Science Engineering",
+  subject: "Data Structures & Algorithms",
+  topic: "Mixed Topics",
+  results: 10,
   data: [
     {
       _id: "1",
       title: "Complete Array Problems Guide",
+      description:
+        "This guide covers common array-based problem patterns with step-by-step solutions that are useful for interviews and competitive programming.",
+      fileUrl: "https://example.com/file1.pdf",
       uploadDate: "2026-06-05",
       status: "approved",
+      userId: { _id: "u1", name: "Runa Mukherjee", role: "teacher" },
+      topicId: "8",
       isBestMaterial: true,
+      isTopperMaterial: true,
+      isAIPicked: false,
+      ratingsAverage: 4.7,
+      ratingsQuantity: 38,
     },
     {
       _id: "2",
       title: "3NF vs BCNF",
+      description:
+        "A concise comparison of 3NF and BCNF with examples that explain when each normalization form is appropriate.",
+      fileUrl: "https://example.com/file2.pdf",
       uploadDate: "2026-07-10",
       status: "pending",
+      userId: { _id: "u2", name: "Sayan Mondal", role: "student" },
+      topicId: "9",
       isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 0,
+      ratingsQuantity: 0,
     },
     {
       _id: "3",
       title: "ACID Properties in Database Transactions",
+      description:
+        "This material explains atomicity, consistency, isolation, and durability with simple transaction examples.",
+      fileUrl: "https://example.com/file3.pdf",
       uploadDate: "2025-05-25",
       status: "pending",
+      userId: { _id: "u3", name: "Subhajit Kundu", role: "student" },
+      topicId: "10",
       isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: true,
+      ratingsAverage: 0,
+      ratingsQuantity: 0,
     },
     {
       _id: "4",
       title: "Two Pointer Technique Explained",
+      description:
+        "A practical walkthrough of the two-pointer approach with solved examples for arrays and strings.",
+      fileUrl: "https://example.com/file4.pdf",
       uploadDate: "2025-02-11",
       status: "rejected",
+      userId: { _id: "u4", name: "Aarav Sharma", role: "teacher" },
+      topicId: "1",
       isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 2.1,
+      ratingsQuantity: 7,
     },
     {
       _id: "5",
       title: "Array Algorithms Cheat Sheet",
+      description:
+        "This cheat sheet summarizes essential array algorithms, their complexity, and the most common use cases.",
+      fileUrl: "https://example.com/file5.pdf",
       uploadDate: "2025-01-02",
       status: "approved",
+      userId: { _id: "u5", name: "Nisha Roy", role: "student" },
+      topicId: "2",
       isBestMaterial: false,
+      isTopperMaterial: true,
+      isAIPicked: true,
+      ratingsAverage: 4.4,
+      ratingsQuantity: 29,
     },
     {
       _id: "6",
       title: "GATE Practice Problems on Deadlocks",
+      description:
+        "This set of practice problems helps learners reason through deadlock prevention and avoidance strategies.",
+      fileUrl: "https://example.com/file6.pdf",
       uploadDate: "2024-12-23",
       status: "approved",
+      userId: { _id: "u6", name: "Runa Mukherjee", role: "teacher" },
+      topicId: "6",
       isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 4.2,
+      ratingsQuantity: 18,
     },
     {
       _id: "7",
       title: "Solved GATE PYQs on Binary Search and Time Complexity",
+      description:
+        "The resource compiles previous-year questions with clear solutions and complexity analysis for binary search problems.",
+      fileUrl: "https://example.com/file7.pdf",
       uploadDate: "2024-01-15",
       status: "approved",
+      userId: { _id: "u7", name: "Sayan Mondal", role: "student" },
+      topicId: "8",
       isBestMaterial: true,
+      isTopperMaterial: true,
+      isAIPicked: false,
+      ratingsAverage: 4.8,
+      ratingsQuantity: 45,
     },
     {
       _id: "8",
       title: "Necessary Conditions for Deadlock",
+      description:
+        "This note outlines the key conditions required for deadlock and summarizes what each condition means in practice.",
+      fileUrl: "https://example.com/file8.pdf",
       uploadDate: "2024-11-06",
       status: "approved",
+      userId: { _id: "u8", name: "Aarav Sharma", role: "teacher" },
+      topicId: "7",
       isBestMaterial: true,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 4.6,
+      ratingsQuantity: 52,
     },
     {
       _id: "9",
       title: "BFS vs DFS",
+      description:
+        "The material compares breadth-first and depth-first traversal with examples suitable for graph theory revision.",
+      fileUrl: "https://example.com/file9.pdf",
       uploadDate: "2024-02-01",
       status: "approved",
+      userId: { _id: "u9", name: "Nisha Roy", role: "student" },
+      topicId: "4",
       isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 4.4,
+      ratingsQuantity: 22,
     },
     {
       _id: "10",
       title: "Solved GATE Numericals on Pipelining",
+      description:
+        "This document demonstrates worked numerical examples for pipelining concepts commonly asked in GATE exams.",
+      fileUrl: "https://example.com/file10.pdf",
       uploadDate: "2023-10-21",
       status: "rejected",
+      userId: { _id: "u10", name: "Runa Mukherjee", role: "teacher" },
+      topicId: "3",
       isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 2.8,
+      ratingsQuantity: 12,
     },
   ],
 };
@@ -632,6 +720,116 @@ export const mockReportsResponse = {
       comment: "Claims TCP is connectionless, which is wrong",
       reportDate: "2026-06-22",
       status: "resolved",
+    },
+  ],
+};
+
+export const mockUserMaterialsResponse: ApiUserMaterialsResponse = {
+  status: "success",
+  results: 3,
+  data: [
+    {
+      _id: "1",
+      title: "3NF vs BCNF",
+      description:
+        "A comparison of Third Normal Form and Boyce-Codd Normal Form with examples covering functional dependency violations.",
+      fileUrl: "https://example.com/file1.pdf",
+      uploadDate: "2025-07-10",
+      status: "pending",
+      userId: { _id: "1", name: "Sayan Mondal", role: "student" },
+      topicId: "3",
+      isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 0,
+      ratingsQuantity: 0,
+      exam: "MAKAUT",
+      branch: "CSE",
+      subject: "Database Management Systems",
+      topic: "Normalization",
+    },
+    {
+      _id: "2",
+      title: "Types of Inheritance",
+      description:
+        "Covers single, multiple, multilevel, and hierarchical inheritance in OOP, along with polymorphism examples in Java.",
+      fileUrl: "https://example.com/file2.pdf",
+      uploadDate: "2024-11-06",
+      status: "approved",
+      userId: { _id: "1", name: "Sayan Mondal", role: "student" },
+      topicId: "7",
+      isBestMaterial: true,
+      isTopperMaterial: false,
+      isAIPicked: true,
+      ratingsAverage: 4,
+      ratingsQuantity: 19,
+      exam: "MAKAUT",
+      branch: "CSE",
+      subject: "Object-Oriented Programming",
+      topic: "Inheritance and Polymorphism",
+    },
+    {
+      _id: "3",
+      title: "Sliding Window Technique Cheat Sheet",
+      description:
+        "Quick reference for fixed and variable-size sliding window patterns with common problem types.",
+      fileUrl: "https://example.com/file3.pdf",
+      uploadDate: "2025-03-22",
+      status: "rejected",
+      userId: { _id: "1", name: "Sayan Mondal", role: "student" },
+      topicId: "1",
+      isBestMaterial: false,
+      isTopperMaterial: false,
+      isAIPicked: false,
+      ratingsAverage: 0,
+      ratingsQuantity: 0,
+      exam: "Jadavpur University",
+      branch: "Information Technology",
+      subject: "Data Structures & Algorithms",
+      topic: "Array",
+    },
+  ],
+};
+
+export const mockUserTopperBadgesResponse: ApiTopperBadgesResponse = {
+  status: "success",
+  results: 3,
+  data: [
+    {
+      _id: "1",
+      userId: "1",
+      userName: "Sayan Mondal",
+      subject: "Database Management Systems",
+      exam: "MAKAUT",
+      branch: "Computer Science & Engineering",
+      year: 2025,
+      cgpa: 9,
+      markSheetUrl: "https://res.cloudinary.com/peerprep/marksheet/1/1.pdf",
+      status: "pending",
+    },
+    {
+      _id: "2",
+      userId: "1",
+      userName: "Sayan Mondal",
+      subject: "Data Structures & Algorithms",
+      exam: "MAKAUT",
+      branch: "Computer Science & Engineering",
+      year: 2024,
+      cgpa: 8.7,
+      markSheetUrl: "https://res.cloudinary.com/peerprep/marksheet/1/2.pdf",
+      status: "approved",
+    },
+    {
+      _id: "3",
+      userId: "1",
+      userName: "Sayan Mondal",
+      subject: "Object-Oriented Programming",
+      exam: "Jadavpur University",
+      branch: "Information Technology",
+      year: 2024,
+      cgpa: 8.2,
+      markSheetUrl: "https://res.cloudinary.com/peerprep/marksheet/1/3.pdf",
+      status: "rejected",
     },
   ],
 };

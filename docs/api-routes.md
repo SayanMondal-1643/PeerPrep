@@ -370,25 +370,39 @@ Delete a topic.
 
 # Materials
 
+> Every endpoint below returns the **full material object** — same shape regardless of which endpoint served it. `userId` is always populated as `{ _id, name, role }`, never a bare string. List endpoints always use the `data` key (never `materials`).
+
 ## GET `/api/v1/materials`
 
-Get all materials
+Get all materials.
 
 ### Response
 
-````json
+```json
 {
   "status": "success",
   "results": 1,
   "data": [
     {
       "_id": "1",
-      "title": "Complete array problems guide",
+      "title": "Complete Array Problems Guide",
+      "description": "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
+      "fileUrl": "https://example.com/file1.pdf",
       "uploadDate": "2026-06-05",
       "status": "approved",
+      "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
+      "topicId": "1",
+      "isBestMaterial": false,
+      "isTopperMaterial": false,
+      "isAIPicked": false,
+      "ratingsAverage": 4.8,
+      "ratingsQuantity": 245
     }
   ]
 }
+```
+
+---
 
 ## GET `/api/v1/topics/:topicID/materials`
 
@@ -404,7 +418,7 @@ Get all materials under a topic.
   "subject": "Data Structures & Algorithms",
   "topic": "Array",
   "results": 1,
-  "materials": [
+  "data": [
     {
       "_id": "1",
       "title": "Complete Array Problems Guide",
@@ -412,7 +426,7 @@ Get all materials under a topic.
       "fileUrl": "https://example.com/file1.pdf",
       "uploadDate": "2026-06-05",
       "status": "approved",
-      "userId": "1",
+      "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
       "topicId": "1",
       "isBestMaterial": false,
       "isTopperMaterial": false,
@@ -422,7 +436,9 @@ Get all materials under a topic.
     }
   ]
 }
-````
+```
+
+> `exam`/`branch`/`subject`/`topic` are the resolved parent-chain names, included for breadcrumbs — same convention as the branch/subject/topic list endpoints. These extra fields are the only difference from the plain `GET /api/v1/materials` response.
 
 ---
 
@@ -442,9 +458,10 @@ Get a single material.
     "fileUrl": "https://example.com/file1.pdf",
     "uploadDate": "2026-06-05",
     "status": "approved",
-    "userId": "1",
+    "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
     "topicId": "1",
     "isBestMaterial": true,
+    "isTopperMaterial": false,
     "isAIPicked": true,
     "ratingsAverage": 4.8,
     "ratingsQuantity": 245
@@ -456,7 +473,7 @@ Get a single material.
 
 ## POST `/api/v1/topics/:topicID/materials`
 
-Create a material under a topic
+Create a material under a topic.
 
 ### Request Body
 
@@ -480,9 +497,10 @@ Create a material under a topic
     "fileUrl": "https://example.com/file2.pdf",
     "uploadDate": "2026-06-12",
     "status": "pending",
-    "userId": "1",
+    "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
     "topicId": "1",
     "isBestMaterial": false,
+    "isTopperMaterial": false,
     "isAIPicked": false,
     "ratingsAverage": 0,
     "ratingsQuantity": 0
@@ -516,9 +534,10 @@ Update a material.
     "fileUrl": "https://example.com/file2.pdf",
     "uploadDate": "2026-06-12",
     "status": "approved",
-    "userId": "1",
+    "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
     "topicId": "1",
     "isBestMaterial": false,
+    "isTopperMaterial": false,
     "isAIPicked": false,
     "ratingsAverage": 0,
     "ratingsQuantity": 0
@@ -758,6 +777,8 @@ Delete a comment.
 
 # Users
 
+> The JWT is set as an `httpOnly` cookie via `res.cookie()` on the backend. It is never included in any JSON response body — none of the endpoints below return a `token` field. Frontend requests use `credentials: 'include'`; there is no client-side token storage. Student accounts do not carry `college`/`branch`/`year` — those fields are dropped entirely. Teacher accounts add `institutionName`, `idProofUrl`, and `verificationStatus` (`"pending" | "verified" | "rejected"`, lowercase). `passwordConfirm` is not sent to the backend; password matching is handled client-side.
+
 ## POST `/api/v1/users/signup`
 
 Create a new user account.
@@ -769,17 +790,17 @@ Create a new user account.
   "name": "Sayan Mondal",
   "email": "sayan@example.com",
   "password": "password123",
-  "passwordConfirm": "password123",
   "role": "student"
 }
 ```
+
+> Teacher signup additionally includes `institutionName` and `idProofUrl` (the latter obtained via a prior direct-to-Cloudinary upload).
 
 ### Response
 
 ```json
 {
-  "status": "success"
-  "token": "jwt",
+  "status": "success",
   "user": {
     "_id": "1",
     "name": "Sayan Mondal",
@@ -799,7 +820,7 @@ Login user.
 
 ```json
 {
-  "email": "sayan@example.com",
+  "email": "runa@example.com",
   "password": "password123"
 }
 ```
@@ -809,12 +830,14 @@ Login user.
 ```json
 {
   "status": "success",
-  "token": "jwt",
   "user": {
     "_id": "1",
-    "name": "Sayan Mondal",
-    "email": "sayan@example.com",
-    "role": "student"
+    "name": "Runa Mukherjee",
+    "email": "runa@example.com",
+    "role": "teacher",
+    "institutionName": "Jadavpur University",
+    "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/1.pdf",
+    "verificationStatus": "verified"
   }
 }
 ```
@@ -823,7 +846,7 @@ Login user.
 
 ## POST `/api/v1/users/logout`
 
-Logout user.
+Logout user. Clears the `httpOnly` auth cookie server-side (cannot be cleared by JS alone).
 
 ### Response
 
@@ -876,7 +899,6 @@ Reset password.
 ```json
 {
   "status": "success",
-  "token": "jwt",
   "user": {
     "_id": "1",
     "name": "Sayan Mondal",
@@ -907,7 +929,6 @@ Update logged-in user's password.
 ```json
 {
   "status": "success",
-  "token": "jwt",
   "user": {
     "_id": "1",
     "name": "Sayan Mondal",
@@ -923,7 +944,7 @@ Update logged-in user's password.
 
 Get logged-in user's profile.
 
-### Response
+### Response (student)
 
 ```json
 {
@@ -933,10 +954,25 @@ Get logged-in user's profile.
     "name": "Sayan Mondal",
     "email": "sayan@example.com",
     "createdAt": "25-04-2024",
-    "role": "student",
-    "college": "NSEC",
-    "branch": "CSE",
-    "year": "3rd"
+    "role": "student"
+  }
+}
+```
+
+### Response (teacher)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "_id": "2",
+    "name": "Runa Mukherjee",
+    "email": "runa@example.com",
+    "createdAt": "15-07-2010",
+    "role": "teacher",
+    "institutionName": "Jadavpur University",
+    "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/1.pdf",
+    "verificationStatus": "verified"
   }
 }
 ```
@@ -951,9 +987,11 @@ Update logged-in user's profile.
 
 ```json
 {
-  "year": "4th"
+  "name": "Sayan K. Mondal"
 }
 ```
+
+> Only fields present on the caller's role (see the response shapes above) are updatable — e.g. a student cannot set `institutionName`.
 
 ### Response
 
@@ -962,13 +1000,10 @@ Update logged-in user's profile.
   "status": "success",
   "data": {
     "_id": "1",
-    "name": "Sayan Mondal",
+    "name": "Sayan K. Mondal",
     "email": "sayan@example.com",
     "createdAt": "25-04-2024",
-    "role": "student",
-    "college": "NSEC",
-    "branch": "CSE",
-    "year": "4th"
+    "role": "student"
   }
 }
 ```
@@ -1012,9 +1047,9 @@ Get all users.
       "name": "Runa Mukherjee",
       "email": "runa@example.com",
       "role": "teacher",
-      "verificationStatus": "pending",
-      "linkedInUrl": "https://linkedin.com/runa-mukherjee",
-      "researchGateUrl": "https://researchgate.com/runa-mukherjee"
+      "institutionName": "Jadavpur University",
+      "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/1.pdf",
+      "verificationStatus": "pending"
     }
   ]
 }
@@ -1036,19 +1071,18 @@ Get a single user.
     "name": "Sayan Mondal",
     "email": "sayan@example.com",
     "createdAt": "25-04-2024",
-    "role": "student",
-    "college": "NSEC",
-    "branch": "CSE",
-    "year": "4th"
+    "role": "student"
   }
 }
 ```
+
+> Same student/teacher shape distinction as `GET /api/v1/users/me` above.
 
 ---
 
 ## GET `/api/v1/users/:userID/materials`
 
-Get all materials uploaded by an user.
+Get all materials uploaded by a user.
 
 ### Response
 
@@ -1064,7 +1098,10 @@ Get all materials uploaded by an user.
       "fileUrl": "https://example.com/file1.pdf",
       "uploadDate": "2026-06-05",
       "status": "approved",
+      "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
+      "topicId": "1",
       "isBestMaterial": false,
+      "isTopperMaterial": false,
       "isAIPicked": false,
       "ratingsAverage": 4.8,
       "ratingsQuantity": 245
@@ -1072,6 +1109,8 @@ Get all materials uploaded by an user.
   ]
 }
 ```
+
+> Same full material shape as every other materials endpoint (see the Materials section) — `userId` is redundant here since the route is already scoped to one user, but the shape stays uniform rather than trimmed.
 
 ---
 

@@ -22,24 +22,11 @@ import {
 } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
+import { Material, ApiMaterialsResponse } from "@/lib/material-types";
 import { mockMaterialsResponse } from "@/lib/mock-data";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-
-interface Material {
-  _id: string;
-  title: string;
-  status: string;
-  uploadDate: string;
-  isBestMaterial: boolean;
-}
-
-interface ApiMaterialResponse {
-  status: string;
-  results: number;
-  data: Material[];
-}
 
 export default function MaterialsTab() {
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -71,7 +58,7 @@ export default function MaterialsTab() {
 
       // const json: ApiMaterialResponse = await response.json();
 
-      const json: ApiMaterialResponse = mockMaterialsResponse;
+      const json: ApiMaterialsResponse = mockMaterialsResponse;
       setMaterials(json.data);
     } catch (error) {
       console.error("Failed to fetch materials:", error);
@@ -151,7 +138,10 @@ export default function MaterialsTab() {
     }
   };
 
-  const updateStatus = async (material: Material, nextStatus: string) => {
+  const updateStatus = async (
+    material: Material,
+    nextStatus: Material["status"],
+  ) => {
     const previousStatus = material.status;
 
     setMaterials((prev) =>

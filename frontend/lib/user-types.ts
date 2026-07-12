@@ -5,7 +5,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
-  accountStatus: "active" | "suspended";
+  accountStatus?: "active" | "suspended";
   verificationStatus?: "pending" | "verified" | "rejected";
   idProofUrl?: string;
 }
@@ -13,4 +13,13 @@ export interface User {
 export interface ApiAuthResponse {
   status: string;
   user: User;
+}
+
+export interface SignupData {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  institutionName?: string;
+  idProofUrl?: string;
 }

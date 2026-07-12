@@ -27,32 +27,17 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useMemo, useState } from "react";
-import { mockToppersResponse } from "@/lib/mock-data";
+import {
+  mockToppersResponse,
+  mockUserTopperBadgesResponse,
+} from "@/lib/mock-data";
+import { ApiTopperBadgesResponse, TopperBadge } from "@/lib/topper-badge-types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
-interface Topper {
-  _id: string;
-  userId: string;
-  userName: string;
-  subject: string;
-  exam: string;
-  branch: string;
-  year: number;
-  cgpa: number;
-  markSheetUrl: string;
-  status: string;
-}
-
-interface ApiToppersResponse {
-  status: string;
-  results: number;
-  data: Topper[];
-}
-
 export default function ToppersTab() {
-  const [toppersList, setToppersList] = useState<Topper[]>([]);
+  const [toppersList, setToppersList] = useState<TopperBadge[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
@@ -77,7 +62,7 @@ export default function ToppersTab() {
       // const json: ApiToppersResponse = await response.json();
 
       // MOCK DATA - TO BE REMOVED WHEN FETCHING FROM API
-      const json: ApiToppersResponse = mockToppersResponse;
+      const json: ApiTopperBadgesResponse = mockUserTopperBadgesResponse;
 
       setToppersList(json.data);
     } catch (error) {
@@ -111,8 +96,8 @@ export default function ToppersTab() {
   }, [toppersList, searchQuery, approvalFilter]);
 
   const updateStatus = async (
-    application: Topper,
-    nextStatus: Topper["status"],
+    application: TopperBadge,
+    nextStatus: TopperBadge["status"],
   ) => {
     const previousStatus = application.status;
 

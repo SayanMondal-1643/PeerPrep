@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ApiMaterialsResponse } from "@/lib/material-types";
 
 // UNCOMMENT THE CODE BELOW TO FETCH FROM API:
 // async function fetchMaterials(topicId: string) {
@@ -32,38 +33,6 @@ import {
 // return null;
 // }
 
-interface UploaderInfo {
-  _id: string;
-  name: string;
-  role: "student" | "teacher";
-}
-
-interface Material {
-  _id: string;
-  title: string;
-  description: string;
-  fileUrl: string;
-  uploadDate: string;
-  status: "pending" | "approved" | "rejected";
-  userId: UploaderInfo;
-  topicId: string;
-  isBestMaterial: boolean;
-  isTopperMaterial: boolean;
-  isAIPicked: boolean;
-  ratingsAverage: number;
-  ratingsQuantity: number;
-}
-
-interface MaterialsResponse {
-  status: string;
-  exam: string;
-  branch: string;
-  subject: string;
-  topic: string;
-  results: number;
-  materials: Material[];
-}
-
 interface Params {
   params: Promise<{
     examId: string;
@@ -74,14 +43,14 @@ interface Params {
 }
 
 // MOCK DATA - TO BE REMOVED
-const mockData: MaterialsResponse = {
+const mockData: ApiMaterialsResponse = {
   status: "success",
   exam: "MAKAUT",
   branch: "Computer Science Engineering",
   subject: "Data Structures & Algorithms",
   topic: "Array",
   results: 5,
-  materials: [
+  data: [
     {
       _id: "1",
       title: "Complete Array Problems Guide",
@@ -211,7 +180,7 @@ export default async function MaterialsPage({ params }: Params) {
           {/* Materials List */}
           <div className="space-y-4">
             {/* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */}
-            {mockData.materials.map((material) => {
+            {mockData.data.map((material) => {
               // const userRating = userRatings[material._id] || 0;
 
               return (

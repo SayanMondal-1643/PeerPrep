@@ -6,7 +6,7 @@ import {
   mockLogoutResponse,
   mockSignupResponse,
 } from "@/lib/mock-data";
-import { User, UserRole } from "./user-types";
+import { User, SignupData, ApiAuthResponse } from "./user-types";
 
 interface AuthContextType {
   user: User | null;
@@ -16,15 +16,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   redirectTo: string | null;
   setRedirectTo: (path: string | null) => void;
-}
-
-export interface SignupData {
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  institutionName?: string;
-  idProofUrl?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,10 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //   const errorData = await res.json()
     //   throw new Error(errorData.message || 'Login failed')
     // }
-    // const data = await res.json()
+    // const data: ApiAuthResponse = await res.json()
 
     // MOCK DATA - TO BE REMOVED LATER
-    const data = await mockLoginResponse(email, password);
+    const data: ApiAuthResponse = await mockLoginResponse(email, password);
 
     setUser(data.user);
   };
@@ -65,10 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //   const errorData = await res.json()
     //   throw new Error(errorData.message || 'Signup failed')
     // }
-    // const responseData = await res.json()
+    // const responseData: ApiAuthResponse = await res.json()
 
     // MOCK DATA - TO BE REMOVED LATER
-    const responseData = await mockSignupResponse(data);
+    const responseData: ApiAuthResponse = await mockSignupResponse(data);
 
     setUser(responseData.user);
   };
