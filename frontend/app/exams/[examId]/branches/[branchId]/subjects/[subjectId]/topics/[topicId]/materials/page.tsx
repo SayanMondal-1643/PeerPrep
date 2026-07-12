@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ApiMaterialsResponse } from "@/lib/material-types";
+import { mockMaterialsResponse } from "@/lib/mock-data";
 
 // UNCOMMENT THE CODE BELOW TO FETCH FROM API:
 // async function fetchMaterials(topicId: string) {
@@ -42,98 +42,6 @@ interface Params {
   }>;
 }
 
-// MOCK DATA - TO BE REMOVED
-const mockData: ApiMaterialsResponse = {
-  status: "success",
-  exam: "MAKAUT",
-  branch: "Computer Science Engineering",
-  subject: "Data Structures & Algorithms",
-  topic: "Array",
-  results: 5,
-  data: [
-    {
-      _id: "1",
-      title: "Complete Array Problems Guide",
-      description:
-        "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
-      fileUrl: "https://example.com/file1.pdf",
-      uploadDate: "2026-06-05",
-      status: "approved",
-      userId: { _id: "1", name: "Sayan Mondal", role: "student" },
-      topicId: "1",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 4.8,
-      ratingsQuantity: 245,
-    },
-    {
-      _id: "2",
-      title: "Array Rotation and Sliding Window Notes",
-      description:
-        "Handwritten notes covering array rotation techniques and the sliding window pattern with worked examples.",
-      fileUrl: "https://example.com/file2.pdf",
-      uploadDate: "2026-06-08",
-      status: "approved",
-      userId: { _id: "2", name: "Runa Mukherjee", role: "teacher" },
-      topicId: "1",
-      isBestMaterial: true,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 4.9,
-      ratingsQuantity: 312,
-    },
-    {
-      _id: "3",
-      title: "Two Pointer Technique Cheat Sheet",
-      description:
-        "Quick reference sheet summarizing two-pointer approaches for common array problems.",
-      fileUrl: "https://example.com/file3.pdf",
-      uploadDate: "2026-06-10",
-      status: "approved",
-      userId: { _id: "1", name: "Sayan Mondal", role: "student" },
-      topicId: "1",
-      isBestMaterial: false,
-      isTopperMaterial: true,
-      isAIPicked: false,
-      ratingsAverage: 4.6,
-      ratingsQuantity: 98,
-    },
-    {
-      _id: "4",
-      title: "Prefix Sum and Difference Array Explained",
-      description:
-        "Step-by-step explanation of prefix sum and difference array techniques with diagrams.",
-      fileUrl: "https://example.com/file4.pdf",
-      uploadDate: "2026-06-14",
-      status: "approved",
-      userId: { _id: "3", name: "Arka Das", role: "teacher" },
-      topicId: "1",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: true,
-      ratingsAverage: 4.2,
-      ratingsQuantity: 41,
-    },
-    {
-      _id: "5",
-      title: "Array Problem Set - MAKAUT Previous Years",
-      description:
-        "Compilation of array-related questions from past MAKAUT semester exams with solutions.",
-      fileUrl: "https://example.com/file5.pdf",
-      uploadDate: "2026-06-16",
-      status: "pending",
-      userId: { _id: "2", name: "Runa Mukherjee", role: "teacher" },
-      topicId: "1",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 0,
-      ratingsQuantity: 0,
-    },
-  ],
-};
-
 export default async function MaterialsPage({ params }: Params) {
   const { examId, branchId, subjectId, topicId } = await params;
   // UNCOMMENT THE LINE TO FETCH FROM API:
@@ -150,18 +58,21 @@ export default async function MaterialsPage({ params }: Params) {
           items={[
             { label: "Home", href: "/" },
             { label: "Exams", href: "/exams" },
-            /* USE `data` INSTEAD OF `mockData` WHEN FETCHING FROM API */
-            { label: mockData.exam, href: `/exams/${examId}/branches` },
+            /* USE `data` INSTEAD OF `mockMaterialsResponse` WHEN FETCHING FROM API */
             {
-              label: mockData.branch,
+              label: mockMaterialsResponse.exam,
+              href: `/exams/${examId}/branches`,
+            },
+            {
+              label: mockMaterialsResponse.branch,
               href: `/exams/${examId}/branches/${branchId}/subjects`,
             },
             {
-              label: mockData.subject,
+              label: mockMaterialsResponse.subject,
               href: `/exams/${examId}/branches/${branchId}/subjects/${subjectId}/topics`,
             },
             {
-              label: mockData.topic,
+              label: mockMaterialsResponse.topic,
               href: `/exams/${examId}/branches/${branchId}/subjects/${subjectId}/topics/${topicId}/materials`,
             },
           ]}
@@ -169,8 +80,10 @@ export default async function MaterialsPage({ params }: Params) {
 
         <div>
           <div className="mb-8">
-            {/* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */}
-            <h1 className="text-3xl font-bold mb-2">{mockData.topic}</h1>
+            {/* USE 'data' INSTEAD OF 'mockMaterialsResponse' WHEN FETCHING FROM API */}
+            <h1 className="text-3xl font-bold mb-2">
+              {mockMaterialsResponse.topic}
+            </h1>
             <p className="text-muted-foreground">
               Browse and download study materials. Rate materials to help fellow
               students find the best content.
@@ -179,8 +92,8 @@ export default async function MaterialsPage({ params }: Params) {
 
           {/* Materials List */}
           <div className="space-y-4">
-            {/* USE 'data' INSTEAD OF 'mockData' WHEN FETCHING FROM API */}
-            {mockData.data.map((material) => {
+            {/* USE 'data' INSTEAD OF 'mockMaterialsResponse' WHEN FETCHING FROM API */}
+            {mockMaterialsResponse.data.map((material) => {
               // const userRating = userRatings[material._id] || 0;
 
               return (

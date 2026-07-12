@@ -37,6 +37,11 @@ export interface ApiMaterialsResponse {
   data: Material[];
 }
 
+export interface ApiMaterialResponse {
+  status: string;
+  data: Material;
+}
+
 export interface ApiUserMaterialsResponse {
   status: string;
   results: number;

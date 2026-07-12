@@ -1,5 +1,6 @@
 import { User, ApiAuthResponse, SignupData } from "./user-types";
 import {
+  ApiMaterialResponse,
   ApiMaterialsResponse,
   ApiUserMaterialsResponse,
 } from "./material-types";
@@ -830,6 +831,73 @@ export const mockUserTopperBadgesResponse: ApiTopperBadgesResponse = {
       cgpa: 8.2,
       markSheetUrl: "https://res.cloudinary.com/peerprep/marksheet/1/3.pdf",
       status: "rejected",
+    },
+  ],
+};
+
+export const mockMaterialResponse: ApiMaterialResponse = {
+  status: "success",
+  data: {
+    _id: "1",
+    title: "Complete Array Problems Guide",
+    description:
+      "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
+    fileUrl:
+      "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
+    uploadDate: "2026-06-05",
+    status: "approved",
+    userId: {
+      _id: "1",
+      name: "Rajesh Kumar",
+      role: "student",
+    },
+    topicId: "1",
+    isBestMaterial: true,
+    isTopperMaterial: false,
+    isAIPicked: true,
+    ratingsAverage: 4.8,
+    ratingsQuantity: 245,
+  },
+};
+
+export const mockCommentsResponse = {
+  status: "success",
+  results: 5,
+  data: [
+    {
+      _id: "1",
+      comment:
+        "This guide covers all the array topics that appeared in last year's MAKAUT exam! The two-pointer technique section was especially helpful. Wish I had found this earlier.",
+      userName: "Sayan Mondal",
+      createdAt: "2025-01-20",
+    },
+    {
+      _id: "2",
+      comment:
+        "Great resource for CSE semester exams. The prefix sum technique explanations are clear and the examples are well-chosen. Definitely helped me prepare better.",
+      userName: "Priya Sharma",
+      createdAt: "2025-01-19",
+    },
+    {
+      _id: "3",
+      comment:
+        "Pretty comprehensive for an array guide. Covers most of the important problems. My only feedback is that the searching section could have more advanced examples.",
+      userName: "Subhajit Kundu",
+      createdAt: "2025-01-18",
+    },
+    {
+      _id: "4",
+      comment:
+        "Exactly what I needed for my Data Structures exam prep! The explanations are beginner-friendly and the difficulty progression is perfect for CSE students.",
+      userName: "Sneha Reddy",
+      createdAt: "2025-01-17",
+    },
+    {
+      _id: "5",
+      comment:
+        "This material helped me understand array traversal and searching better. Previous year MAKAUT questions are similar to the problems covered here.",
+      userName: "Vikram Singh",
+      createdAt: "2025-01-16",
     },
   ],
 };
