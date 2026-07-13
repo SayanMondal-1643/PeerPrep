@@ -1,21 +1,21 @@
-'use client'
+"use client";
 
-import Link from "next/link"
-import { ArrowRight, Users, Star, BookOpen } from "lucide-react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { UploadAuthModal } from "@/components/upload-auth-modal"
-import { useAuth } from "@/lib/auth-context"
+import Link from "next/link";
+import { ArrowRight, Users, Star, BookOpen } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { UploadAuthModal } from "@/components/upload-auth-modal";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LandingPage() {
-  const { isLoggedIn } = useAuth()
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { isLoggedIn } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleUploadClick = () => {
     if (!isLoggedIn) {
-      setIsModalOpen(true)
+      setIsModalOpen(true);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -23,10 +23,11 @@ export default function LandingPage() {
       <section className="container mx-auto px-4 py-20 lg:py-32">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-balance mb-6">
-            Collaborative Exam Preparation Platform
+            Structured and Community-Based Study Materials Platform
           </h1>
-          <p className="text-lg lg:text-xl text-muted-foreground text-balance mb-8 max-w-2xl mx-auto">
-            Access peer-curated study materials to prepare smarter for your exams.
+          <p className="text-lg lg:text-xl text-muted-foreground text-balance mb-8 max-w-4xl mx-auto">
+            Access peer-curated study materials organized by exam, branch,
+            subject, and topic
           </p>
           <div className="flex items-center justify-center gap-4">
             <Button size="lg" asChild>
@@ -46,14 +47,20 @@ export default function LandingPage() {
             )}
           </div>
 
-          <UploadAuthModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} intendedPath="/upload" />
+          <UploadAuthModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            intendedPath="/upload"
+          />
         </div>
       </section>
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-20 border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose PeerPrep</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Why Choose PeerPrep
+          </h2>
           <div className="grid md:grid-cols-4 gap-8">
             <div className="flex flex-col items-start gap-4 p-6 rounded-lg border border-border bg-card">
               <div className="p-3 rounded-lg bg-primary/10">
@@ -61,8 +68,8 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-semibold">Structured Learning</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Navigate through a well-organized hierarchy of exams, branches, subjects, and topics to find exactly
-                what you need.
+                Navigate through a well-organized hierarchy of exams, branches,
+                subjects, and topics to find exactly what you need.
               </p>
             </div>
             <div className="flex flex-col items-start gap-4 p-6 rounded-lg border border-border bg-card">
@@ -71,7 +78,8 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-semibold">Peer-Curated Content</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Access study materials shared and curated by teachers, toppers, and fellow students.
+                Access study materials shared and curated by teachers, toppers,
+                and fellow students.
               </p>
             </div>
             <div className="flex flex-col items-start gap-4 p-6 rounded-lg border border-border bg-card">
@@ -80,7 +88,8 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-semibold">Best Materials First</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Discover the best materials quickly through community ratings and reviews. Quality content rises to the top.
+                Discover the best materials quickly through community ratings
+                and reviews. Quality content rises to the top.
               </p>
             </div>
             <div className="flex flex-col items-start gap-4 p-6 rounded-lg border border-border bg-card">
@@ -89,7 +98,8 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-semibold">Community Driven</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Contribute your own study materials and help fellow students succeed in their academic journey.
+                Contribute your own study materials and help fellow students
+                succeed in their academic journey.
               </p>
             </div>
           </div>
@@ -120,10 +130,12 @@ export default function LandingPage() {
               <BookOpen className="h-5 w-5 text-primary" />
               <span className="text-sm font-medium">PeerPrep</span>
             </div>
-            <p className="text-sm text-muted-foreground">© 2025 PeerPrep. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">
+              © 2026 PeerPrep. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }

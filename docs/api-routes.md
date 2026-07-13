@@ -1157,6 +1157,8 @@ Delete a user.
 
 # Topper Badge Applications
 
+> Every endpoint below returns the **full topper badge object** — same shape regardless of which endpoint served it: `_id`, `userId`, `userName`, `subject`, `exam`, `branch`, `year`, `cgpa`, `markSheetUrl`, `status`.
+
 ## GET `/api/v1/topperBadgeApplications`
 
 Get all topper badge applications.
@@ -1199,15 +1201,21 @@ Get all topper badge applications of a user.
   "data": [
     {
       "_id": "1",
-      "subject": "DBMS",
-      "exam": "MAKAUT",
-      "branch": "CSE",
+      "userId": "1",
+      "userName": "Sayan Mondal",
+      "subject": "Database Management Systems",
+      "exam": "Maulana Abul Kalam Azad University of Technology",
+      "branch": "Computer Science & Engineering",
       "year": 2025,
+      "cgpa": 9,
+      "markSheetUrl": "https://resources/marksheet/1/1",
       "status": "pending"
     }
   ]
 }
 ```
+
+> `userId`/`userName` are redundant here since the route is already scoped to one user, but the shape stays uniform rather than trimmed — same convention as `GET /api/v1/users/:userID/materials`.
 
 ---
 
@@ -1236,10 +1244,14 @@ Create a topper badge application.
   "message": "Application submitted successfully",
   "data": {
     "_id": "2",
+    "userId": "1",
+    "userName": "Sayan Mondal",
     "subject": "DSA",
     "exam": "Jadavpur University",
     "branch": "IT",
     "year": 2024,
+    "cgpa": 9,
+    "markSheetUrl": "https://resources/marksheet/3",
     "status": "pending"
   }
 }
@@ -1266,22 +1278,15 @@ Update topper badge application status.
   "status": "success",
   "data": {
     "_id": "1",
+    "userId": "1",
+    "userName": "Sayan Mondal",
+    "subject": "Database Management Systems",
+    "exam": "Maulana Abul Kalam Azad University of Technology",
+    "branch": "Computer Science & Engineering",
+    "year": 2025,
+    "cgpa": 9,
+    "markSheetUrl": "https://resources/marksheet/1/1",
     "status": "approved"
   }
-}
-```
-
----
-
-## DELETE `/api/v1/topperBadgeApplications/:applicationID`
-
-Delete topper badge application.
-
-### Response
-
-```json
-{
-  "status": "success",
-  "data": null
 }
 ```

@@ -26,6 +26,7 @@ interface ApplyTopperBadgeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: TopperBadgeApplicationData) => void;
+  userId: string;
 }
 
 export interface TopperBadgeApplicationData {
@@ -41,6 +42,7 @@ export default function ApplyTopperBadgeModal({
   isOpen,
   onClose,
   onSubmit,
+  userId,
 }: ApplyTopperBadgeModalProps) {
   const [formData, setFormData] = useState<TopperBadgeApplicationData>({
     exam: "",
@@ -182,12 +184,40 @@ export default function ApplyTopperBadgeModal({
     return newErrors;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
+
+    // UNCOMMENT TO FETCH FROM API
+    // try {
+    //   const res = await fetch(`/api/v1/users/${userId}/topperBadgeApplications`, {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     credentials: 'include',
+    //     body: JSON.stringify({
+    //       exam: formData.exam,
+    //       branch: formData.branch,
+    //       subject: formData.subject,
+    //       year: Number(formData.year),
+    //       cgpa: Number(formData.cgpa),
+    //       markSheetUrl: formData.markSheetUrl,
+    //     }),
+    //   })
+    //   const json = await res.json()
+    //   if (json.status !== 'success') {
+    //     setErrors({ ...errors, submit: 'Failed to submit application' })
+    //     return
+    //   }
+    //   onSubmit(json.data)
+    // } catch (err) {
+    //   console.error('Failed to submit topper badge application', err)
+    //   setErrors({ ...errors, submit: 'Failed to submit application' })
+    //   return
+    // }
+
     onSubmit(formData);
     setFormData({
       exam: "",

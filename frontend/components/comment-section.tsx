@@ -5,8 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { GraduationCap } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { mockCommentsResponse } from "@/lib/mock-data";
+
+interface CommentUser {
+  _id: string;
+  name: string;
+  role: "student" | "teacher";
+  verificationStatus?: "pending" | "verified" | "rejected";
+}
+
+interface Comment {
+  _id: string;
+  comment: string;
+  userId: CommentUser;
+  createdAt: string;
+}
 
 interface CommentSectionProps {
   materialId: string;
@@ -29,7 +44,9 @@ export function CommentSection({
   isLoggedIn,
 }: CommentSectionProps) {
   const { user } = useAuth();
-  const [comments, setComments] = useState(mockCommentsResponse.data);
+  const [comments, setComments] = useState<Comment[]>(
+    mockCommentsResponse.data as Comment[],
+  );
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
@@ -40,10 +57,18 @@ export function CommentSection({
     setIsSubmitting(true);
     // Simulate API call
     setTimeout(() => {
-      const displayName = user?.name ?? "You";
-      const newCommentObj = {
+      const newCommentObj: Comment = {
         _id: `${comments.length + 1}`,
-        userName: displayName,
+        userId: {
+          _id: user?._id ?? "temp",
+          name: user?.name ?? "You",
+          role:
+            user?.role === "teacher" || user?.role === "student"
+              ? user.role
+              : "student",
+          verificationStatus:
+            user?.role === "teacher" ? user?.verificationStatus : undefined,
+        },
         comment: newComment,
         createdAt: new Date().toISOString().split("T")[0],
       };
@@ -54,7 +79,7 @@ export function CommentSection({
   };
 
   const displayedComments = showAllComments ? comments : comments.slice(0, 3);
-  const totalComments = 124;
+  const totalComments = 5;
 
   return (
     <div className="space-y-6">
@@ -91,14 +116,20 @@ export function CommentSection({
           {displayedComments.map((comment) => (
             <Card key={comment._id} className="p-4">
               <div className="flex gap-4">
-                <Avatar className="h-10 w-10 flex-shrink-0">
+                <Avatar className="h-10 w-10 shrink-0">
                   <AvatarFallback className="text-xs font-medium">
-                    {getInitialsFromName(comment.userName)}
+                    {getInitialsFromName(comment.userId.name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <p className="font-medium text-sm">{comment.userName}</p>
+                    <p className="font-medium text-sm flex items-center">
+                      {comment.userId.name}
+                      {comment.userId.role === "teacher" &&
+                        comment.userId.verificationStatus === "verified" && (
+                          <GraduationCap className="h-4 w-4 text-blue-600 ml-1" />
+                        )}
+                    </p>
                     <span className="text-xs text-muted-foreground">
                       {new Date(comment.createdAt).toLocaleDateString("en-GB")}
                     </span>

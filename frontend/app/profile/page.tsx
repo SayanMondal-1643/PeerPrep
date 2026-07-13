@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useRequireAuth } from "@/lib/use-require-auth";
@@ -127,6 +127,53 @@ export default function ProfilePage() {
   const [isApplyBadgeModalOpen, setIsApplyBadgeModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  useEffect(() => {
+    // UNCOMMENT TO FETCH FROM API
+    // const fetchProfile = async () => {
+    //   try {
+    //     const res = await fetch('/api/v1/users/me', { credentials: 'include' })
+    //     const json: MeResponse = await res.json()
+    //     if (json.status === 'success') {
+    //       // update local profile state with json.data if a separate profile state exists;
+    //       // otherwise this just confirms/refreshes what useAuth() already provides
+    //     }
+    //   } catch (err) {
+    //     console.error('Failed to fetch profile', err)
+    //   }
+    // }
+    // fetchProfile()
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    // UNCOMMENT TO FETCH FROM API
+    // const fetchMaterials = async () => {
+    //   try {
+    //     const res = await fetch(`/api/v1/users/${user._id}/materials`, { credentials: 'include' })
+    //     const json = await res.json()
+    //     if (json.status === 'success') setMaterials(json.data)
+    //   } catch (err) {
+    //     console.error('Failed to fetch materials', err)
+    //   }
+    // }
+    // fetchMaterials()
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    // UNCOMMENT TO FETCH FROM API
+    // const fetchTopperBadges = async () => {
+    //   try {
+    //     const res = await fetch(`/api/v1/users/${user._id}/topperBadgeApplications`, { credentials: 'include' })
+    //     const json = await res.json()
+    //     if (json.status === 'success') setTopperBadges(json.data)
+    //   } catch (err) {
+    //     console.error('Failed to fetch topper badges', err)
+    //   }
+    // }
+    // fetchTopperBadges()
+  }, [user]);
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -168,6 +215,18 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
+    // UNCOMMENT TO FETCH FROM API
+    // try {
+    //   const res = await fetch('/api/v1/users/me', { method: 'DELETE', credentials: 'include' })
+    //   const json = await res.json()
+    //   if (json.status !== 'success') {
+    //     console.error('Failed to delete account')
+    //     return
+    //   }
+    // } catch (err) {
+    //   console.error('Failed to delete account', err)
+    //   return
+    // }
     await logout();
     router.push("/");
   };
@@ -447,6 +506,7 @@ export default function ProfilePage() {
         isOpen={isApplyBadgeModalOpen}
         onClose={() => setIsApplyBadgeModalOpen(false)}
         onSubmit={handleBadgeApplicationSubmit}
+        userId={user._id}
       />
     </div>
   );

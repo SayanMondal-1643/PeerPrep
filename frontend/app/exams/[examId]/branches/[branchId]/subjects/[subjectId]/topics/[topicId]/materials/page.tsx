@@ -85,8 +85,8 @@ export default async function MaterialsPage({ params }: Params) {
               {mockMaterialsResponse.topic}
             </h1>
             <p className="text-muted-foreground">
-              Browse and download study materials. Rate materials to help fellow
-              students find the best content.
+              View and download study materials. Rate, comment, and report to
+              help the community find trustworthy content.
             </p>
           </div>
 
@@ -185,7 +185,7 @@ export default async function MaterialsPage({ params }: Params) {
                               ({material.ratingsQuantity} ratings)
                             </span>
                           </div>
-                          <span className="text-muted-foreground">•</span>
+                          {/* <span className="text-muted-foreground">•</span> */}
                           {/* <span className="text-muted-foreground">
                             {material.fileType}
                           </span> */}

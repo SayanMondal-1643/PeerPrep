@@ -23,3 +23,8 @@ export interface SignupData {
   institutionName?: string;
   idProofUrl?: string;
 }
+
+export interface MeResponse {
+  status: string;
+  data: User;
+}

@@ -1,3 +1,4 @@
+import { HierarchyOption, HierarchyResponse } from "./hierarchy-types";
 import { User, ApiAuthResponse, SignupData } from "./user-types";
 import {
   ApiMaterialResponse,
@@ -6,22 +7,6 @@ import {
 } from "./material-types";
 
 import { ApiTopperBadgesResponse } from "./topper-badge-types";
-
-export interface HierarchyOption {
-  _id: string;
-  name: string;
-}
-
-export interface HierarchyResponse {
-  status: string;
-  results: number;
-  data: HierarchyOption[];
-  exam?: string;
-  branch?: string;
-  subject?: string;
-  topic?: string;
-  message?: string;
-}
 
 const mockLoginUsersByEmail: Record<string, User> = {
   "admin@example.com": {
@@ -86,50 +71,50 @@ export async function mockSignupResponse(
   return { status: "success", user };
 }
 
-const exams: HierarchyOption[] = [
-  { _id: "0", name: "Graduate Aptitude Test in Engineering" },
-  { _id: "1", name: "Maulana Abul Kalam Azad University of Technology" },
-  { _id: "2", name: "Jadavpur University" },
-  { _id: "3", name: "Calcutta University" },
+export const exams: HierarchyOption[] = [
+  { _id: "0", name: "Maulana Abul Kalam Azad University of Technology" },
+  { _id: "1", name: "Graduate Aptitude Test in Engineering" },
+  { _id: "2", name: "Calcutta University" },
+  { _id: "3", name: "Jadavpur University" },
 ];
 
-const branches: HierarchyOption[] = [
-  { _id: "1", name: "Computer Science Engineering" },
-  { _id: "2", name: "Information Technology" },
-  { _id: "3", name: "Electronics and Communication Engineering" },
-  { _id: "4", name: "Electrical Engineering" },
-  { _id: "5", name: "Mechanical Engineering" },
-  { _id: "6", name: "Civil Engineering" },
-  { _id: "7", name: "Chemical Engineering" },
-  { _id: "8", name: "Biotechnology" },
-  { _id: "9", name: "Aerospace Engineering" },
-  { _id: "10", name: "Artificial Intelligence and Data Science" },
+export const branches: HierarchyOption[] = [
+  { _id: "0", name: "Computer Science & Engineering" },
+  { _id: "1", name: "Information Technology" },
+  { _id: "2", name: "Electronics and Communication Engineering" },
+  { _id: "3", name: "Electrical Engineering" },
+  { _id: "4", name: "Mechanical Engineering" },
+  { _id: "5", name: "Civil Engineering" },
+  { _id: "6", name: "Chemical Engineering" },
+  { _id: "7", name: "Biomedical Engineering" },
+  { _id: "8", name: "Computer Science & Business Systems" },
+  { _id: "9", name: "Applied Electronics and Instrumentation Engineering" },
 ];
 
 const subjects: HierarchyOption[] = [
-  { _id: "1", name: "Data Structures & Algorithms" },
-  { _id: "2", name: "Computer Organization" },
-  { _id: "3", name: "Computer Architecture" },
-  { _id: "4", name: "Design and Analysis of Algorithms" },
-  { _id: "5", name: "Formal Languages and Automata Theory" },
-  { _id: "6", name: "Operating Systems" },
-  { _id: "7", name: "Object Oriented Programming" },
-  { _id: "8", name: "Software Engineering" },
-  { _id: "9", name: "Database Management Systems" },
-  { _id: "10", name: "Computer Networks" },
+  { _id: "0", name: "Data Structures & Algorithms" },
+  { _id: "1", name: "Computer Organization" },
+  { _id: "2", name: "Computer Architecture" },
+  { _id: "3", name: "Design and Analysis of Algorithms" },
+  { _id: "4", name: "Formal Languages and Automata Theory" },
+  { _id: "5", name: "Operating Systems" },
+  { _id: "6", name: "Object Oriented Programming" },
+  { _id: "7", name: "Software Engineering" },
+  { _id: "8", name: "Database Management Systems" },
+  { _id: "9", name: "Computer Networks" },
 ];
 
 const topics: HierarchyOption[] = [
-  { _id: "1", name: "Array" },
-  { _id: "2", name: "Strings" },
-  { _id: "3", name: "Linked List" },
-  { _id: "4", name: "Stack" },
-  { _id: "5", name: "Queue" },
-  { _id: "6", name: "Tree" },
-  { _id: "7", name: "Graph" },
-  { _id: "8", name: "Searching" },
-  { _id: "9", name: "Sorting" },
-  { _id: "10", name: "Hashing" },
+  { _id: "1", name: "Basic Terminologies & Algorithm Analysis" },
+  { _id: "2", name: "Searching Techniques" },
+  { _id: "3", name: "Stacks" },
+  { _id: "4", name: "Queues" },
+  { _id: "5", name: "Linked Lists" },
+  { _id: "6", name: "Trees" },
+  { _id: "7", name: "B Trees & B+ Trees" },
+  { _id: "8", name: "Sorting Algorithms" },
+  { _id: "9", name: "Hashing" },
+  { _id: "10", name: "Graphs" },
 ];
 
 export const mockExamsResponse: HierarchyResponse = {
@@ -148,7 +133,7 @@ export const mockBranchesResponse: HierarchyResponse = {
 export const mockSubjectsResponse: HierarchyResponse = {
   status: "success",
   exam: "Maulana Abul Kalam Azad University of Technology",
-  branch: "Computer Science Engineering",
+  branch: "Computer Science & Engineering",
   results: subjects.length,
   data: subjects,
 };
@@ -156,179 +141,119 @@ export const mockSubjectsResponse: HierarchyResponse = {
 export const mockTopicsResponse: HierarchyResponse = {
   status: "success",
   exam: "Maulana Abul Kalam Azad University of Technology",
-  branch: "Computer Science Engineering",
+  branch: "Computer Science & Engineering",
   subject: "Data Structures & Algorithms",
   results: topics.length,
   data: topics,
 };
 
+// export const mockMaterialsResponse: ApiMaterialsResponse = {
+//   status: "success",
+//   exam: "Maulana Abul Kalam Azad University of Technology",
+//   branch: "Computer Science & Engineering",
+//   subject: "Data Structures & Algorithms",
+//   topic: "Searching Techniques",
+//   results: 10,
+//   data: [
+//     {
+//       _id: "1",
+//       title: "Searching Techniques Guide: Linear & Binary Search",
+//       description:
+//         "A thorough walkthrough of linear and binary search, covering both iterative and recursive approach of binary search along with their time complexity analysis.",
+//       fileUrl: "/materials/searching_techniques.pdf",
+//       uploadDate: "2026-06-05",
+//       status: "approved",
+//       userId: {
+//         _id: "1",
+//         name: "Sayan Mondal",
+//         role: "student",
+//       },
+//       topicId: "2",
+//       isBestMaterial: true,
+//       isTopperMaterial: false,
+//       isAIPicked: false,
+//       ratingsAverage: 4.8,
+//       ratingsQuantity: 77,
+//     },
+//     {
+//       _id: "2",
+//       title: "MAKAUT Previous Year Questions On Searching Techniques",
+//       description:
+//         "A curated set of previous year MAKAUT exam questions on linear, binary, and interpolation search, with detailed step-by-step solutions.",
+//       fileUrl: "https://example.com/file2.pdf",
+//       uploadDate: "2026-07-10",
+//       status: "approved",
+//       userId: { _id: "2", name: "Subhajit Kundu", role: "student" },
+//       topicId: "2",
+//       isBestMaterial: false,
+//       isTopperMaterial: true,
+//       isAIPicked: false,
+//       ratingsAverage: 4.5,
+//       ratingsQuantity: 32,
+//     },
+//     {
+//       _id: "3",
+//       title: "Interpolation Search",
+//       description:
+//         "Explains the interpolation search technique as an improvement over binary search for uniformly distributed data, with algorithm, complexity analysis, and comparison against binary search.",
+//       fileUrl: "https://example.com/file3.pdf",
+//       uploadDate: "2025-05-25",
+//       status: "approved",
+//       userId: { _id: "3", name: "Akash Samanta", role: "student" },
+//       topicId: "2",
+//       isBestMaterial: false,
+//       isTopperMaterial: false,
+//       isAIPicked: false,
+//       ratingsAverage: 3.7,
+//       ratingsQuantity: 12,
+//     },
+//   ],
+// };
+
 export const mockMaterialsResponse: ApiMaterialsResponse = {
   status: "success",
-  exam: "Graduate Aptitude Test in Engineering",
-  branch: "Computer Science Engineering",
+  exam: "Maulana Abul Kalam Azad University of Technology",
+  branch: "Computer Science & Engineering",
   subject: "Data Structures & Algorithms",
-  topic: "Mixed Topics",
-  results: 10,
+  topic: "Stacks",
+  results: 2,
   data: [
     {
       _id: "1",
-      title: "Complete Array Problems Guide",
+      title: "Complete Guide to Stacks: ADT and Applications",
       description:
-        "This guide covers common array-based problem patterns with step-by-step solutions that are useful for interviews and competitive programming.",
-      fileUrl: "https://example.com/file1.pdf",
-      uploadDate: "2026-06-05",
+        "Covers the Stack ADT and its core operations, along with expression conversion (infix to postfix/prefix) and expression evaluation with algorithms and complexity analysis.",
+      fileUrl: "/materials/stacks_guide.pdf",
+      uploadDate: "2026-06-08",
       status: "approved",
-      userId: { _id: "u1", name: "Runa Mukherjee", role: "teacher" },
-      topicId: "8",
+      userId: {
+        _id: "1",
+        name: "Runa Mukherjee",
+        role: "teacher",
+        verificationStatus: "verified",
+      },
+      topicId: "3",
       isBestMaterial: true,
-      isTopperMaterial: true,
-      isAIPicked: false,
-      ratingsAverage: 4.7,
-      ratingsQuantity: 38,
+      isTopperMaterial: false,
+      isAIPicked: true,
+      ratingsAverage: 4,
+      ratingsQuantity: 2,
     },
     {
       _id: "2",
-      title: "3NF vs BCNF",
+      title: "Stack Applications",
       description:
-        "A concise comparison of 3NF and BCNF with examples that explain when each normalization form is appropriate.",
-      fileUrl: "https://example.com/file2.pdf",
-      uploadDate: "2026-07-10",
-      status: "pending",
-      userId: { _id: "u2", name: "Sayan Mondal", role: "student" },
-      topicId: "9",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 0,
-      ratingsQuantity: 0,
-    },
-    {
-      _id: "3",
-      title: "ACID Properties in Database Transactions",
-      description:
-        "This material explains atomicity, consistency, isolation, and durability with simple transaction examples.",
-      fileUrl: "https://example.com/file3.pdf",
-      uploadDate: "2025-05-25",
-      status: "pending",
-      userId: { _id: "u3", name: "Subhajit Kundu", role: "student" },
-      topicId: "10",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: true,
-      ratingsAverage: 0,
-      ratingsQuantity: 0,
-    },
-    {
-      _id: "4",
-      title: "Two Pointer Technique Explained",
-      description:
-        "A practical walkthrough of the two-pointer approach with solved examples for arrays and strings.",
-      fileUrl: "https://example.com/file4.pdf",
-      uploadDate: "2025-02-11",
-      status: "rejected",
-      userId: { _id: "u4", name: "Aarav Sharma", role: "teacher" },
-      topicId: "1",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 2.1,
-      ratingsQuantity: 7,
-    },
-    {
-      _id: "5",
-      title: "Array Algorithms Cheat Sheet",
-      description:
-        "This cheat sheet summarizes essential array algorithms, their complexity, and the most common use cases.",
+        "Discusses classic stack-based problems including balanced parentheses checking and postfix expression evaluation, with dry runs and code-level implementation notes.",
       fileUrl: "https://example.com/file5.pdf",
-      uploadDate: "2025-01-02",
+      uploadDate: "2026-06-15",
       status: "approved",
-      userId: { _id: "u5", name: "Nisha Roy", role: "student" },
-      topicId: "2",
-      isBestMaterial: false,
-      isTopperMaterial: true,
-      isAIPicked: true,
-      ratingsAverage: 4.4,
-      ratingsQuantity: 29,
-    },
-    {
-      _id: "6",
-      title: "GATE Practice Problems on Deadlocks",
-      description:
-        "This set of practice problems helps learners reason through deadlock prevention and avoidance strategies.",
-      fileUrl: "https://example.com/file6.pdf",
-      uploadDate: "2024-12-23",
-      status: "approved",
-      userId: { _id: "u6", name: "Runa Mukherjee", role: "teacher" },
-      topicId: "6",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 4.2,
-      ratingsQuantity: 18,
-    },
-    {
-      _id: "7",
-      title: "Solved GATE PYQs on Binary Search and Time Complexity",
-      description:
-        "The resource compiles previous-year questions with clear solutions and complexity analysis for binary search problems.",
-      fileUrl: "https://example.com/file7.pdf",
-      uploadDate: "2024-01-15",
-      status: "approved",
-      userId: { _id: "u7", name: "Sayan Mondal", role: "student" },
-      topicId: "8",
-      isBestMaterial: true,
-      isTopperMaterial: true,
-      isAIPicked: false,
-      ratingsAverage: 4.8,
-      ratingsQuantity: 45,
-    },
-    {
-      _id: "8",
-      title: "Necessary Conditions for Deadlock",
-      description:
-        "This note outlines the key conditions required for deadlock and summarizes what each condition means in practice.",
-      fileUrl: "https://example.com/file8.pdf",
-      uploadDate: "2024-11-06",
-      status: "approved",
-      userId: { _id: "u8", name: "Aarav Sharma", role: "teacher" },
-      topicId: "7",
-      isBestMaterial: true,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 4.6,
-      ratingsQuantity: 52,
-    },
-    {
-      _id: "9",
-      title: "BFS vs DFS",
-      description:
-        "The material compares breadth-first and depth-first traversal with examples suitable for graph theory revision.",
-      fileUrl: "https://example.com/file9.pdf",
-      uploadDate: "2024-02-01",
-      status: "approved",
-      userId: { _id: "u9", name: "Nisha Roy", role: "student" },
-      topicId: "4",
-      isBestMaterial: false,
-      isTopperMaterial: false,
-      isAIPicked: false,
-      ratingsAverage: 4.4,
-      ratingsQuantity: 22,
-    },
-    {
-      _id: "10",
-      title: "Solved GATE Numericals on Pipelining",
-      description:
-        "This document demonstrates worked numerical examples for pipelining concepts commonly asked in GATE exams.",
-      fileUrl: "https://example.com/file10.pdf",
-      uploadDate: "2023-10-21",
-      status: "rejected",
-      userId: { _id: "u10", name: "Runa Mukherjee", role: "teacher" },
+      userId: { _id: "3", name: "Akash Samanta", role: "student" },
       topicId: "3",
       isBestMaterial: false,
       isTopperMaterial: false,
       isAIPicked: false,
-      ratingsAverage: 2.8,
-      ratingsQuantity: 12,
+      ratingsAverage: 4.1,
+      ratingsQuantity: 3,
     },
   ],
 };
@@ -839,24 +764,23 @@ export const mockMaterialResponse: ApiMaterialResponse = {
   status: "success",
   data: {
     _id: "1",
-    title: "Complete Array Problems Guide",
+    title: "Searching Techniques Guide: Linear & Binary Search",
     description:
-      "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
-    fileUrl:
-      "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",
+      "A thorough walkthrough of linear and binary search, covering both iterative and recursive approach of binary search along with their time complexity analysis.",
+    fileUrl: "/materials/searching_techniques.pdf",
     uploadDate: "2026-06-05",
     status: "approved",
     userId: {
       _id: "1",
-      name: "Rajesh Kumar",
+      name: "Sayan Mondal",
       role: "student",
     },
-    topicId: "1",
+    topicId: "2",
     isBestMaterial: true,
     isTopperMaterial: false,
-    isAIPicked: true,
+    isAIPicked: false,
     ratingsAverage: 4.8,
-    ratingsQuantity: 245,
+    ratingsQuantity: 77,
   },
 };
 
@@ -867,37 +791,58 @@ export const mockCommentsResponse = {
     {
       _id: "1",
       comment:
-        "This guide covers all the array topics that appeared in last year's MAKAUT exam! The two-pointer technique section was especially helpful. Wish I had found this earlier.",
-      userName: "Sayan Mondal",
-      createdAt: "2025-01-20",
+        "The recursive binary search explanation finally made the concept click for me. The dry run with the array indices was really helpful.",
+      userId: {
+        _id: "4",
+        name: "Ritam Ghosh",
+        role: "student",
+      },
+      createdAt: "2026-07-02",
     },
     {
       _id: "2",
       comment:
-        "Great resource for CSE semester exams. The prefix sum technique explanations are clear and the examples are well-chosen. Definitely helped me prepare better.",
-      userName: "Priya Sharma",
-      createdAt: "2025-01-19",
+        "Good comparison between iterative and recursive approaches. Would've liked a bit more detail on the time and space complexity difference between the two though.",
+      userId: {
+        _id: "3",
+        name: "Akash Samanta",
+        role: "student",
+      },
+      createdAt: "2026-06-25",
     },
     {
       _id: "3",
       comment:
-        "Pretty comprehensive for an array guide. Covers most of the important problems. My only feedback is that the searching section could have more advanced examples.",
-      userName: "Subhajit Kundu",
-      createdAt: "2025-01-18",
+        "This covers exactly what was asked in our last internal exam. The time complexity derivation for binary search is explained really clearly.",
+      userId: {
+        _id: "5",
+        name: "Tapabrata Maity",
+        role: "student",
+      },
+      createdAt: "2026-06-18",
     },
     {
       _id: "4",
       comment:
-        "Exactly what I needed for my Data Structures exam prep! The explanations are beginner-friendly and the difficulty progression is perfect for CSE students.",
-      userName: "Sneha Reddy",
-      createdAt: "2025-01-17",
+        "Simple and to the point. Helped me revise searching techniques quickly before my semester exam.",
+      userId: {
+        _id: "2",
+        name: "Subhajit Kundu",
+        role: "student",
+      },
+      createdAt: "2026-06-14",
     },
     {
       _id: "5",
       comment:
-        "This material helped me understand array traversal and searching better. Previous year MAKAUT questions are similar to the problems covered here.",
-      userName: "Vikram Singh",
-      createdAt: "2025-01-16",
+        "The linear search section could use a bit more depth — a dry run and a note on its space complexity would round it out nicely. Everything else, especially the binary search analysis, is explained very well",
+      userId: {
+        _id: "6",
+        name: "Runa Mukherjee",
+        role: "teacher",
+        verificationStatus: "verified",
+      },
+      createdAt: "2026-06-10",
     },
   ],
 };

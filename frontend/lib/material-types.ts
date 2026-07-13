@@ -2,6 +2,7 @@ interface UploaderInfo {
   _id: string;
   name: string;
   role: "student" | "teacher" | "admin";
+  verificationStatus?: "pending" | "verified" | "rejected";
 }
 
 export interface Material {
