@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RatingComponent } from "@/components/rating-component";
 import { CommentSection } from "@/components/comment-section";
+import { ReportComponent } from "@/components/report-component";
 import { useAuth } from "@/lib/auth-context";
 import { mockMaterialResponse } from "@/lib/mock-data";
+import { ApiMaterialResponse } from "@/lib/material-types";
 
 interface MaterialViewerPageProps {
   params: Promise<{
@@ -23,8 +24,16 @@ export default async function MaterialViewerPage({
   params,
 }: MaterialViewerPageProps) {
   const { examId, branchId, subjectId, topicId } = await params;
-  const material = mockMaterialResponse.data;
-  const backUrl = `/exams/${examId}/${branchId}/${subjectId}/${topicId}`;
+  // UNCOMMENT TO FETCH FROM API
+  // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/materials/${materialId}`);
+  // const json: ApiMaterialResponse = await res.json();
+
+  // MOCK DATA - TO BE REMOVED
+  const json: ApiMaterialResponse = mockMaterialResponse;
+
+  const material = json.data;
+
+  const backUrl = `/exams/${examId}/branches/${branchId}/subjects/${subjectId}/topics/${topicId}/materials`;
 
   return <MaterialViewerContent material={material} backUrl={backUrl} />;
 }
@@ -37,27 +46,6 @@ function MaterialViewerContent({
   backUrl: string;
 }) {
   const { isLoggedIn } = useAuth();
-  const [reportReason, setReportReason] = useState("");
-  const [reportComment, setReportComment] = useState("");
-  const [reportSubmitted, setReportSubmitted] = useState(false);
-
-  const handleSubmitReport = () => {
-    if (!reportReason) {
-      alert("Please select a reason for the report");
-      return;
-    }
-    console.log("[v0] Report submitted:", {
-      materialId: material._id,
-      reason: reportReason,
-      comment: reportComment,
-    });
-    setReportSubmitted(true);
-    setTimeout(() => {
-      setReportReason("");
-      setReportComment("");
-      setReportSubmitted(false);
-    }, 3000);
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,68 +135,10 @@ function MaterialViewerContent({
           {/* Report Section */}
           <section className="border border-border rounded-lg p-6">
             <h3 className="text-xl font-semibold mb-4">Report this material</h3>
-            {isLoggedIn ? (
-              reportSubmitted ? (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-                  <p className="text-sm text-green-800">
-                    Thank you for your report. We'll review it shortly.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Reason Dropdown */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Reason
-                    </label>
-                    <select
-                      value={reportReason}
-                      onChange={(e) => setReportReason(e.target.value)}
-                      className="w-full border border-border rounded-md px-3 py-2 text-sm bg-background"
-                    >
-                      <option value="">Select a reason...</option>
-                      <option value="plagiarism">Plagiarism</option>
-                      <option value="incorrect-content">
-                        Incorrect Content
-                      </option>
-                      <option value="spam">Spam</option>
-                      <option value="inappropriate-content">
-                        Inappropriate Content
-                      </option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  {/* Comment Text Input */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Comment
-                    </label>
-                    <textarea
-                      value={reportComment}
-                      onChange={(e) => setReportComment(e.target.value)}
-                      placeholder="Briefly explain the issue (optional)"
-                      className="w-full border border-border rounded-md px-3 py-2 text-sm bg-background"
-                      rows={4}
-                    />
-                  </div>
-
-                  {/* Submit Report Button */}
-                  <Button
-                    onClick={handleSubmitReport}
-                    className="w-full bg-destructive hover:bg-destructive/90 text-white"
-                  >
-                    Submit Report
-                  </Button>
-                </div>
-              )
-            ) : (
-              <div className="p-4 bg-muted rounded-lg text-center">
-                <p className="text-sm text-muted-foreground">
-                  Log in to report this material.
-                </p>
-              </div>
-            )}
+            <ReportComponent
+              materialId={material._id}
+              isLoggedIn={isLoggedIn}
+            />
           </section>
 
           {/* Comment Section */}

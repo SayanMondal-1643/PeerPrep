@@ -23,7 +23,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { Material, ApiMaterialsResponse } from "@/lib/material-types";
-import { mockMaterialsResponse } from "@/lib/mock-data";
+import {
+  mockMaterialsResponse1,
+  mockMaterialsResponse2,
+} from "@/lib/mock-data";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
@@ -57,9 +60,13 @@ export default function MaterialsTab() {
       // }
 
       // const json: ApiMaterialResponse = await response.json();
+      // setMaterials(json.data);
 
-      const json: ApiMaterialsResponse = mockMaterialsResponse;
-      setMaterials(json.data);
+      // MOCK DATA - TO BE REMOVED
+      setMaterials([
+        ...mockMaterialsResponse1.data,
+        ...mockMaterialsResponse2.data,
+      ]);
     } catch (error) {
       console.error("Failed to fetch materials:", error);
       setFetchError(
@@ -199,7 +206,7 @@ export default function MaterialsTab() {
     return (
       <Card>
         <div className="p-6 space-y-4">
-          <h2 className="text-xl font-semibold">Materials Management</h2>
+          <h2 className="text-xl font-semibold">Material Management</h2>
           <p className="text-sm text-red-600">{fetchError}</p>
           <Button onClick={() => void loadMaterials()}>Retry</Button>
         </div>
@@ -210,7 +217,7 @@ export default function MaterialsTab() {
   return (
     <Card>
       <div className="p-6 border-b border-border">
-        <h2 className="text-xl font-semibold mb-4">Materials Management</h2>
+        <h2 className="text-xl font-semibold mb-4">Material Management</h2>
 
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">

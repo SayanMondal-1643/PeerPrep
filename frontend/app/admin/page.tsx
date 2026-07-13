@@ -19,8 +19,7 @@ export default function AdminPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-muted-foreground">
-            View analytics and manage materials, users, toppers, reports, and
-            platform structure.
+            Manage materials, users, toppers, reports, and platform structure.
           </p>
         </div>
 

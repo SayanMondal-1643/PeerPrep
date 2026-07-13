@@ -17,7 +17,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { mockMaterialsResponse } from "@/lib/mock-data";
+import {
+  mockMaterialsResponse1,
+  mockMaterialsResponse2,
+} from "@/lib/mock-data";
 
 // UNCOMMENT THE CODE BELOW TO FETCH FROM API:
 // async function fetchMaterials(topicId: string) {
@@ -44,6 +47,9 @@ interface Params {
 
 export default async function MaterialsPage({ params }: Params) {
   const { examId, branchId, subjectId, topicId } = await params;
+
+  const mockMaterialsResponse =
+    topicId === "2" ? mockMaterialsResponse1 : mockMaterialsResponse2;
   // UNCOMMENT THE LINE TO FETCH FROM API:
   // const data = await fetchMaterials(topicId);
 

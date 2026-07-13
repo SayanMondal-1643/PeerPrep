@@ -13,7 +13,7 @@ import {
 import { useToast } from "@/lib/hooks/use-toast";
 import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal";
 import { HierarchyNameModal } from "@/components/hierarchy-name-modal";
-import { type HierarchyOption } from "@/lib/mock-data";
+import { type HierarchyOption } from "@/lib/hierarchy-types";
 import {
   fetchBranches,
   fetchExams,
@@ -999,7 +999,7 @@ export default function StructureTab() {
   return (
     <Card>
       <div className="p-6 border-b border-border flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Platform Structure</h2>
+        <h2 className="text-xl font-semibold">Platform Structure Management</h2>
         <Button size="sm" onClick={handleAddExam}>
           <Plus className="mr-2 h-4 w-4" />
           Add Exam
