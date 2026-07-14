@@ -154,7 +154,7 @@ export const mockMaterialsResponse1: ApiMaterialsResponse = {
   branch: "Computer Science & Engineering",
   subject: "Data Structures & Algorithms",
   topic: "Searching Techniques",
-  results: 10,
+  results: 3,
   data: [
     {
       _id: "1",

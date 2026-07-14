@@ -1,5 +1,15 @@
 # PeerPrep API Documentation
 
+> **Conventions used throughout this document:**
+>
+> - **Populated `userId` / `reporterId` fields** (in materials, comments, and reports): every populated user reference includes `_id`, `name`, `role`. Users with `role: "teacher"` additionally include `verificationStatus`.
+> - **Status enums:**
+>   - Material `status`: `"pending" | "approved" | "rejected"`
+>   - Report `status`: `"pending" | "resolved" | "rejected"`
+>   - Topper Badge Application `status`: `"pending" | "approved" | "rejected"`
+>   - User `verificationStatus` (teachers only): `"pending" | "verified" | "rejected"`
+>   - User `accountStatus` (all users): `"active" | "suspended"`
+
 # Exams
 
 ## GET `/api/v1/exams`
@@ -42,7 +52,7 @@ Create an exam.
   "status": "success",
   "data": {
     "_id": "2",
-    "name": "Jadavpur Univerisity"
+    "name": "Jadavpur University"
   }
 }
 ```
@@ -101,12 +111,12 @@ Get all branches under an exam.
 ```json
 {
   "status": "success",
-  "exam": "MAKAUT",
+  "exam": "Maulana Abul Kalam Azad University of Technology",
   "results": 1,
   "data": [
     {
       "_id": "1",
-      "name": "Computer Science Engineering"
+      "name": "Computer Science & Engineering"
     }
   ]
 }
@@ -150,7 +160,7 @@ Update a branch.
 
 ```json
 {
-  "name": "Computer Science Engineering Updated"
+  "name": "Computer Science & Engineering Updated"
 }
 ```
 
@@ -161,7 +171,7 @@ Update a branch.
   "status": "success",
   "data": {
     "_id": "1",
-    "name": "Computer Science Engineering Updated"
+    "name": "Computer Science & Engineering Updated"
   }
 }
 ```
@@ -194,8 +204,8 @@ Get all subjects under a branch.
 ```json
 {
   "status": "success",
-  "exam": "MAKAUT",
-  "branch": "Computer Science Engineering",
+  "exam": "Maulana Abul Kalam Azad University of Technology",
+  "branch": "Computer Science & Engineering",
   "results": 1,
   "data": [
     {
@@ -287,13 +297,13 @@ Get all topics under a subject.
 {
   "status": "success",
   "exam": "Maulana Abul Kalam Azad University of Technology",
-  "branch": "Computer Science Engineering",
+  "branch": "Computer Science & Engineering",
   "subject": "Data Structures & Algorithms",
   "results": 1,
   "data": [
     {
       "_id": "1",
-      "name": "Array"
+      "name": "Basic Terminologies & Algorithm Analysis"
     }
   ]
 }
@@ -309,7 +319,7 @@ Create a topic under a subject.
 
 ```json
 {
-  "name": "Linked List"
+  "name": "Searching techniques"
 }
 ```
 
@@ -320,7 +330,7 @@ Create a topic under a subject.
   "status": "success",
   "data": {
     "_id": "2",
-    "name": "Linked List"
+    "name": "Searching techniques"
   }
 }
 ```
@@ -335,7 +345,7 @@ Update a topic.
 
 ```json
 {
-  "name": "Array Updated"
+  "name": "Basic Terminologies & Algorithm Analysis Updated"
 }
 ```
 
@@ -346,7 +356,7 @@ Update a topic.
   "status": "success",
   "data": {
     "_id": "1",
-    "name": "Array Updated"
+    "name": "Basic Terminologies & Algorithm Analysis Updated"
   }
 }
 ```
@@ -370,8 +380,6 @@ Delete a topic.
 
 # Materials
 
-> Every endpoint below returns the **full material object** — same shape regardless of which endpoint served it. `userId` is always populated as `{ _id, name, role }`, never a bare string. List endpoints always use the `data` key (never `materials`).
-
 ## GET `/api/v1/materials`
 
 Get all materials.
@@ -381,22 +389,46 @@ Get all materials.
 ```json
 {
   "status": "success",
-  "results": 1,
+  "results": 2,
   "data": [
     {
       "_id": "1",
-      "title": "Complete Array Problems Guide",
-      "description": "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
+      "title": "Searching Techniques Guide: Linear & Binary Search",
+      "description": "A thorough walkthrough of linear and binary search, covering both iterative and recursive approach of binary search along with their time complexity analysis.",
       "fileUrl": "https://example.com/file1.pdf",
       "uploadDate": "2026-06-05",
       "status": "approved",
-      "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
-      "topicId": "1",
-      "isBestMaterial": false,
+      "userId": {
+        "_id": "1",
+        "name": "Sayan Mondal",
+        "role": "student"
+      },
+      "topicId": "2",
+      "isBestMaterial": true,
       "isTopperMaterial": false,
       "isAIPicked": false,
       "ratingsAverage": 4.8,
-      "ratingsQuantity": 245
+      "ratingsQuantity": 77
+    },
+    {
+      "_id": "2",
+      "title": "Complete Guide to Stacks: ADT and Applications",
+      "description": "Covers the Stack ADT and its core operations, along with expression conversion (infix to postfix/prefix) and expression evaluation with algorithms and complexity analysis.",
+      "fileUrl": "https://example.com/file2.pdf",
+      "uploadDate": "2026-06-08",
+      "status": "approved",
+      "userId": {
+        "_id": "2",
+        "name": "Runa Mukherjee",
+        "role": "teacher",
+        "verificationStatus": "verified"
+      },
+      "topicId": "3",
+      "isBestMaterial": true,
+      "isTopperMaterial": false,
+      "isAIPicked": true,
+      "ratingsAverage": 4,
+      "ratingsQuantity": 2
     }
   ]
 }
@@ -413,26 +445,31 @@ Get all materials under a topic.
 ```json
 {
   "status": "success",
-  "exam": "MAKAUT",
-  "branch": "Computer Science Engineering",
+  "exam": "Maulana Abul Kalam Azad University of Technology",
+  "branch": "Computer Science & Engineering",
   "subject": "Data Structures & Algorithms",
-  "topic": "Array",
+  "topic": "Stacks",
   "results": 1,
   "data": [
     {
-      "_id": "1",
-      "title": "Complete Array Problems Guide",
-      "description": "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
-      "fileUrl": "https://example.com/file1.pdf",
-      "uploadDate": "2026-06-05",
+      "_id": "2",
+      "title": "Complete Guide to Stacks: ADT and Applications",
+      "description": "Covers the Stack ADT and its core operations, along with expression conversion (infix to postfix/prefix) and expression evaluation with algorithms and complexity analysis.",
+      "fileUrl": "https://example.com/file2.pdf",
+      "uploadDate": "2026-06-08",
       "status": "approved",
-      "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
-      "topicId": "1",
-      "isBestMaterial": false,
+      "userId": {
+        "_id": "2",
+        "name": "Runa Mukherjee",
+        "role": "teacher",
+        "verificationStatus": "verified"
+      },
+      "topicId": "3",
+      "isBestMaterial": true,
       "isTopperMaterial": false,
-      "isAIPicked": false,
-      "ratingsAverage": 4.8,
-      "ratingsQuantity": 245
+      "isAIPicked": true,
+      "ratingsAverage": 4,
+      "ratingsQuantity": 2
     }
   ]
 }
@@ -453,18 +490,22 @@ Get a single material.
   "status": "success",
   "data": {
     "_id": "1",
-    "title": "Complete Array Problems Guide",
-    "description": "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
+    "title": "Searching Techniques Guide: Linear & Binary Search",
+    "description": "A thorough walkthrough of linear and binary search, covering both iterative and recursive approach of binary search along with their time complexity analysis.",
     "fileUrl": "https://example.com/file1.pdf",
     "uploadDate": "2026-06-05",
     "status": "approved",
-    "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
-    "topicId": "1",
+    "userId": {
+      "_id": "1",
+      "name": "Sayan Mondal",
+      "role": "student"
+    },
+    "topicId": "2",
     "isBestMaterial": true,
     "isTopperMaterial": false,
-    "isAIPicked": true,
+    "isAIPicked": false,
     "ratingsAverage": 4.8,
-    "ratingsQuantity": 245
+    "ratingsQuantity": 77
   }
 }
 ```
@@ -479,9 +520,9 @@ Create a material under a topic.
 
 ```json
 {
-  "title": "Array Algorithms Cheat Sheet",
-  "description": "Quick reference for sorting, searching, and sliding window patterns",
-  "fileUrl": "https://example.com/file2.pdf"
+  "title": "MAKAUT Previous Year Questions On Searching Techniques",
+  "description": "A curated set of previous year MAKAUT exam questions on linear, binary, and interpolation search, with detailed step-by-step solutions.",
+  "fileUrl": "https://example.com/file3.pdf"
 }
 ```
 
@@ -491,19 +532,19 @@ Create a material under a topic.
 {
   "status": "success",
   "data": {
-    "_id": "2",
-    "title": "Array Algorithms Cheat Sheet",
-    "description": "Quick reference for sorting, searching, and sliding window patterns",
-    "fileUrl": "https://example.com/file2.pdf",
-    "uploadDate": "2026-06-12",
-    "status": "pending",
-    "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
-    "topicId": "1",
+    "_id": "3",
+    "title": "MAKAUT Previous Year Questions On Searching Techniques",
+    "description": "A curated set of previous year MAKAUT exam questions on linear, binary, and interpolation search, with detailed step-by-step solutions.",
+    "fileUrl": "https://example.com/file3.pdf",
+    "uploadDate": "2026-06-10",
+    "status": "approved",
+    "userId": { "_id": "3", "name": "Subhajit Kundu", "role": "student" },
+    "topicId": "2",
     "isBestMaterial": false,
-    "isTopperMaterial": false,
+    "isTopperMaterial": true,
     "isAIPicked": false,
-    "ratingsAverage": 0,
-    "ratingsQuantity": 0
+    "ratingsAverage": 4.5,
+    "ratingsQuantity": 32
   }
 }
 ```
@@ -528,19 +569,23 @@ Update a material.
 {
   "status": "success",
   "data": {
-    "_id": "2",
-    "title": "Array Algorithms Cheat Sheet",
-    "description": "Quick reference for sorting, searching, and sliding window patterns",
-    "fileUrl": "https://example.com/file2.pdf",
-    "uploadDate": "2026-06-12",
+    "_id": "1",
+    "title": "Searching Techniques Guide: Linear & Binary Search",
+    "description": "A thorough walkthrough of linear and binary search, covering both iterative and recursive approach of binary search along with their time complexity analysis.",
+    "fileUrl": "https://example.com/file1.pdf",
+    "uploadDate": "2026-06-05",
     "status": "approved",
-    "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
-    "topicId": "1",
-    "isBestMaterial": false,
+    "userId": {
+      "_id": "1",
+      "name": "Sayan Mondal",
+      "role": "student"
+    },
+    "topicId": "2",
+    "isBestMaterial": true,
     "isTopperMaterial": false,
     "isAIPicked": false,
-    "ratingsAverage": 0,
-    "ratingsQuantity": 0
+    "ratingsAverage": 4.8,
+    "ratingsQuantity": 77
   }
 }
 ```
@@ -594,6 +639,8 @@ Rate a material.
 
 # Reports
 
+> Every endpoint below returns the **full report object** under `data` — same shape regardless of which endpoint served it: `_id`, `materialId`, `materialTitle`, `reporterId`, `reportReason`, `comment`, `reportDate`, `status`. POST/PATCH additionally include a `message` field alongside `data`.
+
 ## GET `/api/v1/reports`
 
 Get all reports.
@@ -607,13 +654,17 @@ Get all reports.
   "data": [
     {
       "_id": "1",
-      "materialId": "1",
-      "materialTitle": "Sorting Techniques",
-      "reporter": { "_id": 1, "name": "Sayan Mondal", "role: "student" },
+      "materialId": "2",
+      "materialTitle": "MAKAUT Previous Year Questions On Searching Techniques",
+      "reporterId": {
+        "_id": "1",
+        "name": "Sayan Mondal",
+        "role": "student"
+      },
       "reportReason": "Incorrect content",
-      "comment": "Binary search can't be done on unsorted arrays",
+      "comment": "Not all questions are actual MAKAUT PYQs",
       "reportDate": "2026-06-13",
-      "status": "reviewed",
+      "status": "pending"
     }
   ]
 }
@@ -630,7 +681,7 @@ Report a material.
 ```json
 {
   "reportReason": "Incorrect content",
-  "comment": "Binary search description is wrong"
+  "comment": "Not all questions are actual MAKAUT PYQs"
 }
 ```
 
@@ -639,7 +690,21 @@ Report a material.
 ```json
 {
   "status": "success",
-  "message": "Report submitted successfully"
+  "message": "Report submitted successfully",
+  "data": {
+    "_id": "2",
+    "materialId": "1",
+    "materialTitle": "Searching Techniques Guide: Linear & Binary Search",
+    "reporterId": {
+      "_id": "3",
+      "name": "Subhajit Kundu",
+      "role": "student"
+    },
+    "reportReason": "Incorrect content",
+    "comment": "Not all questions are actual MAKAUT PYQs",
+    "reportDate": "2026-07-14",
+    "status": "pending"
+  }
 }
 ```
 
@@ -653,7 +718,7 @@ Update report status.
 
 ```json
 {
-  "status": "reviewed"
+  "status": "resolved"
 }
 ```
 
@@ -662,28 +727,29 @@ Update report status.
 ```json
 {
   "status": "success",
-  "message": "Status updated successfully"
-}
-```
-
----
-
-## DELETE `/api/v1/reports/:reportID`
-
-Delete a report.
-
-### Response
-
-```json
-{
-  "status": "success",
-  "data": null
+  "message": "Status updated successfully",
+  "data": {
+    "_id": "1",
+    "materialId": "2",
+    "materialTitle": "MAKAUT Previous Year Questions On Searching Techniques",
+    "reporterId": {
+      "_id": "1",
+      "name": "Sayan Mondal",
+      "role": "student"
+    },
+    "reportReason": "Incorrect content",
+    "comment": "Not all questions are actual MAKAUT PYQs",
+    "reportDate": "2026-06-13",
+    "status": "resolved"
+  }
 }
 ```
 
 ---
 
 # Comments
+
+> Every endpoint below returns the **full comment object** — same shape regardless of which endpoint served it: `_id`, `comment`, `userId`, `createdAt`.
 
 ## GET `/api/v1/materials/:materialID/comments`
 
@@ -698,9 +764,14 @@ Get all comments under a material.
   "data": [
     {
       "_id": "1",
-      "comment": "This guide covers all the array topics that appeared in last year's MAKAUT exam! The two-pointer technique section was especially helpful. Wish I had found this earlier",
-      "userName": "Sayan Mondal",
-      "createdAt": "2026-06-05"
+      "comment": "The linear search section could use a bit more depth — a dry run and a note on its space complexity would round it out nicely. Everything else, especially the binary search analysis, is explained very well",
+      "userId": {
+        "_id": "2",
+        "name": "Runa Mukherjee",
+        "role": "teacher",
+        "verificationStatus": "verified"
+      },
+      "createdAt": "2026-06-10"
     }
   ]
 }
@@ -716,7 +787,7 @@ Comment on a material.
 
 ```json
 {
-  "comment": "Great resource for CSE semester exams. The prefix sum technique explanations are clear and the examples are well-chosen. Definitely helped me prepare better."
+  "comment": "Simple and to the point. Helped me revise searching techniques quickly before my semester exam."
 }
 ```
 
@@ -727,7 +798,13 @@ Comment on a material.
   "status": "success",
   "data": {
     "_id": "2",
-    "comment": "Great resource for CSE semester exams. The prefix sum technique explanations are clear and the examples are well-chosen. Definitely helped me prepare better."
+    "comment": "Simple and to the point. Helped me revise searching techniques quickly before my semester exam.",
+    "userId": {
+      "_id": "3",
+      "name": "Subhajit Kundu",
+      "role": "student"
+    },
+    "createdAt": "2026-07-14"
   }
 }
 ```
@@ -752,8 +829,15 @@ Edit a comment.
 {
   "status": "success",
   "data": {
-    "_id": "2",
-    "comment": "Updated comment"
+    "_id": "1",
+    "comment": "Updated comment",
+    "userId": {
+      "_id": "2",
+      "name": "Runa Mukherjee",
+      "role": "teacher",
+      "verificationStatus": "verified"
+    },
+    "createdAt": "2026-06-10"
   }
 }
 ```
@@ -777,7 +861,7 @@ Delete a comment.
 
 # Users
 
-> The JWT is set as an `httpOnly` cookie via `res.cookie()` on the backend. It is never included in any JSON response body — none of the endpoints below return a `token` field. Frontend requests use `credentials: 'include'`; there is no client-side token storage. Student accounts do not carry `college`/`branch`/`year` — those fields are dropped entirely. Teacher accounts add `institutionName`, `idProofUrl`, and `verificationStatus` (`"pending" | "verified" | "rejected"`, lowercase). `passwordConfirm` is not sent to the backend; password matching is handled client-side.
+> The JWT is set as an `httpOnly` cookie via `res.cookie()` on the backend. It is never included in any JSON response body — none of the endpoints below return a `token` field. Frontend requests use `credentials: 'include'`; there is no client-side token storage. Teacher accounts add `institutionName`, `idProofUrl`, and `verificationStatus` (`"pending" | "verified" | "rejected"`, lowercase). `passwordConfirm` is not sent to the backend; password matching is handled client-side.
 
 ## POST `/api/v1/users/signup`
 
@@ -794,18 +878,19 @@ Create a new user account.
 }
 ```
 
-> Teacher signup additionally includes `institutionName` and `idProofUrl` (the latter obtained via a prior direct-to-Cloudinary upload).
+> Teacher signup additionally includes `institutionName` and `idProofUrl`.
 
 ### Response
 
 ```json
 {
   "status": "success",
-  "user": {
+  "data": {
     "_id": "1",
     "name": "Sayan Mondal",
     "email": "sayan@example.com",
-    "role": "student"
+    "role": "student",
+    "accountStatus": "active"
   }
 }
 ```
@@ -830,14 +915,15 @@ Login user.
 ```json
 {
   "status": "success",
-  "user": {
-    "_id": "1",
+  "data": {
+    "_id": "2",
     "name": "Runa Mukherjee",
     "email": "runa@example.com",
     "role": "teacher",
-    "institutionName": "Jadavpur University",
+    "institutionName": "Netaji Subhash Engineering College",
     "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/1.pdf",
-    "verificationStatus": "verified"
+    "verificationStatus": "verified",
+    "accountStatus": "active"
   }
 }
 ```
@@ -899,11 +985,12 @@ Reset password.
 ```json
 {
   "status": "success",
-  "user": {
+  "data": {
     "_id": "1",
     "name": "Sayan Mondal",
     "email": "sayan@example.com",
-    "role": "student"
+    "role": "student",
+    "accountStatus": "active"
   }
 }
 ```
@@ -929,11 +1016,12 @@ Update logged-in user's password.
 ```json
 {
   "status": "success",
-  "user": {
+  "data": {
     "_id": "1",
     "name": "Sayan Mondal",
     "email": "sayan@example.com",
-    "role": "student"
+    "role": "student",
+    "accountStatus": "active"
   }
 }
 ```
@@ -953,8 +1041,8 @@ Get logged-in user's profile.
     "_id": "1",
     "name": "Sayan Mondal",
     "email": "sayan@example.com",
-    "createdAt": "25-04-2024",
-    "role": "student"
+    "role": "student",
+    "accountStatus": "active"
   }
 }
 ```
@@ -968,11 +1056,11 @@ Get logged-in user's profile.
     "_id": "2",
     "name": "Runa Mukherjee",
     "email": "runa@example.com",
-    "createdAt": "15-07-2010",
     "role": "teacher",
-    "institutionName": "Jadavpur University",
+    "institutionName": "Netaji Subhash Engineering College",
     "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/1.pdf",
-    "verificationStatus": "verified"
+    "verificationStatus": "verified",
+    "accountStatus": "active"
   }
 }
 ```
@@ -991,8 +1079,6 @@ Update logged-in user's profile.
 }
 ```
 
-> Only fields present on the caller's role (see the response shapes above) are updatable — e.g. a student cannot set `institutionName`.
-
 ### Response
 
 ```json
@@ -1002,8 +1088,8 @@ Update logged-in user's profile.
     "_id": "1",
     "name": "Sayan K. Mondal",
     "email": "sayan@example.com",
-    "createdAt": "25-04-2024",
-    "role": "student"
+    "role": "student",
+    "accountStatus": "active"
   }
 }
 ```
@@ -1040,16 +1126,18 @@ Get all users.
       "_id": "1",
       "name": "Sayan Mondal",
       "email": "sayan@example.com",
-      "role": "student"
+      "role": "student",
+      "accountStatus": "active"
     },
     {
       "_id": "2",
       "name": "Runa Mukherjee",
       "email": "runa@example.com",
       "role": "teacher",
-      "institutionName": "Jadavpur University",
-      "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/1.pdf",
-      "verificationStatus": "pending"
+      "institutionName": "Netaji Subhash Engineering College",
+      "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/5.pdf",
+      "verificationStatus": "verified",
+      "accountStatus": "active"
     }
   ]
 }
@@ -1070,8 +1158,8 @@ Get a single user.
     "_id": "1",
     "name": "Sayan Mondal",
     "email": "sayan@example.com",
-    "createdAt": "25-04-2024",
-    "role": "student"
+    "role": "student",
+    "accountStatus": "active"
   }
 }
 ```
@@ -1093,24 +1181,26 @@ Get all materials uploaded by a user.
   "data": [
     {
       "_id": "1",
-      "title": "Complete Array Problems Guide",
-      "description": "A concise guide covering essential array concepts, searching techniques, and problem-solving patterns commonly used in MAKAUT Data Structures exams.",
+      "title": "Searching Techniques Guide: Linear & Binary Search",
+      "description": "A thorough walkthrough of linear and binary search, covering both iterative and recursive approach of binary search along with their time complexity analysis.",
       "fileUrl": "https://example.com/file1.pdf",
       "uploadDate": "2026-06-05",
       "status": "approved",
-      "userId": { "_id": "1", "name": "Sayan Mondal", "role": "student" },
-      "topicId": "1",
-      "isBestMaterial": false,
+      "userId": {
+        "_id": "1",
+        "name": "Sayan Mondal",
+        "role": "student"
+      },
+      "topicId": "2",
+      "isBestMaterial": true,
       "isTopperMaterial": false,
       "isAIPicked": false,
       "ratingsAverage": 4.8,
-      "ratingsQuantity": 245
+      "ratingsQuantity": 77
     }
   ]
 }
 ```
-
-> Same full material shape as every other materials endpoint (see the Materials section) — `userId` is redundant here since the route is already scoped to one user, but the shape stays uniform rather than trimmed.
 
 ---
 
@@ -1133,7 +1223,13 @@ Update a user.
   "status": "success",
   "data": {
     "_id": "2",
-    "verificationStatus": "verified"
+    "name": "Runa Mukherjee",
+    "email": "runa@example.com",
+    "role": "teacher",
+    "institutionName": "Netaji Subhash Engineering College",
+    "idProofUrl": "https://res.cloudinary.com/peerprep/id-proof/1.pdf",
+    "verificationStatus": "verified",
+    "accountStatus": "active"
   }
 }
 ```
@@ -1174,12 +1270,12 @@ Get all topper badge applications.
       "_id": "1",
       "userId": "1",
       "userName": "Sayan Mondal",
-      "subject": "Database Management Systems",
+      "subject": "Computer Networks",
       "exam": "Maulana Abul Kalam Azad University of Technology",
       "branch": "Computer Science & Engineering",
       "year": 2025,
       "cgpa": 9,
-      "markSheetUrl": "https://resources/marksheet/1/1",
+      "markSheetUrl": "https://res.cloudinary.com/peerprep/marksheet/1.pdf",
       "status": "pending"
     }
   ]
@@ -1203,19 +1299,19 @@ Get all topper badge applications of a user.
       "_id": "1",
       "userId": "1",
       "userName": "Sayan Mondal",
-      "subject": "Database Management Systems",
+      "subject": "Computer Networks",
       "exam": "Maulana Abul Kalam Azad University of Technology",
       "branch": "Computer Science & Engineering",
       "year": 2025,
       "cgpa": 9,
-      "markSheetUrl": "https://resources/marksheet/1/1",
-      "status": "pending"
+      "markSheetUrl": "https://res.cloudinary.com/peerprep/marksheet/1.pdf",
+      "status": "approved"
     }
   ]
 }
 ```
 
-> `userId`/`userName` are redundant here since the route is already scoped to one user, but the shape stays uniform rather than trimmed — same convention as `GET /api/v1/users/:userID/materials`.
+> `userId`/`userName` are redundant here since the route is already scoped to one user, but the shape stays uniform rather than trimmed.
 
 ---
 
@@ -1227,12 +1323,12 @@ Create a topper badge application.
 
 ```json
 {
-  "exam": "Jadavpur University",
-  "branch": "IT",
-  "subject": "DSA",
-  "year": 2024,
-  "cgpa": 9,
-  "markSheetUrl": "https://resources/marksheet/3"
+  "exam": "Maulana Abul Kalam Azad University of Technology",
+  "branch": "Computer Science & Engineering",
+  "subject": "Object-Oriented Programming",
+  "year": 2025,
+  "cgpa": 7,
+  "markSheetUrl": "https://res.cloudinary.com/peerprep/marksheet/2.pdf"
 }
 ```
 
@@ -1244,14 +1340,14 @@ Create a topper badge application.
   "message": "Application submitted successfully",
   "data": {
     "_id": "2",
-    "userId": "1",
-    "userName": "Sayan Mondal",
-    "subject": "DSA",
-    "exam": "Jadavpur University",
-    "branch": "IT",
-    "year": 2024,
-    "cgpa": 9,
-    "markSheetUrl": "https://resources/marksheet/3",
+    "userId": "4",
+    "userName": "Akash Samanta",
+    "subject": "Object-Oriented Programming",
+    "exam": "Maulana Abul Kalam Azad University of Technology",
+    "branch": "Computer Science & Engineering",
+    "year": 2025,
+    "cgpa": 7,
+    "markSheetUrl": "https://res.cloudinary.com/peerprep/marksheet/1/3.pdf",
     "status": "pending"
   }
 }
@@ -1277,15 +1373,15 @@ Update topper badge application status.
 {
   "status": "success",
   "data": {
-    "_id": "1",
-    "userId": "1",
-    "userName": "Sayan Mondal",
-    "subject": "Database Management Systems",
+    "_id": "2",
+    "userId": "4",
+    "userName": "Akash Samanta",
+    "subject": "Object-Oriented Programming",
     "exam": "Maulana Abul Kalam Azad University of Technology",
     "branch": "Computer Science & Engineering",
     "year": 2025,
-    "cgpa": 9,
-    "markSheetUrl": "https://resources/marksheet/1/1",
+    "cgpa": 7,
+    "markSheetUrl": "https://res.cloudinary.com/peerprep/marksheet/1/3.pdf",
     "status": "approved"
   }
 }
