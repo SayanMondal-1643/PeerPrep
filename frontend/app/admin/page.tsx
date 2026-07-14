@@ -7,11 +7,19 @@ import UsersTab from "@/components/admin/users-tab";
 import ToppersTab from "@/components/admin/toppers-tab";
 import ReportsTab from "@/components/admin/reports-tab";
 import StructureTab from "@/components/admin/structure-tab";
+import { useRequireRole } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth-context";
 
 // TODO: move MarksheetViewerModal + its state into ToppersTab
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("materials");
+  const { isLoading } = useAuth();
+  useRequireRole("admin");
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">

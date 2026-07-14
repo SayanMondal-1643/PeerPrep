@@ -1,51 +1,45 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RatingComponent } from "@/components/rating-component";
 import { CommentSection } from "@/components/comment-section";
 import { ReportComponent } from "@/components/report-component";
 import { useAuth } from "@/lib/auth-context";
-import { mockMaterialResponse } from "@/lib/mock-data";
-import { ApiMaterialResponse } from "@/lib/material-types";
+import { useMaterial } from "@/lib/hooks/use-materials";
 
-interface MaterialViewerPageProps {
-  params: Promise<{
+export default function MaterialViewerPage() {
+  const { examId, branchId, subjectId, topicId, materialId } = useParams<{
     examId: string;
     branchId: string;
     subjectId: string;
     topicId: string;
     materialId: string;
-  }>;
-}
-
-export default async function MaterialViewerPage({
-  params,
-}: MaterialViewerPageProps) {
-  const { examId, branchId, subjectId, topicId } = await params;
-  // UNCOMMENT TO FETCH FROM API
-  // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/materials/${materialId}`);
-  // const json: ApiMaterialResponse = await res.json();
-
-  // MOCK DATA - TO BE REMOVED
-  const json: ApiMaterialResponse = mockMaterialResponse;
-
-  const material = json.data;
+  }>();
+  const { isLoggedIn } = useAuth();
+  const { data, isLoading, isError } = useMaterial(materialId);
 
   const backUrl = `/exams/${examId}/branches/${branchId}/subjects/${subjectId}/topics/${topicId}/materials`;
 
-  return <MaterialViewerContent material={material} backUrl={backUrl} />;
-}
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading material...</p>
+      </div>
+    );
+  }
 
-function MaterialViewerContent({
-  material,
-  backUrl,
-}: {
-  material: typeof mockMaterialResponse.data;
-  backUrl: string;
-}) {
-  const { isLoggedIn } = useAuth();
+  if (isError || !data) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-destructive">Failed to load material.</p>
+      </div>
+    );
+  }
+
+  const material = data.data;
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,7 +88,6 @@ function MaterialViewerContent({
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="space-y-8">
           {/* Material Info */}
           <section className="border border-border rounded-lg p-6">

@@ -3,21 +3,12 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRateMaterial } from "@/lib/hooks/use-ratings";
 
 interface RatingComponentProps {
   materialId: string;
   currentRating: number;
   onSubmit?: (rating: number) => void;
-}
-
-interface RatingResponse {
-  status: string;
-  data: {
-    _id: string;
-    ratingValue: number;
-    ratingsAverage: number;
-    ratingsQuantity: number;
-  };
 }
 
 export function RatingComponent({
@@ -28,26 +19,18 @@ export function RatingComponent({
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(currentRating);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const rateMaterial = useRateMaterial();
 
   const handleRating = (rating: number) => {
     setSelectedRating(rating);
   };
 
   const handleSubmit = async () => {
-    // UNCOMMENT TO FETCH FROM API
-    // try {
-    //   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/materials/${materialId}/ratings`, {
-    //     method: "POST",
-    //     credentials: "include",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ ratingValue: selectedRating }),
-    //   });
-    //   const json: RatingResponse = await res.json();
-    //   if (json.status !== "success") throw new Error("Failed to submit rating");
-    // } catch (err) {
-    //   setIsSubmitted(false);
-    //   return;
-    // }
+    try {
+      await rateMaterial.mutateAsync({ materialId, ratingValue: selectedRating });
+    } catch {
+      return;
+    }
 
     onSubmit?.(selectedRating);
     setIsSubmitted(true);

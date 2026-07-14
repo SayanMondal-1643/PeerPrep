@@ -1,66 +1,118 @@
-import {
-  HierarchyOption,
-  mockBranchesResponse,
-  mockExamsResponse,
-  mockSubjectsResponse,
-  mockTopicsResponse,
-} from "@/lib/mock-data";
+import { apiFetch } from "@/lib/api-client";
+import { HierarchyOption, HierarchyResponse } from "@/lib/hierarchy-types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+export async function fetchExamsResponse(): Promise<HierarchyResponse> {
+  return apiFetch<HierarchyResponse>("/exams");
+}
 
 export async function fetchExams(): Promise<HierarchyOption[]> {
-  // UNCOMMENT TO FETCH FROM API
-  // const response = await fetch(`${API_BASE_URL}/api/v1/exams`);
-  // const json = await response.json();
-  // if (!response.ok) throw new Error(json?.message || "Failed to load exams");
-
-  // MOCK DATA - TO BE REMOVED
-  const json = mockExamsResponse;
+  const json = await fetchExamsResponse();
   return json.data;
 }
 
-export async function fetchBranches(
-  examId: string,
-): Promise<HierarchyOption[]> {
-  // UNCOMMENT TO FETCH FROM API
-  // const response = await fetch(
-  //   `${API_BASE_URL}/api/v1/exams/${examId}/branches`,
-  // );
-  // const json = await response.json();
-  // if (!response.ok) throw new Error(json?.message || "Failed to load branches");
+export async function fetchBranchesResponse(examId: string): Promise<HierarchyResponse> {
+  return apiFetch<HierarchyResponse>(`/exams/${examId}/branches`);
+}
 
-  // MOCK DATA - TO BE REMOVED
-  const json = mockBranchesResponse;
+export async function fetchBranches(examId: string): Promise<HierarchyOption[]> {
+  const json = await fetchBranchesResponse(examId);
   return json.data;
 }
 
-export async function fetchSubjects(
-  branchId: string,
-): Promise<HierarchyOption[]> {
-  // UNCOMMENT TO FETCH FROM API
-  // const response = await fetch(
-  //   `${API_BASE_URL}/api/v1/branches/${branchId}/subjects`,
-  // );
-  // const json = await response.json();
-  // if (!response.ok) throw new Error(json?.message || "Failed to load subjects");
+export async function fetchSubjectsResponse(branchId: string): Promise<HierarchyResponse> {
+  return apiFetch<HierarchyResponse>(`/branches/${branchId}/subjects`);
+}
 
-  // MOCK DATA - TO BE REMOVED
-  const json = mockSubjectsResponse;
+export async function fetchSubjects(branchId: string): Promise<HierarchyOption[]> {
+  const json = await fetchSubjectsResponse(branchId);
   return json.data;
 }
 
-export async function fetchTopics(
-  subjectId: string,
-): Promise<HierarchyOption[]> {
-  // UNCOMMENT TO FETCH FROM API
-  // const response = await fetch(
-  //   `${API_BASE_URL}/api/v1/subjects/${subjectId}/topics`,
-  // );
-  // const json = await response.json();
-  // if (!response.ok) throw new Error(json?.message || "Failed to load topics");
+export async function fetchTopicsResponse(subjectId: string): Promise<HierarchyResponse> {
+  return apiFetch<HierarchyResponse>(`/subjects/${subjectId}/topics`);
+}
 
-  // MOCK DATA - TO BE REMOVED
-  const json = mockTopicsResponse;
+export async function fetchTopics(subjectId: string): Promise<HierarchyOption[]> {
+  const json = await fetchTopicsResponse(subjectId);
   return json.data;
+}
+
+export async function createExam(name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>("/exams", {
+    method: "POST",
+    body: { name },
+  });
+  return json.data;
+}
+
+export async function updateExam(examId: string, name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>(`/exams/${examId}`, {
+    method: "PATCH",
+    body: { name },
+  });
+  return json.data;
+}
+
+export async function deleteExam(examId: string): Promise<void> {
+  await apiFetch(`/exams/${examId}`, { method: "DELETE" });
+}
+
+export async function createBranch(examId: string, name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>(
+    `/exams/${examId}/branches`,
+    { method: "POST", body: { name } },
+  );
+  return json.data;
+}
+
+export async function updateBranch(branchId: string, name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>(`/branches/${branchId}`, {
+    method: "PATCH",
+    body: { name },
+  });
+  return json.data;
+}
+
+export async function deleteBranch(branchId: string): Promise<void> {
+  await apiFetch(`/branches/${branchId}`, { method: "DELETE" });
+}
+
+export async function createSubject(branchId: string, name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>(
+    `/branches/${branchId}/subjects`,
+    { method: "POST", body: { name } },
+  );
+  return json.data;
+}
+
+export async function updateSubject(subjectId: string, name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>(`/subjects/${subjectId}`, {
+    method: "PATCH",
+    body: { name },
+  });
+  return json.data;
+}
+
+export async function deleteSubject(subjectId: string): Promise<void> {
+  await apiFetch(`/subjects/${subjectId}`, { method: "DELETE" });
+}
+
+export async function createTopic(subjectId: string, name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>(
+    `/subjects/${subjectId}/topics`,
+    { method: "POST", body: { name } },
+  );
+  return json.data;
+}
+
+export async function updateTopic(topicId: string, name: string): Promise<HierarchyOption> {
+  const json = await apiFetch<{ status: string; data: HierarchyOption }>(`/topics/${topicId}`, {
+    method: "PATCH",
+    body: { name },
+  });
+  return json.data;
+}
+
+export async function deleteTopic(topicId: string): Promise<void> {
+  await apiFetch(`/topics/${topicId}`, { method: "DELETE" });
 }

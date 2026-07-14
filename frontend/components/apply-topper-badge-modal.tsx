@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { fetchBranches, fetchExams, fetchSubjects } from "@/lib/hierarchy-api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { useCreateTopperBadgeApplication } from "@/lib/hooks/use-topper-badges";
 import type { HierarchyOption } from "@/lib/hierarchy-types";
 
 interface ApplyTopperBadgeModalProps {
@@ -64,6 +65,7 @@ export default function ApplyTopperBadgeModal({
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
   const [isUploadingMarksheet, setIsUploadingMarksheet] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const createApplication = useCreateTopperBadgeApplication();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -191,32 +193,21 @@ export default function ApplyTopperBadgeModal({
       return;
     }
 
-    // UNCOMMENT TO FETCH FROM API
-    // try {
-    //   const res = await fetch(`/api/v1/users/${userId}/topperBadgeApplications`, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     credentials: 'include',
-    //     body: JSON.stringify({
-    //       exam: formData.exam,
-    //       branch: formData.branch,
-    //       subject: formData.subject,
-    //       year: Number(formData.year),
-    //       cgpa: Number(formData.cgpa),
-    //       markSheetUrl: formData.markSheetUrl,
-    //     }),
-    //   })
-    //   const json = await res.json()
-    //   if (json.status !== 'success') {
-    //     setErrors({ ...errors, submit: 'Failed to submit application' })
-    //     return
-    //   }
-    //   onSubmit(json.data)
-    // } catch (err) {
-    //   console.error('Failed to submit topper badge application', err)
-    //   setErrors({ ...errors, submit: 'Failed to submit application' })
-    //   return
-    // }
+    try {
+      await createApplication.mutateAsync({
+        userId,
+        exam: formData.exam,
+        branch: formData.branch,
+        subject: formData.subject,
+        year: Number(formData.year),
+        cgpa: Number(formData.cgpa),
+        markSheetUrl: formData.markSheetUrl,
+      });
+    } catch (err) {
+      console.error("Failed to submit topper badge application", err);
+      setErrors({ ...errors, submit: "Failed to submit application" });
+      return;
+    }
 
     onSubmit(formData);
     setFormData({

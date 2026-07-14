@@ -2,15 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useReportMaterial } from "@/lib/hooks/use-reports";
 
 interface ReportComponentProps {
   materialId: string;
   isLoggedIn: boolean;
-}
-
-interface ReportResponse {
-  status: string;
-  message: string;
 }
 
 export function ReportComponent({
@@ -20,6 +16,7 @@ export function ReportComponent({
   const [reportReason, setReportReason] = useState("");
   const [reportComment, setReportComment] = useState("");
   const [reportSubmitted, setReportSubmitted] = useState(false);
+  const reportMaterial = useReportMaterial();
 
   const handleSubmitReport = async () => {
     if (!reportReason) {
@@ -27,19 +24,15 @@ export function ReportComponent({
       return;
     }
 
-    // UNCOMMENT TO FETCH FROM API
-    // try {
-    //   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/materials/${materialId}/reports`, {
-    //     method: "POST",
-    //     credentials: "include",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ reportReason, comment: reportComment }),
-    //   });
-    //   const json: ReportResponse = await res.json();
-    //   if (json.status !== "success") throw new Error("Failed to submit report");
-    // } catch (err) {
-    //   return;
-    // }
+    try {
+      await reportMaterial.mutateAsync({
+        materialId,
+        reportReason,
+        comment: reportComment || undefined,
+      });
+    } catch {
+      return;
+    }
 
     setReportSubmitted(true);
     setTimeout(() => {

@@ -1,63 +1,30 @@
+"use client";
+
 import Link from "next/link";
-import { BookOpen, ChevronLeft, FolderOpen } from "lucide-react";
+import { useParams } from "next/navigation";
+import { ChevronLeft, FolderOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { HierarchyOption, HierarchyResponse } from "@/lib/hierarchy-types";
-import { mockBranchesResponse, exams } from "@/lib/mock-data";
+import { useBranches } from "@/lib/hooks/use-branches";
 
-// UNCOMMENT THE CODE BELOW TO FETCH FROM API:
-// async function fetchBranches(examId: string) {
-//   try {
-//     const response = await fetch(`http://localhost:5000/api/v1/exams/${examId}/branches`);
-//     const result = await response.json()
-//     if (result.status === "success") {
-//       return result
-//     }
-//   } catch (error) {
-//     console.error("Failed to fetch branches:", error)
-//   }
-// return null;
-// }
+export default function BranchesPage() {
+  const { examId } = useParams<{ examId: string }>();
+  const { data, isLoading, isError } = useBranches(examId);
 
-interface Params {
-  params: Promise<{ examId: string }>;
-}
-
-export default async function BranchesPage({ params }: Params) {
-  const { examId } = await params;
-
-  // Conditionally load branches based on examId
-  let branches: HierarchyOption[] = [];
-  let exam = "Exam Not Found";
-
-  if (examId === "0") {
-    const mockData: HierarchyResponse = mockBranchesResponse;
-    branches = mockData.data;
-    exam = mockData.exam || "Exam";
-  } else {
-    exam = exams.find((e) => e._id === examId)?.name ?? "Exam Not Found";
-  }
-
-  // if (!data) return <p>Failed to load branches.</p>;
-  // if (data.branches.length === 0) return <p>No branches found.</p>;
+  const branches = data?.data ?? [];
+  const exam = data?.exam ?? "Exam";
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
             { label: "Exams", href: "/exams" },
-            /* USE 'data' INSTEAD OF 'mockBranchesResponse' WHEN FETCHING FROM API */
-            {
-              label: exam,
-              href: `/exams/${examId}/branches`,
-            },
+            { label: exam, href: `/exams/${examId}/branches` },
           ]}
         />
 
-        {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">{exam}</h1>
           {branches.length > 0 && (
@@ -67,8 +34,10 @@ export default async function BranchesPage({ params }: Params) {
           )}
         </div>
 
-        {/* Branches/Universities Grid or Empty State */}
-        {branches.length > 0 ? (
+        {isLoading && <p className="text-muted-foreground">Loading branches...</p>}
+        {isError && <p className="text-destructive">Failed to load branches.</p>}
+
+        {!isLoading && !isError && branches.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-4">
             {branches.map((branch) => (
               <Link
@@ -89,15 +58,18 @@ export default async function BranchesPage({ params }: Params) {
             ))}
           </div>
         ) : (
-          <Card className="p-16 text-center">
-            <div className="flex flex-col items-center gap-4">
-              <FolderOpen className="h-12 w-12 text-muted-foreground" />
-              <h2 className="text-xl font-semibold">No branches yet</h2>
-              <p className="text-muted-foreground">
-                This exam doesn't have any branches yet. Check back later.
-              </p>
-            </div>
-          </Card>
+          !isLoading &&
+          !isError && (
+            <Card className="p-16 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <FolderOpen className="h-12 w-12 text-muted-foreground" />
+                <h2 className="text-xl font-semibold">No branches yet</h2>
+                <p className="text-muted-foreground">
+                  This exam doesn't have any branches yet. Check back later.
+                </p>
+              </div>
+            </Card>
+          )
         )}
       </div>
     </div>
