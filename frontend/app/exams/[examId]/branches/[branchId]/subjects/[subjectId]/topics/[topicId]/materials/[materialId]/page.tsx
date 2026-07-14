@@ -66,7 +66,7 @@ export default function MaterialViewerPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="bg-white border border-border rounded-lg mb-8 overflow-hidden">
-          <div className="h-150 border-b border-border">
+          <div className="border-b border-border h-150">
             <div className="p-0">
               <iframe
                 src={material.fileUrl}
