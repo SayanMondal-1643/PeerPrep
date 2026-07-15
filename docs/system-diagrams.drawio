@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36" pages="7">
   <diagram name="Use Case Diagram" id="1FFgl4pPgkKbFWqbniPX">
-    <mxGraphModel dx="1201" dy="1749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1012" dy="1672" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -150,9 +150,6 @@
         </mxCell>
         <mxCell id="_WPPJhyleVOJKaH4UYVH-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;p data-pm-slice=&quot;0 0 []&quot;&gt;Structured Exam Preparation &amp;amp; Community-based Study Material System&amp;nbsp;&lt;/p&gt;&lt;p&gt;&lt;/p&gt;" vertex="1">
           <mxGeometry height="30" width="450" x="240" y="-20" as="geometry" />
-        </mxCell>
-        <mxCell id="qA5mWKvSn9RvMBPntLgc-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Use Case Diagram" vertex="1">
-          <mxGeometry height="30" width="120" x="405" y="510" as="geometry" />
         </mxCell>
         <mxCell id="mp6lVPu1jhr-NsRJLlRV-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Report Study Material" vertex="1">
           <mxGeometry height="50" width="142.75" x="279.13" y="380" as="geometry" />
@@ -1044,7 +1041,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="vm3i1zrZB9KsM35_d4r1" name="Level-0 DFD">
-    <mxGraphModel dx="686" dy="371" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="905" dy="512" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1114,9 +1111,6 @@
             <mxPoint x="540.7500000000001" y="485.75" as="sourcePoint" />
             <mxPoint x="540" y="413" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="S_ub42VxKoXx-gvxOhhk-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Level 0 Data Flow Diagram&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="220" x="370" y="740" as="geometry" />
         </mxCell>
         <mxCell id="Du6SoLQTcYUyUzN4AiGI-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Content Requests &amp;amp; Submissions" vertex="1">
           <mxGeometry height="30" width="190" x="165" y="518" as="geometry" />
@@ -2586,7 +2580,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="OZejEB-5139xgU2_dzgZ" name="Activity Diagram">
-    <mxGraphModel dx="1044" dy="564" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1720" dy="972" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -2712,9 +2706,6 @@
             <mxPoint x="325" y="500" as="sourcePoint" />
             <mxPoint x="245" y="540" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="hOJYp3ULRWYfLavboaCq-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Activity Diagram for Best Material Selection" vertex="1">
-          <mxGeometry height="30" width="245" x="303" y="1040" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
