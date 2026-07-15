@@ -27,10 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useMemo, useState } from "react";
-import {
-  mockToppersResponse,
-  mockUserTopperBadgesResponse,
-} from "@/lib/mock-data";
+import { mockTopperBadgesResponse } from "@/lib/mock-data";
 import { ApiTopperBadgesResponse, TopperBadge } from "@/lib/topper-badge-types";
 
 const API_BASE_URL =
@@ -62,7 +59,7 @@ export default function ToppersTab() {
       // const json: ApiToppersResponse = await response.json();
 
       // MOCK DATA - TO BE REMOVED WHEN FETCHING FROM API
-      const json: ApiTopperBadgesResponse = mockUserTopperBadgesResponse;
+      const json: ApiTopperBadgesResponse = mockTopperBadgesResponse;
 
       setToppersList(json.data);
     } catch (error) {

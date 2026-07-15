@@ -15,7 +15,6 @@ import {
 } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -245,7 +244,7 @@ export default function ProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold">{user.name}</h1>
-                {user.role === "teacher" ? (
+                {user.role === "teacher" && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -256,8 +255,6 @@ export default function ProfilePage() {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                ) : (
-                  <Badge variant="secondary">Student</Badge>
                 )}
               </div>
               <p className="text-sm text-muted-foreground">{user.email}</p>

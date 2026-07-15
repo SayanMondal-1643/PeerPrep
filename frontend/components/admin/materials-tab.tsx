@@ -26,6 +26,7 @@ import { Material, ApiMaterialsResponse } from "@/lib/material-types";
 import {
   mockMaterialsResponse1,
   mockMaterialsResponse2,
+  mockMaterialsResponse3,
 } from "@/lib/mock-data";
 
 const API_BASE_URL =
@@ -66,6 +67,7 @@ export default function MaterialsTab() {
       setMaterials([
         ...mockMaterialsResponse1.data,
         ...mockMaterialsResponse2.data,
+        ...mockMaterialsResponse3.data,
       ]);
     } catch (error) {
       console.error("Failed to fetch materials:", error);

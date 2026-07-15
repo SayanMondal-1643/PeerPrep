@@ -304,7 +304,7 @@ function SignupForm() {
                   ) : null}
                   {selectedFileName ? (
                     <p className="text-sm text-green-600">
-                      File selected: {selectedFileName}
+                      ID Proof uploaded successfully
                     </p>
                   ) : null}
                   {uploadError ? (

@@ -97,6 +97,14 @@ function LoginForm() {
                   )}
                 </button>
               </div>
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
             </div>
 
             {/* Error Message */}
@@ -126,7 +134,7 @@ function LoginForm() {
           </div>
 
           {/* DEMO CREDENTIALS - TO BE REMOVED LATER */}
-          <div className="mt-8 p-4 rounded-md bg-card border border-border space-y-1">
+          {/* <div className="mt-8 p-4 rounded-md bg-card border border-border space-y-1">
             <p className="text-xs font-semibold text-muted-foreground mb-2">
               Demo Credentials:
             </p>
@@ -142,7 +150,7 @@ function LoginForm() {
             <p className="text-xs text-muted-foreground">
               Student 2: subhajit@example.com, password123
             </p>
-          </div>
+          </div> */}
         </div>
       </Card>
     </div>

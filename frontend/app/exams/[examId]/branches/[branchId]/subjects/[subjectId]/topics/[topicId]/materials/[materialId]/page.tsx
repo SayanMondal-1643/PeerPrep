@@ -70,7 +70,7 @@ function MaterialViewerContent({
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="bg-white border border-border rounded-lg mb-8 overflow-hidden">
           <div className="h-150 border-b border-border">
             <div className="p-0">

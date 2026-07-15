@@ -1,6 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MaterialDownloadButtonProps {
@@ -19,7 +20,8 @@ export function MaterialDownloadButton({
   return (
     <Button size="sm" asChild className={className}>
       <a href={href} download onClick={handleClick}>
-        View / Download
+        <Download className="h-4 w-4 mr-1" />
+        Download
       </a>
     </Button>
   );
