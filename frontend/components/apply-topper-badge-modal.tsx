@@ -60,6 +60,7 @@ export default function ApplyTopperBadgeModal({
   const [subjects, setSubjects] = useState<HierarchyOption[]>([]);
   const [selectedExamId, setSelectedExamId] = useState("");
   const [selectedBranchId, setSelectedBranchId] = useState("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [isLoadingExams, setIsLoadingExams] = useState(false);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
@@ -137,6 +138,7 @@ export default function ApplyTopperBadgeModal({
     const subjectName =
       subjects.find((subject) => subject._id === subjectId)?.name || "";
     setFormData((prev) => ({ ...prev, subject: subjectName }));
+    setSelectedSubjectId(subjectId);
   };
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -199,6 +201,7 @@ export default function ApplyTopperBadgeModal({
         exam: formData.exam,
         branch: formData.branch,
         subject: formData.subject,
+        subjectId: selectedSubjectId,
         year: Number(formData.year),
         cgpa: Number(formData.cgpa),
         markSheetUrl: formData.markSheetUrl,
@@ -220,6 +223,7 @@ export default function ApplyTopperBadgeModal({
     });
     setSelectedExamId("");
     setSelectedBranchId("");
+    setSelectedSubjectId("");
     setBranches([]);
     setSubjects([]);
     setErrors({});
@@ -229,7 +233,7 @@ export default function ApplyTopperBadgeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>Apply for Topper Badge</DialogTitle>
           <DialogDescription>

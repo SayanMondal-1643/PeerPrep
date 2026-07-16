@@ -8,26 +8,49 @@ import { requireAuth, requireOwnerOrAdmin } from "@/lib/auth/guards";
 import { serializeTopperBadge } from "@/lib/api-helpers/serializeTopperBadge";
 
 export const GET = catchAsync(
-  async (req: NextRequest, { params }: { params: Promise<{ userId: string }> }) => {
+  async (
+    req: NextRequest,
+    { params }: { params: Promise<{ userId: string }> },
+  ) => {
     await requireAuth(req);
 
     const { userId } = await params;
-    const applications = await TopperBadgeApplication.find({ userId }).populate("userId", "name");
+    const applications = await TopperBadgeApplication.find({ userId }).populate(
+      "userId",
+      "name",
+    );
 
-    return success(applications.map(serializeTopperBadge), { results: applications.length });
+    return success(applications.map(serializeTopperBadge), {
+      results: applications.length,
+    });
   },
 );
 
 export const POST = catchAsync(
-  async (req: NextRequest, { params }: { params: Promise<{ userId: string }> }) => {
+  async (
+    req: NextRequest,
+    { params }: { params: Promise<{ userId: string }> },
+  ) => {
     const currentUser = await requireAuth(req);
 
     const { userId } = await params;
     requireOwnerOrAdmin(currentUser, userId);
 
-    const { exam, branch, subject, year, cgpa, markSheetUrl } = await req.json();
+    const { exam, branch, subject, subjectId, year, cgpa, markSheetUrl } =
+      await req.json();
 
-    if (!exam || !branch || !subject || !year || cgpa === undefined || !markSheetUrl) {
+    if (!subjectId) {
+      throw new AppError("subjectId is required.", 400);
+    }
+
+    if (
+      !exam ||
+      !branch ||
+      !subject ||
+      !year ||
+      cgpa === undefined ||
+      !markSheetUrl
+    ) {
       throw new AppError(
         "exam, branch, subject, year, cgpa, and markSheetUrl are required.",
         400,
@@ -41,6 +64,7 @@ export const POST = catchAsync(
 
     let application = await TopperBadgeApplication.create({
       userId,
+      subjectId,
       exam,
       branch,
       subject,

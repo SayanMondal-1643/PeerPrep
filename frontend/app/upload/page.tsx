@@ -48,6 +48,7 @@ export default function UploadPage() {
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
   const [isLoadingTopics, setIsLoadingTopics] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useRequireAuth();
   const createMaterial = useCreateMaterial();
@@ -227,6 +228,7 @@ export default function UploadPage() {
 
     setIsSubmitting(true);
     setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       const fileUrl = await uploadToCloudinary(selectedFile);
@@ -238,7 +240,7 @@ export default function UploadPage() {
         fileUrl,
       });
 
-      alert("Material uploaded successfully!");
+      setSuccessMessage("Material uploaded successfully!");
 
       setTitle("");
       setDescription("");
@@ -273,10 +275,6 @@ export default function UploadPage() {
 
         <Card className="p-6 lg:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {errorMessage ? (
-              <p className="text-sm text-destructive">{errorMessage}</p>
-            ) : null}
-
             {/* Exam Selection */}
             <div className="space-y-2">
               <Label htmlFor="exam">Exam *</Label>
@@ -443,16 +441,13 @@ export default function UploadPage() {
                     <p className="text-sm text-muted-foreground mb-2">
                       Drag and drop your file here, or click to browse
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      PDF, DOC, DOCX, PPT, PPTX (Max 50MB)
-                    </p>
                   </>
                 )}
                 <Input
                   id="file"
                   type="file"
                   className="sr-only"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx"
+                  accept=".pdf"
                   onChange={handleFileChange}
                   required
                 />
@@ -470,7 +465,16 @@ export default function UploadPage() {
               </div>
             </div>
 
-            <div className="border-t border-border pt-6" />
+            {successMessage ? (
+              <p className="text-sm text-green-600 text-center">
+                {successMessage}
+              </p>
+            ) : null}
+            {errorMessage ? (
+              <p className="text-sm text-destructive text-center">
+                {errorMessage}
+              </p>
+            ) : null}
 
             {/* Submit Button */}
             <div className="flex gap-3">

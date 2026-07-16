@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Topic from "@/lib/models/Topic";
 import Material from "@/lib/models/Material";
+import TopperBadgeApplication from "@/lib/models/TopperBadgeApplication";
 import { catchAsync } from "@/lib/api-helpers/catchAsync";
 import { AppError } from "@/lib/api-helpers/AppError";
 import { requireAuth } from "@/lib/auth/guards";
@@ -8,7 +9,10 @@ import { resolveBreadcrumb } from "@/lib/api-helpers/breadcrumb";
 import { USER_REF_SELECT } from "@/lib/api-helpers/populateUser";
 
 export const GET = catchAsync(
-  async (req: NextRequest, { params }: { params: Promise<{ topicId: string }> }) => {
+  async (
+    req: NextRequest,
+    { params }: { params: Promise<{ topicId: string }> },
+  ) => {
     const { topicId } = await params;
 
     const topic = await Topic.findById(topicId).select("name subjectId");
@@ -16,7 +20,9 @@ export const GET = catchAsync(
       throw new AppError("No topic found with that ID.", 404);
     }
 
-    const { exam, branch, subject } = await resolveBreadcrumb({ subjectId: String(topic.subjectId) });
+    const { exam, branch, subject } = await resolveBreadcrumb({
+      subjectId: String(topic.subjectId),
+    });
 
     const materials = await Material.find({ topicId })
       .populate("userId", USER_REF_SELECT)
@@ -35,7 +41,10 @@ export const GET = catchAsync(
 );
 
 export const POST = catchAsync(
-  async (req: NextRequest, { params }: { params: Promise<{ topicId: string }> }) => {
+  async (
+    req: NextRequest,
+    { params }: { params: Promise<{ topicId: string }> },
+  ) => {
     const user = await requireAuth(req);
 
     const { topicId } = await params;
@@ -50,16 +59,26 @@ export const POST = catchAsync(
       throw new AppError("No topic found with that ID.", 404);
     }
 
+    const isTopperMaterial = !!(await TopperBadgeApplication.exists({
+      userId: user._id,
+      subjectId: topic.subjectId,
+      status: "approved",
+    }));
+
     const material = await Material.create({
       title,
       description,
       fileUrl,
       topicId,
       userId: user._id,
+      isTopperMaterial,
     });
 
     await material.populate("userId", USER_REF_SELECT);
 
-    return NextResponse.json({ status: "success", data: material }, { status: 201 });
+    return NextResponse.json(
+      { status: "success", data: material },
+      { status: 201 },
+    );
   },
 );
