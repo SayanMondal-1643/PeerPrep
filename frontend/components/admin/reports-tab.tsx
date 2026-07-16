@@ -48,7 +48,10 @@ export default function ReportsTab() {
     setRowErrors((prev) => ({ ...prev, [report._id]: "" }));
 
     try {
-      await updateReportStatus.mutateAsync({ reportId: report._id, status: nextStatus });
+      await updateReportStatus.mutateAsync({
+        reportId: report._id,
+        status: nextStatus,
+      });
     } catch {
       setRowErrors((prev) => ({
         ...prev,
@@ -135,7 +138,13 @@ export default function ReportsTab() {
                   </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span>{report.reporterId.name}</span>
+                      <Link
+                        href={`/profile/${report.reporterId._id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {report.reporterId.name}
+                      </Link>
+
                       {report.reporterId.role === "teacher" &&
                         report.reporterId.verificationStatus === "verified" && (
                           <TooltipProvider>

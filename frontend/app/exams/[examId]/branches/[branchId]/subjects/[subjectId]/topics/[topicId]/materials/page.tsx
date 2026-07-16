@@ -69,10 +69,16 @@ export default function MaterialsPage() {
             </p>
           </div>
 
-          {isLoading && <p className="text-muted-foreground">Loading materials...</p>}
-          {isError && <p className="text-destructive">Failed to load materials.</p>}
+          {isLoading && (
+            <p className="text-muted-foreground">Loading materials...</p>
+          )}
+          {isError && (
+            <p className="text-destructive">Failed to load materials.</p>
+          )}
           {!isLoading && !isError && materials.length === 0 && (
-            <p className="text-muted-foreground">No materials found for this topic yet.</p>
+            <p className="text-muted-foreground">
+              No materials found for this topic yet.
+            </p>
           )}
 
           <div className="space-y-4">
@@ -168,7 +174,13 @@ export default function MaterialsPage() {
                         <span className="text-muted-foreground">•</span>
                         <div className="flex items-center gap-1">
                           <span className="text-muted-foreground">
-                            By {material.userId.name}
+                            By{" "}
+                            <Link
+                              href={`/profile/${material.userId._id}`}
+                              className="text-muted-foreground hover:underline"
+                            >
+                              {material.userId.name}
+                            </Link>
                           </span>
                           {material.userId.role === "teacher" && (
                             <GraduationCap className="h-4 w-4 text-blue-500" />

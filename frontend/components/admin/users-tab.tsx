@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useState } from "react";
 import { ChevronDown, Eye, GraduationCap, Search, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -196,8 +196,8 @@ export default function UsersTab() {
                 return (
                   <TableRow key={user._id}>
                     <TableCell className="font-medium text-primary">
-                      <a
-                        href="#"
+                      <Link
+                        href={`/profile/${user._id}`}
                         className="inline-flex items-center gap-1.5 hover:underline"
                       >
                         <span>{user.name}</span>
@@ -207,7 +207,7 @@ export default function UsersTab() {
                         {user.role === "admin" && (
                           <Shield className="h-4 w-4 text-amber-500" />
                         )}
-                      </a>
+                      </Link>
                     </TableCell>
                     <TableCell className="text-center">
                       {user.role === "teacher" ? (

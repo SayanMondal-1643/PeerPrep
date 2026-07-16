@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,7 +80,11 @@ export function CommentSection({
     if (!editText.trim()) return;
 
     try {
-      await updateComment.mutateAsync({ commentId, comment: editText, materialId });
+      await updateComment.mutateAsync({
+        commentId,
+        comment: editText,
+        materialId,
+      });
     } finally {
       setEditingCommentId(null);
       setEditText("");
@@ -122,23 +127,37 @@ export function CommentSection({
           </div>
         )}
 
-        {isLoading && <p className="text-sm text-muted-foreground">Loading comments...</p>}
-        {isError && <p className="text-sm text-destructive">Failed to load comments.</p>}
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">Loading comments...</p>
+        )}
+        {isError && (
+          <p className="text-sm text-destructive">Failed to load comments.</p>
+        )}
 
         {/* Comments List */}
         <div className="space-y-4">
           {displayedComments.map((comment) => (
             <Card key={comment._id} className="p-4">
               <div className="flex gap-4">
-                <Avatar className="h-10 w-10 shrink-0">
-                  <AvatarFallback className="text-xs font-medium">
-                    {getInitialsFromName(comment.userId.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <Link
+                  href={`/profile/${comment.userId._id}`}
+                  className="shrink-0"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="text-xs font-medium">
+                      {getInitialsFromName(comment.userId.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <p className="font-medium text-sm flex items-center">
-                      {comment.userId.name}
+                      <Link
+                        href={`/profile/${comment.userId._id}`}
+                        className="hover:underline"
+                      >
+                        {comment.userId.name}
+                      </Link>
                       {comment.userId.role === "teacher" &&
                         comment.userId.verificationStatus === "verified" && (
                           <GraduationCap className="h-4 w-4 text-blue-600 ml-1" />

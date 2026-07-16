@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RatingComponent } from "@/components/rating-component";
 import { CommentSection } from "@/components/comment-section";
@@ -56,9 +56,20 @@ export default function MaterialViewerPage() {
           </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold">{material.title}</h1>
-            <p className="text-sm text-muted-foreground">
-              By {material.userId.name}
-            </p>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">
+                By{" "}
+                <Link
+                  href={`/profile/${material.userId._id}`}
+                  className="text-muted-foreground hover:underline"
+                >
+                  {material.userId.name}
+                </Link>
+              </span>
+              {material.userId.role === "teacher" && (
+                <GraduationCap className="h-4 w-4 text-blue-500" />
+              )}
+            </div>
           </div>
         </div>
       </div>
