@@ -46,5 +46,5 @@ export interface ApiMaterialResponse {
 export interface ApiUserMaterialsResponse {
   status: string;
   results: number;
-  data: MaterialWithBreadcrumb[];
+  data: Material[];
 }

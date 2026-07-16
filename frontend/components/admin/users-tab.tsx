@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Eye, GraduationCap, Search, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,25 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { mockUsersResponse } from "@/lib/mock-data";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-
-interface User {
-  _id: string;
-  name: string;
-  role: string;
-  verificationStatus: string;
-  accountStatus: string;
-  idProofUrl?: string;
-}
-
-interface ApiUserResponse {
-  status: string;
-  results: number;
-  data: User[];
-}
+import { useUsers, useUpdateUser } from "@/lib/hooks/use-users";
 
 const verificationOptions = [
   { value: "pending", label: "Pending" },
@@ -75,41 +57,15 @@ function getStatusBadgeStyles(status: string) {
 }
 
 export default function UsersTab() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, isError, refetch } = useUsers();
+  const updateUser = useUpdateUser();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [verificationFilter, setVerificationFilter] = useState("all");
   const [accountStatusFilter, setAccountStatusFilter] = useState("all");
 
-  const loadUsers = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // UNCOMMENT TO FETCH FROM API
-      // const response = await fetch(`${API_BASE_URL}/api/v1/users`);
-      // if (!response.ok) {
-      //   throw new Error("Failed to load users.");
-      // }
-      // const json: ApiUserResponse = await response.json();
-
-      const json: ApiUserResponse = mockUsersResponse;
-      setUsers(json.data);
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-      setError(
-        error instanceof Error ? error.message : "Unable to load users.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadUsers();
-  }, []);
+  const users = data?.data ?? [];
 
   const filteredUsers = users.filter((user) => {
     const normalizedQuery = searchQuery.toLowerCase();
@@ -130,71 +86,15 @@ export default function UsersTab() {
     );
   });
 
-  const updateVerificationStatus = async (user: User, nextStatus: string) => {
-    const previousStatus = user.verificationStatus;
-
-    setUsers((prev) =>
-      prev.map((item) =>
-        item._id === user._id
-          ? { ...item, verificationStatus: nextStatus }
-          : item,
-      ),
-    );
-
-    try {
-      // UNCOMMENT TO FETCH FROM API
-      // const response = await fetch(`${API_BASE_URL}/api/v1/users/${user._id}`, {
-      //   method: "PATCH",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ verificationStatus: nextStatus }),
-      // });
-      // if (!response.ok) {
-      //   throw new Error("Failed to update verification status.");
-      // }
-    } catch {
-      setUsers((prev) =>
-        prev.map((item) =>
-          item._id === user._id
-            ? { ...item, verificationStatus: previousStatus }
-            : item,
-        ),
-      );
-      setError("Unable to update verification status.");
-    }
+  const updateVerificationStatus = (userId: string, nextStatus: string) => {
+    updateUser.mutate({ userId, updates: { verificationStatus: nextStatus } });
   };
 
-  const updateAccountStatus = async (user: User, nextStatus: string) => {
-    const previousStatus = user.accountStatus;
-
-    setUsers((prev) =>
-      prev.map((item) =>
-        item._id === user._id ? { ...item, accountStatus: nextStatus } : item,
-      ),
-    );
-
-    try {
-      // UNCOMMENT TO FETCH FROM API
-      // const response = await fetch(`${API_BASE_URL}/api/v1/users/${user._id}`, {
-      //   method: "PATCH",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ accountStatus: nextStatus }),
-      // });
-      // if (!response.ok) {
-      //   throw new Error("Failed to update account status.");
-      // }
-    } catch {
-      setUsers((prev) =>
-        prev.map((item) =>
-          item._id === user._id
-            ? { ...item, accountStatus: previousStatus }
-            : item,
-        ),
-      );
-      setError("Unable to update account status.");
-    }
+  const updateAccountStatus = (userId: string, nextStatus: string) => {
+    updateUser.mutate({ userId, updates: { accountStatus: nextStatus } });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <div className="p-6 space-y-4">
@@ -210,13 +110,13 @@ export default function UsersTab() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Card>
         <div className="p-6 space-y-4">
           <h2 className="text-xl font-semibold">User Management</h2>
-          <p className="text-sm text-red-600">{error}</p>
-          <Button onClick={() => void loadUsers()}>Retry</Button>
+          <p className="text-sm text-red-600">Unable to load users.</p>
+          <Button onClick={() => void refetch()}>Retry</Button>
         </div>
       </Card>
     );
@@ -290,8 +190,8 @@ export default function UsersTab() {
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => {
-                const verificationState = user.verificationStatus;
-                const accountStatus = user.accountStatus;
+                const verificationState = user.verificationStatus ?? "pending";
+                const accountStatus = user.accountStatus ?? "active";
 
                 return (
                   <TableRow key={user._id}>
@@ -318,7 +218,7 @@ export default function UsersTab() {
                               variant="outline"
                               className="h-7 px-2.5 text-xs border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:cursor-pointer"
                               onClick={() =>
-                                void updateVerificationStatus(user, "verified")
+                                updateVerificationStatus(user._id, "verified")
                               }
                             >
                               Verify
@@ -328,7 +228,7 @@ export default function UsersTab() {
                               variant="outline"
                               className="h-7 px-2.5 text-xs border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:cursor-pointer"
                               onClick={() =>
-                                void updateVerificationStatus(user, "rejected")
+                                updateVerificationStatus(user._id, "rejected")
                               }
                             >
                               Reject
@@ -387,8 +287,8 @@ export default function UsersTab() {
                                     <DropdownMenuItem
                                       key={option.value}
                                       onClick={() =>
-                                        void updateVerificationStatus(
-                                          user,
+                                        updateVerificationStatus(
+                                          user._id,
                                           option.value,
                                         )
                                       }
@@ -454,7 +354,7 @@ export default function UsersTab() {
                               <DropdownMenuItem
                                 key={option.value}
                                 onClick={() =>
-                                  void updateAccountStatus(user, option.value)
+                                  updateAccountStatus(user._id, option.value)
                                 }
                               >
                                 {option.label}

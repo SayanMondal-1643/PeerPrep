@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -13,27 +13,13 @@ import {
 } from "@/components/ui/tooltip";
 import { GraduationCap, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { mockCommentsResponse } from "@/lib/mock-data";
-
-interface CommentUser {
-  _id: string;
-  name: string;
-  role: "student" | "teacher";
-  verificationStatus?: "pending" | "verified" | "rejected";
-}
-
-interface Comment {
-  _id: string;
-  comment: string;
-  userId: CommentUser;
-  createdAt: string;
-}
-
-interface CommentsResponse {
-  status: string;
-  results: number;
-  data: Comment[];
-}
+import {
+  useComments,
+  useCreateComment,
+  useDeleteComment,
+  useUpdateComment,
+} from "@/lib/hooks/use-comments";
+import { Comment } from "@/lib/comment-types";
 
 interface CommentSectionProps {
   materialId: string;
@@ -56,20 +42,14 @@ export function CommentSection({
   isLoggedIn,
 }: CommentSectionProps) {
   const { user } = useAuth();
-  const [comments, setComments] = useState<Comment[]>(
-    mockCommentsResponse.data as Comment[],
-  );
-  useEffect(() => {
-    // UNCOMMENT TO FETCH FROM API
-    // const fetchComments = async () => {
-    //   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/materials/${materialId}/comments`);
-    //   const json: CommentsResponse = await res.json();
-    //   setComments(json.data);
-    // };
-    // fetchComments();
-  }, [materialId]);
+  const { data, isLoading, isError } = useComments(materialId);
+  const createComment = useCreateComment();
+  const updateComment = useUpdateComment();
+  const deleteComment = useDeleteComment();
+
+  const comments: Comment[] = data?.data ?? [];
+
   const [newComment, setNewComment] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
@@ -77,28 +57,12 @@ export function CommentSection({
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
 
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      const newCommentObj: Comment = {
-        _id: `${comments.length + 1}`,
-        userId: {
-          _id: user?._id ?? "temp",
-          name: user?.name ?? "You",
-          role:
-            user?.role === "teacher" || user?.role === "student"
-              ? user.role
-              : "student",
-          verificationStatus:
-            user?.role === "teacher" ? user?.verificationStatus : undefined,
-        },
-        comment: newComment,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      setComments([newCommentObj, ...comments]);
+    try {
+      await createComment.mutateAsync({ materialId, comment: newComment });
       setNewComment("");
-      setIsSubmitting(false);
-    }, 500);
+    } catch {
+      // leave the draft in place if submission fails
+    }
   };
 
   const handleStartEdit = (comment: Comment) => {
@@ -114,54 +78,24 @@ export function CommentSection({
   const handleSaveEdit = async (commentId: string) => {
     if (!editText.trim()) return;
 
-    const previousComments = comments;
-    setComments(
-      comments.map((c) =>
-        c._id === commentId ? { ...c, comment: editText } : c,
-      ),
-    );
-    setEditingCommentId(null);
-    setEditText("");
-
-    // UNCOMMENT TO FETCH FROM API
-    // try {
-    //   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/comments/${commentId}`, {
-    //     method: "PATCH",
-    //     credentials: "include",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ comment: editText }),
-    //   });
-    //   const json = await res.json();
-    //   if (json.status !== "success") throw new Error("Failed to update comment");
-    // } catch (err) {
-    //   setComments(previousComments);
-    // }
+    try {
+      await updateComment.mutateAsync({ commentId, comment: editText, materialId });
+    } finally {
+      setEditingCommentId(null);
+      setEditText("");
+    }
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    const previousComments = comments;
-    setComments(comments.filter((c) => c._id !== commentId));
-
-    // UNCOMMENT TO FETCH FROM API
-    // try {
-    //   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/comments/${commentId}`, {
-    //     method: "DELETE",
-    //     credentials: "include",
-    //   });
-    //   const json = await res.json();
-    //   if (json.status !== "success") throw new Error("Failed to delete comment");
-    // } catch (err) {
-    //   setComments(previousComments);
-    // }
+    await deleteComment.mutateAsync({ commentId, materialId });
   };
 
   const displayedComments = showAllComments ? comments : comments.slice(0, 3);
-  const totalComments = 5;
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold mb-4">Comments ({totalComments})</h3>
+        <h3 className="font-semibold mb-4">Comments ({comments.length})</h3>
 
         {isLoggedIn ? (
           <div className="mb-6 space-y-3">
@@ -170,14 +104,14 @@ export function CommentSection({
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="min-h-24"
-              disabled={isSubmitting}
+              disabled={createComment.isPending}
             />
             <Button
               onClick={handleSubmitComment}
-              disabled={!newComment.trim() || isSubmitting}
+              disabled={!newComment.trim() || createComment.isPending}
               size="sm"
             >
-              {isSubmitting ? "Posting..." : "Post Comment"}
+              {createComment.isPending ? "Posting..." : "Post Comment"}
             </Button>
           </div>
         ) : (
@@ -187,6 +121,9 @@ export function CommentSection({
             </p>
           </div>
         )}
+
+        {isLoading && <p className="text-sm text-muted-foreground">Loading comments...</p>}
+        {isError && <p className="text-sm text-destructive">Failed to load comments.</p>}
 
         {/* Comments List */}
         <div className="space-y-4">

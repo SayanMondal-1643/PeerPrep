@@ -12,7 +12,7 @@ export interface User {
 
 export interface ApiAuthResponse {
   status: string;
-  user: User;
+  data: User;
 }
 
 export interface SignupData {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,12 +14,25 @@ import { useToast } from "@/lib/hooks/use-toast";
 import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal";
 import { HierarchyNameModal } from "@/components/hierarchy-name-modal";
 import { type HierarchyOption } from "@/lib/hierarchy-types";
+import { useExams, useCreateExam, useUpdateExam, useDeleteExam } from "@/lib/hooks/use-exams";
 import {
-  fetchBranches,
-  fetchExams,
-  fetchSubjects,
-  fetchTopics,
-} from "@/lib/hierarchy-api";
+  useBranches,
+  useCreateBranch,
+  useUpdateBranch,
+  useDeleteBranch,
+} from "@/lib/hooks/use-branches";
+import {
+  useSubjects,
+  useCreateSubject,
+  useUpdateSubject,
+  useDeleteSubject,
+} from "@/lib/hooks/use-subjects";
+import {
+  useTopics,
+  useCreateTopic,
+  useUpdateTopic,
+  useDeleteTopic,
+} from "@/lib/hooks/use-topics";
 
 type NameModalType =
   | "addExam"
@@ -63,33 +76,26 @@ interface DeleteModalState {
 export default function StructureTab() {
   const { toast } = useToast();
 
-  const [exams, setExams] = useState<HierarchyOption[]>([]);
-  const [isLoadingExams, setIsLoadingExams] = useState(false);
-  const [branchesByExamId, setBranchesByExamId] = useState<
-    Record<string, HierarchyOption[]>
-  >({});
-  const [subjectsByBranchId, setSubjectsByBranchId] = useState<
-    Record<string, HierarchyOption[]>
-  >({});
-  const [topicsBySubjectId, setTopicsBySubjectId] = useState<
-    Record<string, HierarchyOption[]>
-  >({});
-  const [loadingBranchIds, setLoadingBranchIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const [loadingSubjectIds, setLoadingSubjectIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const [loadingTopicIds, setLoadingTopicIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const { data: exams, isLoading: isLoadingExams } = useExams();
+  const createExam = useCreateExam();
+  const updateExam = useUpdateExam();
+  const deleteExam = useDeleteExam();
+
+  const createBranch = useCreateBranch();
+  const updateBranch = useUpdateBranch();
+  const deleteBranch = useDeleteBranch();
+
+  const createSubject = useCreateSubject();
+  const updateSubject = useUpdateSubject();
+  const deleteSubject = useDeleteSubject();
+
+  const createTopic = useCreateTopic();
+  const updateTopic = useUpdateTopic();
+  const deleteTopic = useDeleteTopic();
+
   const [expandedExams, setExpandedExams] = useState<Set<string>>(new Set());
-  const [expandedBranches, setExpandedBranches] = useState<Set<string>>(
-    new Set(),
-  );
-  const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedBranches, setExpandedBranches] = useState<Set<string>>(new Set());
+  const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
 
   const [nameModal, setNameModal] = useState<NameModalState>({
     isOpen: false,
@@ -108,148 +114,40 @@ export default function StructureTab() {
     itemName: "",
   });
 
-  const loadExams = async () => {
-    setIsLoadingExams(true);
-
-    try {
-      const exams = await fetchExams();
-      setExams(exams);
-    } catch (error) {
-      console.error("Failed to fetch exams:", error);
-      toast({ title: "Error", description: "Unable to load exams right now." });
-    } finally {
-      setIsLoadingExams(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadExams();
-  }, []);
-
-  const toggleExamExpand = async (examId: string) => {
-    const nextExpandedExams = new Set(expandedExams);
-
-    if (nextExpandedExams.has(examId)) {
-      nextExpandedExams.delete(examId);
-      setExpandedExams(nextExpandedExams);
-      return;
-    }
-
-    nextExpandedExams.add(examId);
-    setExpandedExams(nextExpandedExams);
-
-    if (
-      branchesByExamId[examId] === undefined &&
-      !loadingBranchIds.has(examId)
-    ) {
-      setLoadingBranchIds((prev) => {
-        const next = new Set(prev);
+  const toggleExamExpand = (examId: string) => {
+    setExpandedExams((prev) => {
+      const next = new Set(prev);
+      if (next.has(examId)) {
+        next.delete(examId);
+      } else {
         next.add(examId);
-        return next;
-      });
-
-      try {
-        const branches = await fetchBranches(examId);
-
-        setBranchesByExamId((prev) => ({ ...prev, [examId]: branches }));
-      } catch (error) {
-        console.error("Failed to fetch branches:", error);
-        toast({
-          title: "Error",
-          description: "Unable to load branches right now.",
-        });
-      } finally {
-        setLoadingBranchIds((prev) => {
-          const next = new Set(prev);
-          next.delete(examId);
-          return next;
-        });
       }
-    }
+      return next;
+    });
   };
 
-  const toggleBranchExpand = async (branchId: string) => {
-    const nextExpandedBranches = new Set(expandedBranches);
-
-    if (nextExpandedBranches.has(branchId)) {
-      nextExpandedBranches.delete(branchId);
-      setExpandedBranches(nextExpandedBranches);
-      return;
-    }
-
-    nextExpandedBranches.add(branchId);
-    setExpandedBranches(nextExpandedBranches);
-
-    if (
-      subjectsByBranchId[branchId] === undefined &&
-      !loadingSubjectIds.has(branchId)
-    ) {
-      setLoadingSubjectIds((prev) => {
-        const next = new Set(prev);
+  const toggleBranchExpand = (branchId: string) => {
+    setExpandedBranches((prev) => {
+      const next = new Set(prev);
+      if (next.has(branchId)) {
+        next.delete(branchId);
+      } else {
         next.add(branchId);
-        return next;
-      });
-
-      try {
-        const data = await fetchSubjects(branchId);
-
-        setSubjectsByBranchId((prev) => ({ ...prev, [branchId]: data }));
-      } catch (error) {
-        console.error("Failed to fetch subjects:", error);
-        toast({
-          title: "Error",
-          description: "Unable to load subjects right now.",
-        });
-      } finally {
-        setLoadingSubjectIds((prev) => {
-          const next = new Set(prev);
-          next.delete(branchId);
-          return next;
-        });
       }
-    }
+      return next;
+    });
   };
 
-  const toggleSubjectExpand = async (subjectId: string) => {
-    const nextExpandedSubjects = new Set(expandedSubjects);
-
-    if (nextExpandedSubjects.has(subjectId)) {
-      nextExpandedSubjects.delete(subjectId);
-      setExpandedSubjects(nextExpandedSubjects);
-      return;
-    }
-
-    nextExpandedSubjects.add(subjectId);
-    setExpandedSubjects(nextExpandedSubjects);
-
-    if (
-      topicsBySubjectId[subjectId] === undefined &&
-      !loadingTopicIds.has(subjectId)
-    ) {
-      setLoadingTopicIds((prev) => {
-        const next = new Set(prev);
+  const toggleSubjectExpand = (subjectId: string) => {
+    setExpandedSubjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(subjectId)) {
+        next.delete(subjectId);
+      } else {
         next.add(subjectId);
-        return next;
-      });
-
-      try {
-        const data = await fetchTopics(subjectId);
-
-        setTopicsBySubjectId((prev) => ({ ...prev, [subjectId]: data }));
-      } catch (error) {
-        console.error("Failed to fetch topics:", error);
-        toast({
-          title: "Error",
-          description: "Unable to load topics right now.",
-        });
-      } finally {
-        setLoadingTopicIds((prev) => {
-          const next = new Set(prev);
-          next.delete(subjectId);
-          return next;
-        });
       }
-    }
+      return next;
+    });
   };
 
   const handleAddExam = () => {
@@ -453,544 +351,122 @@ export default function StructureTab() {
       return;
     }
 
-    if (nameModal.type === "addExam") {
-      try {
-        // UNCOMMENT TO POST TO API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/exams`, {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ name: trimmedName }),
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to add exam");
-
-        const json = {
-          status: "success",
-          data: { _id: `exam-${Date.now()}`, name: trimmedName },
-        };
-        setExams((prev) => [...prev, json.data]);
+    try {
+      if (nameModal.type === "addExam") {
+        await createExam.mutateAsync(trimmedName);
         toast({ title: "Success", description: "Exam added successfully" });
-      } catch (error) {
-        console.error("Failed to add exam:", error);
-        toast({
-          title: "Error",
-          description: "Unable to add the exam right now.",
-        });
-      }
-    } else if (nameModal.type === "addBranch" && nameModal.examId) {
-      try {
-        // UNCOMMENT TO POST TO API
-        // const response = await fetch(
-        //   `${API_BASE_URL}/api/v1/exams/${nameModal.examId}/branches`,
-        //   {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({ name: trimmedName }),
-        //   },
-        // );
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to add branch");
-
-        const json = {
-          status: "success",
-          data: { _id: `branch-${Date.now()}`, name: trimmedName },
-        };
-        setBranchesByExamId((prev) => ({
-          ...prev,
-          [nameModal.examId as string]: [
-            ...(prev[nameModal.examId as string] || []),
-            json.data,
-          ],
-        }));
+      } else if (nameModal.type === "addBranch" && nameModal.examId) {
+        await createBranch.mutateAsync({ examId: nameModal.examId, name: trimmedName });
         toast({ title: "Success", description: "Branch added successfully" });
-      } catch (error) {
-        console.error("Failed to add branch:", error);
-        toast({
-          title: "Error",
-          description: "Unable to add the branch right now.",
-        });
-      }
-    } else if (
-      nameModal.type === "addSubject" &&
-      nameModal.examId &&
-      nameModal.branchId
-    ) {
-      try {
-        // UNCOMMENT TO POST TO API
-        // const response = await fetch(
-        //   `${API_BASE_URL}/api/v1/branches/${nameModal.branchId}/subjects`,
-        //   {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({ name: trimmedName }),
-        //   },
-        // );
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to add subject");
-
-        const json = {
-          status: "success",
-          data: { _id: `subject-${Date.now()}`, name: trimmedName },
-        };
-        setSubjectsByBranchId((prev) => ({
-          ...prev,
-          [nameModal.branchId as string]: [
-            ...(prev[nameModal.branchId as string] || []),
-            json.data,
-          ],
-        }));
+      } else if (
+        nameModal.type === "addSubject" &&
+        nameModal.examId &&
+        nameModal.branchId
+      ) {
+        await createSubject.mutateAsync({ branchId: nameModal.branchId, name: trimmedName });
         toast({ title: "Success", description: "Subject added successfully" });
-      } catch (error) {
-        console.error("Failed to add subject:", error);
-        toast({
-          title: "Error",
-          description: "Unable to add the subject right now.",
-        });
-      }
-    } else if (
-      nameModal.type === "addTopic" &&
-      nameModal.examId &&
-      nameModal.branchId &&
-      nameModal.subjectId
-    ) {
-      try {
-        // UNCOMMENT TO POST TO API
-        // const response = await fetch(
-        //   `${API_BASE_URL}/api/v1/subjects/${nameModal.subjectId}/topics`,
-        //   {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({ name: trimmedName }),
-        //   },
-        // );
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to add topic");
-
-        const json = {
-          status: "success",
-          data: { _id: `topic-${Date.now()}`, name: trimmedName },
-        };
-        setTopicsBySubjectId((prev) => ({
-          ...prev,
-          [nameModal.subjectId as string]: [
-            ...(prev[nameModal.subjectId as string] || []),
-            json.data,
-          ],
-        }));
+      } else if (
+        nameModal.type === "addTopic" &&
+        nameModal.examId &&
+        nameModal.branchId &&
+        nameModal.subjectId
+      ) {
+        await createTopic.mutateAsync({ subjectId: nameModal.subjectId, name: trimmedName });
         toast({ title: "Success", description: "Topic added successfully" });
-      } catch (error) {
-        console.error("Failed to add topic:", error);
-        toast({
-          title: "Error",
-          description: "Unable to add the topic right now.",
-        });
-      }
-    } else if (nameModal.type === "editExam" && nameModal.examId) {
-      const previousName = nameModal.currentName || "";
-      const updatedExamId = nameModal.examId;
-
-      setExams((prev) =>
-        prev.map((exam) =>
-          exam._id === updatedExamId ? { ...exam, name: trimmedName } : exam,
-        ),
-      );
-
-      try {
-        // UNCOMMENT TO PATCH THE API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/exams/${updatedExamId}`, {
-        //   method: "PATCH",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ name: trimmedName }),
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to update exam");
-
-        const json = {
-          status: "success",
-          data: { _id: updatedExamId, name: trimmedName },
-        };
-        if (!json.data) {
-          throw new Error("Failed to update exam");
-        }
+      } else if (nameModal.type === "editExam" && nameModal.examId) {
+        await updateExam.mutateAsync({ examId: nameModal.examId, name: trimmedName });
         toast({ title: "Success", description: "Exam edited successfully" });
-      } catch (error) {
-        console.error("Failed to update exam:", error);
-        setExams((prev) =>
-          prev.map((exam) =>
-            exam._id === updatedExamId ? { ...exam, name: previousName } : exam,
-          ),
-        );
-        toast({
-          title: "Error",
-          description: "Unable to update the exam right now.",
+      } else if (
+        nameModal.type === "editBranch" &&
+        nameModal.examId &&
+        nameModal.branchId
+      ) {
+        await updateBranch.mutateAsync({
+          branchId: nameModal.branchId,
+          name: trimmedName,
+          examId: nameModal.examId,
         });
-      }
-    } else if (
-      nameModal.type === "editBranch" &&
-      nameModal.examId &&
-      nameModal.branchId
-    ) {
-      const previousName = nameModal.currentName || "";
-      const updatedExamId = nameModal.examId;
-      const updatedBranchId = nameModal.branchId;
-
-      setBranchesByExamId((prev) => ({
-        ...prev,
-        [updatedExamId]: (prev[updatedExamId] || []).map((branch) =>
-          branch._id === updatedBranchId
-            ? { ...branch, name: trimmedName }
-            : branch,
-        ),
-      }));
-
-      try {
-        // UNCOMMENT TO PATCH THE API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/branches/${updatedBranchId}`, {
-        //   method: "PATCH",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ name: trimmedName }),
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to update branch");
-
-        const json = {
-          status: "success",
-          data: { _id: updatedBranchId, name: trimmedName },
-        };
-        if (!json.data) {
-          throw new Error("Failed to update branch");
-        }
         toast({ title: "Success", description: "Branch edited successfully" });
-      } catch (error) {
-        console.error("Failed to update branch:", error);
-        setBranchesByExamId((prev) => ({
-          ...prev,
-          [updatedExamId]: (prev[updatedExamId] || []).map((branch) =>
-            branch._id === updatedBranchId
-              ? { ...branch, name: previousName }
-              : branch,
-          ),
-        }));
-        toast({
-          title: "Error",
-          description: "Unable to update the branch right now.",
+      } else if (
+        nameModal.type === "editSubject" &&
+        nameModal.examId &&
+        nameModal.branchId &&
+        nameModal.subjectId
+      ) {
+        await updateSubject.mutateAsync({
+          subjectId: nameModal.subjectId,
+          name: trimmedName,
+          branchId: nameModal.branchId,
         });
-      }
-    } else if (
-      nameModal.type === "editSubject" &&
-      nameModal.examId &&
-      nameModal.branchId &&
-      nameModal.subjectId
-    ) {
-      const previousName = nameModal.currentName || "";
-      const updatedBranchId = nameModal.branchId;
-      const updatedSubjectId = nameModal.subjectId;
-
-      setSubjectsByBranchId((prev) => ({
-        ...prev,
-        [updatedBranchId]: (prev[updatedBranchId] || []).map((subject) =>
-          subject._id === updatedSubjectId
-            ? { ...subject, name: trimmedName }
-            : subject,
-        ),
-      }));
-
-      try {
-        // UNCOMMENT TO PATCH THE API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/subjects/${updatedSubjectId}`, {
-        //   method: "PATCH",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ name: trimmedName }),
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to update subject");
-
-        const json = {
-          status: "success",
-          data: { _id: updatedSubjectId, name: trimmedName },
-        };
-        if (!json.data) {
-          throw new Error("Failed to update subject");
-        }
-        toast({
-          title: "Success",
-          description: "Subject edited successfully",
+        toast({ title: "Success", description: "Subject edited successfully" });
+      } else if (
+        nameModal.type === "editTopic" &&
+        nameModal.examId &&
+        nameModal.branchId &&
+        nameModal.subjectId &&
+        nameModal.topicId
+      ) {
+        await updateTopic.mutateAsync({
+          topicId: nameModal.topicId,
+          name: trimmedName,
+          subjectId: nameModal.subjectId,
         });
-      } catch (error) {
-        console.error("Failed to update subject:", error);
-        setSubjectsByBranchId((prev) => ({
-          ...prev,
-          [updatedBranchId]: (prev[updatedBranchId] || []).map((subject) =>
-            subject._id === updatedSubjectId
-              ? { ...subject, name: previousName }
-              : subject,
-          ),
-        }));
-        toast({
-          title: "Error",
-          description: "Unable to update the subject right now.",
-        });
-      }
-    } else if (
-      nameModal.type === "editTopic" &&
-      nameModal.examId &&
-      nameModal.branchId &&
-      nameModal.subjectId &&
-      nameModal.topicId
-    ) {
-      const previousName = nameModal.currentName || "";
-      const updatedSubjectId = nameModal.subjectId;
-      const updatedTopicId = nameModal.topicId;
-
-      setTopicsBySubjectId((prev) => ({
-        ...prev,
-        [updatedSubjectId]: (prev[updatedSubjectId] || []).map((topic) =>
-          topic._id === updatedTopicId
-            ? { ...topic, name: trimmedName }
-            : topic,
-        ),
-      }));
-
-      try {
-        // UNCOMMENT TO PATCH THE API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/topics/${updatedTopicId}`, {
-        //   method: "PATCH",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ name: trimmedName }),
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to update topic");
-
-        const json = {
-          status: "success",
-          data: { _id: updatedTopicId, name: trimmedName },
-        };
-        if (!json.data) {
-          throw new Error("Failed to update topic");
-        }
         toast({ title: "Success", description: "Topic edited successfully" });
-      } catch (error) {
-        console.error("Failed to update topic:", error);
-        setTopicsBySubjectId((prev) => ({
-          ...prev,
-          [updatedSubjectId]: (prev[updatedSubjectId] || []).map((topic) =>
-            topic._id === updatedTopicId
-              ? { ...topic, name: previousName }
-              : topic,
-          ),
-        }));
-        toast({
-          title: "Error",
-          description: "Unable to update the topic right now.",
-        });
       }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Unable to save changes right now.",
+      });
     }
 
     setNameModal((prev) => ({ ...prev, isOpen: false }));
   };
 
   const handleDeleteConfirm = async () => {
-    if (deleteModal.type === "exam" && deleteModal.examId) {
-      const previousExams = exams;
-      const previousBranches = branchesByExamId[deleteModal.examId] || [];
-      const previousExpandedExams = new Set(expandedExams);
-
-      setExams((prev) =>
-        prev.filter((exam) => exam._id !== deleteModal.examId),
-      );
-      setBranchesByExamId((prev) => {
-        const next = { ...prev };
-        delete next[deleteModal.examId as string];
-        return next;
-      });
-      setExpandedExams((prev) => {
-        const next = new Set(prev);
-        next.delete(deleteModal.examId as string);
-        return next;
-      });
-
-      try {
-        // UNCOMMENT TO DELETE FROM API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/exams/${deleteModal.examId}`, {
-        //   method: "DELETE",
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to delete exam");
-
-        const json = { status: "success", data: null };
-        if (json.status !== "success") {
-          throw new Error("Failed to delete exam");
-        }
+    try {
+      if (deleteModal.type === "exam" && deleteModal.examId) {
+        await deleteExam.mutateAsync(deleteModal.examId);
         toast({ title: "Success", description: "Exam deleted successfully" });
-      } catch (error) {
-        console.error("Failed to delete exam:", error);
-        setExams(previousExams);
-        setBranchesByExamId((prev) => ({
-          ...prev,
-          [deleteModal.examId as string]: previousBranches,
-        }));
-        setExpandedExams(previousExpandedExams);
-        toast({
-          title: "Error",
-          description: "Unable to delete the exam right now.",
+      } else if (
+        deleteModal.type === "branch" &&
+        deleteModal.examId &&
+        deleteModal.branchId
+      ) {
+        await deleteBranch.mutateAsync({
+          branchId: deleteModal.branchId,
+          examId: deleteModal.examId,
         });
-      }
-    } else if (
-      deleteModal.type === "branch" &&
-      deleteModal.examId &&
-      deleteModal.branchId
-    ) {
-      const previousBranches = branchesByExamId[deleteModal.examId] || [];
-      const previousExpandedBranches = new Set(expandedBranches);
-      const previousSubjects = subjectsByBranchId[deleteModal.branchId] || [];
-
-      setBranchesByExamId((prev) => ({
-        ...prev,
-        [deleteModal.examId as string]: (
-          prev[deleteModal.examId as string] || []
-        ).filter((branch) => branch._id !== deleteModal.branchId),
-      }));
-      setSubjectsByBranchId((prev) => {
-        const next = { ...prev };
-        delete next[deleteModal.branchId as string];
-        return next;
-      });
-      setExpandedBranches((prev) => {
-        const next = new Set(prev);
-        next.delete(deleteModal.branchId as string);
-        return next;
-      });
-
-      try {
-        // UNCOMMENT TO DELETE FROM API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/branches/${deleteModal.branchId}`, {
-        //   method: "DELETE",
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to delete branch");
-
-        // MOCK DATA - TO BE REMOVED
-        const json = { status: "success", data: null };
-
-        if (json.status !== "success") {
-          throw new Error("Failed to delete branch");
-        }
         toast({ title: "Success", description: "Branch deleted successfully" });
-      } catch (error) {
-        console.error("Failed to delete branch:", error);
-        setBranchesByExamId((prev) => ({
-          ...prev,
-          [deleteModal.examId as string]: previousBranches,
-        }));
-        setSubjectsByBranchId((prev) => ({
-          ...prev,
-          [deleteModal.branchId as string]: previousSubjects,
-        }));
-        setExpandedBranches(previousExpandedBranches);
-        toast({
-          title: "Error",
-          description: "Unable to delete the branch right now.",
+      } else if (
+        deleteModal.type === "subject" &&
+        deleteModal.examId &&
+        deleteModal.branchId &&
+        deleteModal.subjectId
+      ) {
+        await deleteSubject.mutateAsync({
+          subjectId: deleteModal.subjectId,
+          branchId: deleteModal.branchId,
         });
-      }
-    } else if (
-      deleteModal.type === "subject" &&
-      deleteModal.examId &&
-      deleteModal.branchId &&
-      deleteModal.subjectId
-    ) {
-      const previousSubjects = subjectsByBranchId[deleteModal.branchId] || [];
-      const previousExpandedSubjects = new Set(expandedSubjects);
-      const previousTopics = topicsBySubjectId[deleteModal.subjectId] || [];
-
-      setSubjectsByBranchId((prev) => ({
-        ...prev,
-        [deleteModal.branchId as string]: (
-          prev[deleteModal.branchId as string] || []
-        ).filter((subject) => subject._id !== deleteModal.subjectId),
-      }));
-      setTopicsBySubjectId((prev) => {
-        const next = { ...prev };
-        delete next[deleteModal.subjectId as string];
-        return next;
-      });
-      setExpandedSubjects((prev) => {
-        const next = new Set(prev);
-        next.delete(deleteModal.subjectId as string);
-        return next;
-      });
-
-      try {
-        // UNCOMMENT TO DELETE FROM API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/subjects/${deleteModal.subjectId}`, {
-        //   method: "DELETE",
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to delete subject");
-
-        const json = { status: "success", data: null };
-        if (json.status !== "success") {
-          throw new Error("Failed to delete subject");
-        }
-        toast({
-          title: "Success",
-          description: "Subject deleted successfully",
+        toast({ title: "Success", description: "Subject deleted successfully" });
+      } else if (
+        deleteModal.type === "topic" &&
+        deleteModal.examId &&
+        deleteModal.branchId &&
+        deleteModal.subjectId &&
+        deleteModal.topicId
+      ) {
+        await deleteTopic.mutateAsync({
+          topicId: deleteModal.topicId,
+          subjectId: deleteModal.subjectId,
         });
-      } catch (error) {
-        console.error("Failed to delete subject:", error);
-        setSubjectsByBranchId((prev) => ({
-          ...prev,
-          [deleteModal.branchId as string]: previousSubjects,
-        }));
-        setTopicsBySubjectId((prev) => ({
-          ...prev,
-          [deleteModal.subjectId as string]: previousTopics,
-        }));
-        setExpandedSubjects(previousExpandedSubjects);
-        toast({
-          title: "Error",
-          description: "Unable to delete the subject right now.",
-        });
-      }
-    } else if (
-      deleteModal.type === "topic" &&
-      deleteModal.examId &&
-      deleteModal.branchId &&
-      deleteModal.subjectId &&
-      deleteModal.topicId
-    ) {
-      const previousTopics = topicsBySubjectId[deleteModal.subjectId] || [];
-
-      setTopicsBySubjectId((prev) => ({
-        ...prev,
-        [deleteModal.subjectId as string]: (
-          prev[deleteModal.subjectId as string] || []
-        ).filter((topic) => topic._id !== deleteModal.topicId),
-      }));
-
-      try {
-        // UNCOMMENT TO DELETE FROM API
-        // const response = await fetch(`${API_BASE_URL}/api/v1/topics/${deleteModal.topicId}`, {
-        //   method: "DELETE",
-        // });
-        // const json = await response.json();
-        // if (!response.ok) throw new Error(json?.message || "Failed to delete topic");
-
-        const json = { status: "success", data: null };
-        if (json.status !== "success") {
-          throw new Error("Failed to delete topic");
-        }
         toast({ title: "Success", description: "Topic deleted successfully" });
-      } catch (error) {
-        console.error("Failed to delete topic:", error);
-        setTopicsBySubjectId((prev) => ({
-          ...prev,
-          [deleteModal.subjectId as string]: previousTopics,
-        }));
-        toast({
-          title: "Error",
-          description: "Unable to delete the topic right now.",
-        });
       }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Unable to delete right now.",
+      });
     }
 
     setDeleteModal((prev) => ({ ...prev, isOpen: false }));
@@ -1016,400 +492,28 @@ export default function StructureTab() {
               </div>
             </div>
           ) : (
-            exams.map((exam) => (
-              <div
+            (exams ?? []).map((exam) => (
+              <ExamRow
                 key={exam._id}
-                className="border border-border rounded-lg overflow-hidden"
-              >
-                <div
-                  className="bg-background hover:bg-muted/50 transition-colors p-4 flex items-center justify-between group cursor-pointer"
-                  onClick={() => toggleExamExpand(exam._id)}
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="shrink-0">
-                      {expandedExams.has(exam._id) ? (
-                        <ChevronDown className="h-5 w-5" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg">{exam.name}</h3>
-                    </div>
-                  </div>
-
-                  <div
-                    className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleAddBranch(exam._id, exam.name)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Add Branch</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditExam(exam)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Edit Exam</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() =>
-                              handleDeleteExam(exam._id, exam.name)
-                            }
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete Exam</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-
-                {expandedExams.has(exam._id) && (
-                  <div className="border-t border-border bg-muted/30">
-                    {loadingBranchIds.has(exam._id) ? (
-                      <div className="border-b border-border last:border-b-0">
-                        <div className="bg-background p-4 ml-6 flex items-center justify-between cursor-not-allowed opacity-70">
-                          <span className="text-sm text-muted-foreground">
-                            Loading...
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      (branchesByExamId[exam._id] || []).map((branch) => (
-                        <div
-                          key={branch._id}
-                          className="border-b border-border last:border-b-0"
-                        >
-                          <div
-                            className="bg-background hover:bg-muted/50 transition-colors p-4 ml-6 flex items-center justify-between group cursor-pointer"
-                            onClick={() => toggleBranchExpand(branch._id)}
-                          >
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="shrink-0">
-                                {expandedBranches.has(branch._id) ? (
-                                  <ChevronDown className="h-5 w-5" />
-                                ) : (
-                                  <ChevronRight className="h-5 w-5" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold">{branch.name}</h4>
-                              </div>
-                            </div>
-
-                            <div
-                              className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        handleAddSubject(
-                                          exam._id,
-                                          branch._id,
-                                          branch.name,
-                                          exam.name,
-                                        )
-                                      }
-                                    >
-                                      <Plus className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Add Subject</TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        handleEditBranch(branch, exam._id)
-                                      }
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Edit Branch</TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        handleDeleteBranch(
-                                          exam._id,
-                                          branch._id,
-                                          branch.name,
-                                        )
-                                      }
-                                    >
-                                      <Trash2 className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Delete Branch</TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </div>
-
-                          {expandedBranches.has(branch._id) && (
-                            <div className="bg-muted/20">
-                              {loadingSubjectIds.has(branch._id) ? (
-                                <div className="border-b border-border last:border-b-0">
-                                  <div className="bg-background p-4 ml-12 flex items-center justify-between cursor-not-allowed opacity-70">
-                                    <span className="text-sm text-muted-foreground">
-                                      Loading...
-                                    </span>
-                                  </div>
-                                </div>
-                              ) : (
-                                (subjectsByBranchId[branch._id] || []).map(
-                                  (subject) => (
-                                    <div
-                                      key={subject._id}
-                                      className="border-b border-border last:border-b-0"
-                                    >
-                                      <div
-                                        className="bg-background hover:bg-muted/50 transition-colors p-4 ml-12 flex items-center justify-between group cursor-pointer"
-                                        onClick={() =>
-                                          toggleSubjectExpand(subject._id)
-                                        }
-                                      >
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                          <div className="shrink-0">
-                                            {expandedSubjects.has(
-                                              subject._id,
-                                            ) ? (
-                                              <ChevronDown className="h-5 w-5" />
-                                            ) : (
-                                              <ChevronRight className="h-5 w-5" />
-                                            )}
-                                          </div>
-                                          <div className="flex-1 min-w-0">
-                                            <h5 className="font-semibold">
-                                              {subject.name}
-                                            </h5>
-                                          </div>
-                                        </div>
-
-                                        <div
-                                          className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                          onClick={(event) =>
-                                            event.stopPropagation()
-                                          }
-                                        >
-                                          <TooltipProvider>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <Button
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  onClick={() =>
-                                                    handleAddTopic(
-                                                      exam._id,
-                                                      branch._id,
-                                                      subject._id,
-                                                      exam.name,
-                                                      branch.name,
-                                                      subject.name,
-                                                    )
-                                                  }
-                                                >
-                                                  <Plus className="h-4 w-4" />
-                                                </Button>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                Add Topic
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </TooltipProvider>
-
-                                          <TooltipProvider>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <Button
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  onClick={() =>
-                                                    handleEditSubject(
-                                                      subject,
-                                                      exam._id,
-                                                      branch._id,
-                                                    )
-                                                  }
-                                                >
-                                                  <Edit className="h-4 w-4" />
-                                                </Button>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                Edit Subject
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </TooltipProvider>
-
-                                          <TooltipProvider>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <Button
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  onClick={() =>
-                                                    handleDeleteSubject(
-                                                      exam._id,
-                                                      branch._id,
-                                                      subject._id,
-                                                      subject.name,
-                                                    )
-                                                  }
-                                                >
-                                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                                </Button>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                Delete Subject
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </TooltipProvider>
-                                        </div>
-                                      </div>
-
-                                      {expandedSubjects.has(subject._id) && (
-                                        <div className="bg-muted/10">
-                                          {loadingTopicIds.has(subject._id) ? (
-                                            <div className="border-b border-border last:border-b-0">
-                                              <div className="bg-background p-4 ml-18 flex items-center justify-between cursor-not-allowed opacity-70">
-                                                <span className="text-sm text-muted-foreground">
-                                                  Loading...
-                                                </span>
-                                              </div>
-                                            </div>
-                                          ) : (
-                                            (
-                                              topicsBySubjectId[subject._id] ||
-                                              []
-                                            ).map((topic) => (
-                                              <div
-                                                key={topic._id}
-                                                className="border-b border-border last:border-b-0"
-                                              >
-                                                <div className="bg-background hover:bg-muted/50 transition-colors p-4 ml-18 flex items-center justify-between group">
-                                                  <div className="flex-1 min-w-0">
-                                                    <h6 className="font-medium">
-                                                      {topic.name}
-                                                    </h6>
-                                                  </div>
-
-                                                  <div
-                                                    className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={(event) =>
-                                                      event.stopPropagation()
-                                                    }
-                                                  >
-                                                    <TooltipProvider>
-                                                      <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                          <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() =>
-                                                              handleEditTopic(
-                                                                topic,
-                                                                exam._id,
-                                                                branch._id,
-                                                                subject._id,
-                                                              )
-                                                            }
-                                                          >
-                                                            <Edit className="h-4 w-4" />
-                                                          </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          Edit Topic
-                                                        </TooltipContent>
-                                                      </Tooltip>
-                                                    </TooltipProvider>
-
-                                                    <TooltipProvider>
-                                                      <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                          <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={() =>
-                                                              handleDeleteTopic(
-                                                                exam._id,
-                                                                branch._id,
-                                                                subject._id,
-                                                                topic._id,
-                                                                topic.name,
-                                                              )
-                                                            }
-                                                          >
-                                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                                          </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          Delete Topic
-                                                        </TooltipContent>
-                                                      </Tooltip>
-                                                    </TooltipProvider>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            ))
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  ),
-                                )
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
+                exam={exam}
+                isExpanded={expandedExams.has(exam._id)}
+                onToggle={() => toggleExamExpand(exam._id)}
+                onAddBranch={handleAddBranch}
+                onEditExam={handleEditExam}
+                onDeleteExam={handleDeleteExam}
+                expandedBranches={expandedBranches}
+                onToggleBranch={toggleBranchExpand}
+                onAddSubject={handleAddSubject}
+                onEditBranch={handleEditBranch}
+                onDeleteBranch={handleDeleteBranch}
+                expandedSubjects={expandedSubjects}
+                onToggleSubject={toggleSubjectExpand}
+                onAddTopic={handleAddTopic}
+                onEditSubject={handleEditSubject}
+                onDeleteSubject={handleDeleteSubject}
+                onEditTopic={handleEditTopic}
+                onDeleteTopic={handleDeleteTopic}
+              />
             ))
           )}
         </div>
@@ -1434,5 +538,520 @@ export default function StructureTab() {
         itemName={deleteModal.itemName}
       />
     </Card>
+  );
+}
+
+interface ExamRowProps {
+  exam: HierarchyOption;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onAddBranch: (examId: string, examName: string) => void;
+  onEditExam: (exam: HierarchyOption) => void;
+  onDeleteExam: (examId: string, examName: string) => void;
+  expandedBranches: Set<string>;
+  onToggleBranch: (branchId: string) => void;
+  onAddSubject: (
+    examId: string,
+    branchId: string,
+    branchName: string,
+    examName: string,
+  ) => void;
+  onEditBranch: (branch: HierarchyOption, examId: string) => void;
+  onDeleteBranch: (examId: string, branchId: string, branchName: string) => void;
+  expandedSubjects: Set<string>;
+  onToggleSubject: (subjectId: string) => void;
+  onAddTopic: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    examName: string,
+    branchName: string,
+    subjectName: string,
+  ) => void;
+  onEditSubject: (subject: HierarchyOption, examId: string, branchId: string) => void;
+  onDeleteSubject: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    subjectName: string,
+  ) => void;
+  onEditTopic: (
+    topic: HierarchyOption,
+    examId: string,
+    branchId: string,
+    subjectId: string,
+  ) => void;
+  onDeleteTopic: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    topicId: string,
+    topicName: string,
+  ) => void;
+}
+
+function ExamRow({
+  exam,
+  isExpanded,
+  onToggle,
+  onAddBranch,
+  onEditExam,
+  onDeleteExam,
+  expandedBranches,
+  onToggleBranch,
+  onAddSubject,
+  onEditBranch,
+  onDeleteBranch,
+  expandedSubjects,
+  onToggleSubject,
+  onAddTopic,
+  onEditSubject,
+  onDeleteSubject,
+  onEditTopic,
+  onDeleteTopic,
+}: ExamRowProps) {
+  const { data: branchesResponse, isLoading } = useBranches(isExpanded ? exam._id : undefined);
+  const branches = branchesResponse?.data;
+
+  return (
+    <div className="border border-border rounded-lg overflow-hidden">
+      <div
+        className="bg-background hover:bg-muted/50 transition-colors p-4 flex items-center justify-between group cursor-pointer"
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="shrink-0">
+            {isExpanded ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-lg">{exam.name}</h3>
+          </div>
+        </div>
+
+        <div
+          className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" onClick={() => onAddBranch(exam._id, exam.name)}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Branch</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" onClick={() => onEditExam(exam)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit Exam</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onDeleteExam(exam._id, exam.name)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete Exam</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="border-t border-border bg-muted/30">
+          {isLoading ? (
+            <div className="border-b border-border last:border-b-0">
+              <div className="bg-background p-4 ml-6 flex items-center justify-between cursor-not-allowed opacity-70">
+                <span className="text-sm text-muted-foreground">Loading...</span>
+              </div>
+            </div>
+          ) : (
+            (branches ?? []).map((branch) => (
+              <BranchRow
+                key={branch._id}
+                exam={exam}
+                branch={branch}
+                isExpanded={expandedBranches.has(branch._id)}
+                onToggle={() => onToggleBranch(branch._id)}
+                onAddSubject={onAddSubject}
+                onEditBranch={onEditBranch}
+                onDeleteBranch={onDeleteBranch}
+                expandedSubjects={expandedSubjects}
+                onToggleSubject={onToggleSubject}
+                onAddTopic={onAddTopic}
+                onEditSubject={onEditSubject}
+                onDeleteSubject={onDeleteSubject}
+                onEditTopic={onEditTopic}
+                onDeleteTopic={onDeleteTopic}
+              />
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface BranchRowProps {
+  exam: HierarchyOption;
+  branch: HierarchyOption;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onAddSubject: (
+    examId: string,
+    branchId: string,
+    branchName: string,
+    examName: string,
+  ) => void;
+  onEditBranch: (branch: HierarchyOption, examId: string) => void;
+  onDeleteBranch: (examId: string, branchId: string, branchName: string) => void;
+  expandedSubjects: Set<string>;
+  onToggleSubject: (subjectId: string) => void;
+  onAddTopic: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    examName: string,
+    branchName: string,
+    subjectName: string,
+  ) => void;
+  onEditSubject: (subject: HierarchyOption, examId: string, branchId: string) => void;
+  onDeleteSubject: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    subjectName: string,
+  ) => void;
+  onEditTopic: (
+    topic: HierarchyOption,
+    examId: string,
+    branchId: string,
+    subjectId: string,
+  ) => void;
+  onDeleteTopic: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    topicId: string,
+    topicName: string,
+  ) => void;
+}
+
+function BranchRow({
+  exam,
+  branch,
+  isExpanded,
+  onToggle,
+  onAddSubject,
+  onEditBranch,
+  onDeleteBranch,
+  expandedSubjects,
+  onToggleSubject,
+  onAddTopic,
+  onEditSubject,
+  onDeleteSubject,
+  onEditTopic,
+  onDeleteTopic,
+}: BranchRowProps) {
+  const { data: subjectsResponse, isLoading } = useSubjects(isExpanded ? branch._id : undefined);
+  const subjects = subjectsResponse?.data;
+
+  return (
+    <div className="border-b border-border last:border-b-0">
+      <div
+        className="bg-background hover:bg-muted/50 transition-colors p-4 ml-6 flex items-center justify-between group cursor-pointer"
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="shrink-0">
+            {isExpanded ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold">{branch.name}</h4>
+          </div>
+        </div>
+
+        <div
+          className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onAddSubject(exam._id, branch._id, branch.name, exam.name)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Subject</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" onClick={() => onEditBranch(branch, exam._id)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit Branch</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onDeleteBranch(exam._id, branch._id, branch.name)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete Branch</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="bg-muted/20">
+          {isLoading ? (
+            <div className="border-b border-border last:border-b-0">
+              <div className="bg-background p-4 ml-12 flex items-center justify-between cursor-not-allowed opacity-70">
+                <span className="text-sm text-muted-foreground">Loading...</span>
+              </div>
+            </div>
+          ) : (
+            (subjects ?? []).map((subject) => (
+              <SubjectRow
+                key={subject._id}
+                exam={exam}
+                branch={branch}
+                subject={subject}
+                isExpanded={expandedSubjects.has(subject._id)}
+                onToggle={() => onToggleSubject(subject._id)}
+                onAddTopic={onAddTopic}
+                onEditSubject={onEditSubject}
+                onDeleteSubject={onDeleteSubject}
+                onEditTopic={onEditTopic}
+                onDeleteTopic={onDeleteTopic}
+              />
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface SubjectRowProps {
+  exam: HierarchyOption;
+  branch: HierarchyOption;
+  subject: HierarchyOption;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onAddTopic: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    examName: string,
+    branchName: string,
+    subjectName: string,
+  ) => void;
+  onEditSubject: (subject: HierarchyOption, examId: string, branchId: string) => void;
+  onDeleteSubject: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    subjectName: string,
+  ) => void;
+  onEditTopic: (
+    topic: HierarchyOption,
+    examId: string,
+    branchId: string,
+    subjectId: string,
+  ) => void;
+  onDeleteTopic: (
+    examId: string,
+    branchId: string,
+    subjectId: string,
+    topicId: string,
+    topicName: string,
+  ) => void;
+}
+
+function SubjectRow({
+  exam,
+  branch,
+  subject,
+  isExpanded,
+  onToggle,
+  onAddTopic,
+  onEditSubject,
+  onDeleteSubject,
+  onEditTopic,
+  onDeleteTopic,
+}: SubjectRowProps) {
+  const { data: topicsResponse, isLoading } = useTopics(isExpanded ? subject._id : undefined);
+  const topics = topicsResponse?.data;
+
+  return (
+    <div className="border-b border-border last:border-b-0">
+      <div
+        className="bg-background hover:bg-muted/50 transition-colors p-4 ml-12 flex items-center justify-between group cursor-pointer"
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="shrink-0">
+            {isExpanded ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h5 className="font-semibold">{subject.name}</h5>
+          </div>
+        </div>
+
+        <div
+          className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    onAddTopic(exam._id, branch._id, subject._id, exam.name, branch.name, subject.name)
+                  }
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Topic</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onEditSubject(subject, exam._id, branch._id)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit Subject</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onDeleteSubject(exam._id, branch._id, subject._id, subject.name)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete Subject</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="bg-muted/10">
+          {isLoading ? (
+            <div className="border-b border-border last:border-b-0">
+              <div className="bg-background p-4 ml-18 flex items-center justify-between cursor-not-allowed opacity-70">
+                <span className="text-sm text-muted-foreground">Loading...</span>
+              </div>
+            </div>
+          ) : (
+            (topics ?? []).map((topic) => (
+              <div key={topic._id} className="border-b border-border last:border-b-0">
+                <div className="bg-background hover:bg-muted/50 transition-colors p-4 ml-18 flex items-center justify-between group">
+                  <div className="flex-1 min-w-0">
+                    <h6 className="font-medium">{topic.name}</h6>
+                  </div>
+
+                  <div
+                    className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onEditTopic(topic, exam._id, branch._id, subject._id)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Edit Topic</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              onDeleteTopic(exam._id, branch._id, subject._id, topic._id, topic.name)
+                            }
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete Topic</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
   );
 }

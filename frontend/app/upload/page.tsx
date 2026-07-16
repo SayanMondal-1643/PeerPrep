@@ -25,8 +25,9 @@ import {
 } from "@/lib/hierarchy-api";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { useCreateMaterial } from "@/lib/hooks/use-materials";
 
-import type { HierarchyOption } from "@/lib/mock-data";
+import type { HierarchyOption } from "@/lib/hierarchy-types";
 
 export default function UploadPage() {
   const [exams, setExams] = useState<HierarchyOption[]>([]);
@@ -49,6 +50,7 @@ export default function UploadPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useRequireAuth();
+  const createMaterial = useCreateMaterial();
 
   useEffect(() => {
     const loadExams = async () => {
@@ -229,27 +231,12 @@ export default function UploadPage() {
     try {
       const fileUrl = await uploadToCloudinary(selectedFile);
 
-      // const response = await fetch(
-      //   `${API_BASE_URL}/api/v1/topics/${selectedTopicId}/materials`,
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       // Authorization: `Bearer ${token}`,   // ← UNCOMMENT THIS AFTER IMPLEMENTING AUTHENTICATION
-      //     },
-      //     body: JSON.stringify({
-      //       title,
-      //       description,
-      //       fileUrl,
-      //     }),
-      //   }
-      // );
-
-      // const json = await response.json();
-
-      // if (!response.ok) {
-      //   throw new Error(json?.message || "Failed to upload material");
-      // }
+      await createMaterial.mutateAsync({
+        topicId: selectedTopicId,
+        title,
+        description,
+        fileUrl,
+      });
 
       alert("Material uploaded successfully!");
 

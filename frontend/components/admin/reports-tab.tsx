@@ -25,75 +25,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useEffect, useMemo, useState } from "react";
-import { mockReportsResponse } from "@/lib/mock-data";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-
-interface Reporter {
-  _id: string;
-  name: string;
-  role: "student" | "teacher";
-  verificationStatus?: "pending" | "verified" | "rejected";
-}
-
-interface Report {
-  _id: string;
-  materialId: string;
-  materialTitle: string;
-  reporterId: Reporter;
-  reportReason: string;
-  comment: string;
-  reportDate: string;
-  status: "pending" | "resolved" | "dismissed";
-}
-
-interface ApiReportsResponse {
-  status: string;
-  results: number;
-  data: Report[];
-}
+import { useMemo, useState } from "react";
+import { useReports, useUpdateReportStatus } from "@/lib/hooks/use-reports";
+import { Report } from "@/lib/report-types";
 
 export default function ReportsTab() {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, isError, refetch } = useReports();
+  const updateReportStatus = useUpdateReportStatus();
+
   const [statusFilter, setStatusFilter] = useState("all");
-  const [pendingStatusIds, setPendingStatusIds] = useState<
-    Record<string, boolean>
-  >({});
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
 
-  const loadReports = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await new Promise((resolve) => window.setTimeout(resolve, 500));
-
-      // UNCOMMENT TO FETCH FROM API
-      // const response = await fetch(`${API_BASE_URL}/api/v1/reports`);
-      // if (!response.ok) {
-      //   throw new Error("Failed to load reports.");
-      // }
-      // const json: ApiReportsResponse = await response.json();
-
-      const json = mockReportsResponse as ApiReportsResponse;
-      setReports(json.data);
-    } catch (error) {
-      console.error("Failed to fetch reports:", error);
-      setError(
-        error instanceof Error ? error.message : "Unable to load reports.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadReports();
-  }, []);
+  const reports = data?.data ?? [];
 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
@@ -102,38 +45,15 @@ export default function ReportsTab() {
   }, [reports, statusFilter]);
 
   const updateStatus = async (report: Report, nextStatus: Report["status"]) => {
-    const previousStatus = report.status;
-
-    setReports((prev) =>
-      prev.map((item) =>
-        item._id === report._id ? { ...item, status: nextStatus } : item,
-      ),
-    );
-    setPendingStatusIds((prev) => ({ ...prev, [report._id]: true }));
     setRowErrors((prev) => ({ ...prev, [report._id]: "" }));
 
     try {
-      // UNCOMMENT TO FETCH FROM API
-      // const response = await fetch(`${API_BASE_URL}/api/v1/reports/${report._id}`, {
-      //   method: "PATCH",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ status: nextStatus }),
-      // });
-      // if (!response.ok) {
-      //   throw new Error("Failed to update report status.");
-      // }
+      await updateReportStatus.mutateAsync({ reportId: report._id, status: nextStatus });
     } catch {
-      setReports((prev) =>
-        prev.map((item) =>
-          item._id === report._id ? { ...item, status: previousStatus } : item,
-        ),
-      );
       setRowErrors((prev) => ({
         ...prev,
         [report._id]: "Unable to update report status.",
       }));
-    } finally {
-      setPendingStatusIds((prev) => ({ ...prev, [report._id]: false }));
     }
   };
 
@@ -153,13 +73,13 @@ export default function ReportsTab() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Card>
         <div className="p-6 space-y-4">
           <h2 className="text-xl font-semibold">Report Management</h2>
-          <p className="text-sm text-red-600">{error}</p>
-          <Button onClick={() => void loadReports()}>Retry</Button>
+          <p className="text-sm text-red-600">Unable to load reports.</p>
+          <Button onClick={() => void refetch()}>Retry</Button>
         </div>
       </Card>
     );
@@ -179,7 +99,7 @@ export default function ReportsTab() {
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
             <option value="resolved">Resolved</option>
-            <option value="dismissed">Dismissed</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
       </div>
@@ -197,7 +117,9 @@ export default function ReportsTab() {
           </TableHeader>
           <TableBody>
             {filteredReports.map((report) => {
-              const isPendingStatus = Boolean(pendingStatusIds[report._id]);
+              const isPendingStatus =
+                updateReportStatus.isPending &&
+                updateReportStatus.variables?.reportId === report._id;
               const errorMessage = rowErrors[report._id];
 
               return (
@@ -276,10 +198,10 @@ export default function ReportsTab() {
                             className="h-8 px-3 border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:cursor-pointer"
                             disabled={isPendingStatus}
                             onClick={() =>
-                              void updateStatus(report, "dismissed")
+                              void updateStatus(report, "rejected")
                             }
                           >
-                            Dismiss
+                            Reject
                           </Button>
                         </div>
                       ) : (
@@ -294,7 +216,7 @@ export default function ReportsTab() {
                           >
                             {report.status === "resolved"
                               ? "Resolved"
-                              : "Dismissed"}
+                              : "Rejected"}
                           </Badge>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -325,10 +247,10 @@ export default function ReportsTab() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onSelect={() =>
-                                  void updateStatus(report, "dismissed")
+                                  void updateStatus(report, "rejected")
                                 }
                               >
-                                Dismissed
+                                Rejected
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

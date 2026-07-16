@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useRequireAuth } from "@/lib/use-require-auth";
-import {
-  MaterialWithBreadcrumb,
-  ApiUserMaterialsResponse,
-} from "@/lib/material-types";
-import { TopperBadge } from "@/lib/topper-badge-types";
-import {
-  mockUserMaterialsResponse,
-  mockUserTopperBadgesResponse,
-} from "@/lib/mock-data";
+import { useUserMaterials } from "@/lib/hooks/use-materials";
+import { useUserTopperBadges } from "@/lib/hooks/use-topper-badges";
+import { apiFetch } from "@/lib/api-client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -48,9 +43,7 @@ import {
   Trophy,
   Star,
 } from "lucide-react";
-import ApplyTopperBadgeModal, {
-  TopperBadgeApplicationData,
-} from "@/components/apply-topper-badge-modal";
+import ApplyTopperBadgeModal from "@/components/apply-topper-badge-modal";
 
 const getStatusIcon = (status: string) => {
   const tooltipTexts: Record<string, string> = {
@@ -114,64 +107,17 @@ const formatDate = (dateString: string) => {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user, logout } = useAuth();
   useRequireAuth();
 
-  const [materials, setMaterials] = useState<MaterialWithBreadcrumb[]>(
-    (mockUserMaterialsResponse as ApiUserMaterialsResponse).data,
-  );
-  const [topperBadges, setTopperBadges] = useState<TopperBadge[]>(
-    mockUserTopperBadgesResponse.data,
-  );
+  const { data: materialsData } = useUserMaterials(user?._id);
+  const { data: topperBadgesData } = useUserTopperBadges(user?._id);
+  const materials = materialsData?.data ?? [];
+  const topperBadges = topperBadgesData?.data ?? [];
+
   const [isApplyBadgeModalOpen, setIsApplyBadgeModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  useEffect(() => {
-    // UNCOMMENT TO FETCH FROM API
-    // const fetchProfile = async () => {
-    //   try {
-    //     const res = await fetch('/api/v1/users/me', { credentials: 'include' })
-    //     const json: MeResponse = await res.json()
-    //     if (json.status === 'success') {
-    //       // update local profile state with json.data if a separate profile state exists;
-    //       // otherwise this just confirms/refreshes what useAuth() already provides
-    //     }
-    //   } catch (err) {
-    //     console.error('Failed to fetch profile', err)
-    //   }
-    // }
-    // fetchProfile()
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    // UNCOMMENT TO FETCH FROM API
-    // const fetchMaterials = async () => {
-    //   try {
-    //     const res = await fetch(`/api/v1/users/${user._id}/materials`, { credentials: 'include' })
-    //     const json = await res.json()
-    //     if (json.status === 'success') setMaterials(json.data)
-    //   } catch (err) {
-    //     console.error('Failed to fetch materials', err)
-    //   }
-    // }
-    // fetchMaterials()
-  }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-    // UNCOMMENT TO FETCH FROM API
-    // const fetchTopperBadges = async () => {
-    //   try {
-    //     const res = await fetch(`/api/v1/users/${user._id}/topperBadgeApplications`, { credentials: 'include' })
-    //     const json = await res.json()
-    //     if (json.status === 'success') setTopperBadges(json.data)
-    //   } catch (err) {
-    //     console.error('Failed to fetch topper badges', err)
-    //   }
-    // }
-    // fetchTopperBadges()
-  }, [user]);
 
   const getInitials = (name: string) => {
     return name
@@ -197,35 +143,17 @@ export default function ProfilePage() {
     );
   }
 
-  const handleBadgeApplicationSubmit = (data: TopperBadgeApplicationData) => {
-    const newBadge: TopperBadge = {
-      _id: Date.now().toString(),
-      userId: user._id,
-      userName: user.name,
-      subject: data.subject,
-      exam: data.exam,
-      branch: data.branch,
-      year: Number(data.year),
-      cgpa: Number(data.cgpa),
-      markSheetUrl: data.markSheetUrl,
-      status: "pending",
-    };
-    setTopperBadges([...topperBadges, newBadge]);
+  const handleBadgeApplicationSubmit = () => {
+    queryClient.invalidateQueries({ queryKey: ["topperBadges", "user", user._id] });
   };
 
   const handleDeleteAccount = async () => {
-    // UNCOMMENT TO FETCH FROM API
-    // try {
-    //   const res = await fetch('/api/v1/users/me', { method: 'DELETE', credentials: 'include' })
-    //   const json = await res.json()
-    //   if (json.status !== 'success') {
-    //     console.error('Failed to delete account')
-    //     return
-    //   }
-    // } catch (err) {
-    //   console.error('Failed to delete account', err)
-    //   return
-    // }
+    try {
+      await apiFetch("/users/me", { method: "DELETE" });
+    } catch (err) {
+      console.error("Failed to delete account", err);
+      return;
+    }
     await logout();
     router.push("/");
   };
@@ -300,32 +228,9 @@ export default function ProfilePage() {
                       <h3 className="text-lg font-semibold mb-2">
                         {material.title}
                       </h3>
-                      <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                        <div>
-                          <span className="font-medium text-foreground">
-                            Exam:
-                          </span>{" "}
-                          {material.exam}
-                        </div>
-                        <div>
-                          <span className="font-medium text-foreground">
-                            Branch:
-                          </span>{" "}
-                          {material.branch}
-                        </div>
-                        <div>
-                          <span className="font-medium text-foreground">
-                            Subject:
-                          </span>{" "}
-                          {material.subject}
-                        </div>
-                        <div>
-                          <span className="font-medium text-foreground">
-                            Topic:
-                          </span>{" "}
-                          {material.topic}
-                        </div>
-                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {material.description}
+                      </p>
                     </div>
                   </div>
 

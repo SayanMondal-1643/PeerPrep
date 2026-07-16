@@ -1,16 +1,14 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import {
-  mockLoginResponse,
-  mockLogoutResponse,
-  mockSignupResponse,
-} from "@/lib/mock-data";
-import { User, SignupData, ApiAuthResponse } from "./user-types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiFetch, ApiClientError } from "@/lib/api-client";
+import { User, SignupData, ApiAuthResponse, MeResponse } from "./user-types";
 
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
   logout: () => Promise<void>;
@@ -21,68 +19,57 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const queryClient = useQueryClient();
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: async () => {
+      try {
+        const json = await apiFetch<MeResponse>("/users/me");
+        return json.data;
+      } catch (err) {
+        if (err instanceof ApiClientError && err.status === 401) {
+          return null;
+        }
+        throw err;
+      }
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const login = async (email: string, password: string) => {
-    // UNCOMMENT TO FETCH FROM API
-    // const res = await fetch('/api/v1/users/login', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   credentials: 'include',
-    //   body: JSON.stringify({ email, password }),
-    // })
-    // if (!res.ok) {
-    //   const errorData = await res.json()
-    //   throw new Error(errorData.message || 'Login failed')
-    // }
-    // const data: ApiAuthResponse = await res.json()
+    const data = await apiFetch<ApiAuthResponse>("/users/login", {
+      method: "POST",
+      body: { email, password },
+    });
 
-    // MOCK DATA - TO BE REMOVED LATER
-    const data: ApiAuthResponse = await mockLoginResponse(email, password);
-
-    setUser(data.user);
+    queryClient.setQueryData(["currentUser"], data.data);
   };
 
   const signup = async (data: SignupData) => {
-    // UNCOMMENT TO FETCH FROM API
-    // const res = await fetch('/api/v1/users/signup', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   credentials: 'include',
-    //   body: JSON.stringify(data),
-    // })
-    // if (!res.ok) {
-    //   const errorData = await res.json()
-    //   throw new Error(errorData.message || 'Signup failed')
-    // }
-    // const responseData: ApiAuthResponse = await res.json()
+    const responseData = await apiFetch<ApiAuthResponse>("/users/signup", {
+      method: "POST",
+      body: data,
+    });
 
-    // MOCK DATA - TO BE REMOVED LATER
-    const responseData: ApiAuthResponse = await mockSignupResponse(data);
-
-    setUser(responseData.user);
+    queryClient.setQueryData(["currentUser"], responseData.data);
   };
 
   const logout = async () => {
-    // UNCOMMENT TO FETCH FROM API
-    // await fetch('/api/v1/users/logout', {
-    //   method: 'POST',
-    //   credentials: 'include',
-    // })
+    await apiFetch("/users/logout", { method: "POST" });
 
-    // MOCK DATA - TO BE REMOVED LATER
-    await mockLogoutResponse();
-
-    setUser(null);
+    queryClient.setQueryData(["currentUser"], null);
     setRedirectTo(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user ?? null,
         isLoggedIn: !!user,
+        isLoading,
         login,
         signup,
         logout,

@@ -26,57 +26,22 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useEffect, useMemo, useState } from "react";
-import { mockTopperBadgesResponse } from "@/lib/mock-data";
-import { ApiTopperBadgesResponse, TopperBadge } from "@/lib/topper-badge-types";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+import { useMemo, useState } from "react";
+import {
+  useAllTopperBadges,
+  useUpdateTopperBadgeApplication,
+} from "@/lib/hooks/use-topper-badges";
+import { TopperBadge } from "@/lib/topper-badge-types";
 
 export default function ToppersTab() {
-  const [toppersList, setToppersList] = useState<TopperBadge[]>([]);
+  const { data, isLoading, isError, refetch } = useAllTopperBadges();
+  const updateApplication = useUpdateTopperBadgeApplication();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pendingStatusIds, setPendingStatusIds] = useState<
-    Record<string, boolean>
-  >({});
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
 
-  const loadTopperApplications = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await new Promise((resolve) => window.setTimeout(resolve, 500));
-
-      // UNCOMMENT TO FETCH FROM API
-      // const response = await fetch(`${API_BASE_URL}/api/v1/topperBadgeApplications`);
-      // if (!response.ok) {
-      //   throw new Error("Failed to load topper applications.");
-      // }
-      // const json: ApiToppersResponse = await response.json();
-
-      // MOCK DATA - TO BE REMOVED WHEN FETCHING FROM API
-      const json: ApiTopperBadgesResponse = mockTopperBadgesResponse;
-
-      setToppersList(json.data);
-    } catch (error) {
-      console.error("Failed to fetch topper applications:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to load topper applications.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void loadTopperApplications();
-  }, []);
+  const toppersList = data?.data ?? [];
 
   const filteredToppers = useMemo(() => {
     const normalizedQuery = searchQuery.toLowerCase();
@@ -96,40 +61,18 @@ export default function ToppersTab() {
     application: TopperBadge,
     nextStatus: TopperBadge["status"],
   ) => {
-    const previousStatus = application.status;
-
-    setToppersList((prev) =>
-      prev.map((item) =>
-        item._id === application._id ? { ...item, status: nextStatus } : item,
-      ),
-    );
-    setPendingStatusIds((prev) => ({ ...prev, [application._id]: true }));
     setRowErrors((prev) => ({ ...prev, [application._id]: "" }));
 
     try {
-      // UNCOMMENT TO PATCH API
-      // const response = await fetch(`${API_BASE_URL}/api/v1/topperBadgeApplications/${application._id}`, {
-      //   method: "PATCH",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ status: nextStatus }),
-      // });
-      // if (!response.ok) {
-      //   throw new Error("Failed to update status.");
-      // }
+      await updateApplication.mutateAsync({
+        applicationId: application._id,
+        status: nextStatus,
+      });
     } catch {
-      setToppersList((prev) =>
-        prev.map((item) =>
-          item._id === application._id
-            ? { ...item, status: previousStatus }
-            : item,
-        ),
-      );
       setRowErrors((prev) => ({
         ...prev,
         [application._id]: "Unable to update status.",
       }));
-    } finally {
-      setPendingStatusIds((prev) => ({ ...prev, [application._id]: false }));
     }
   };
 
@@ -149,13 +92,15 @@ export default function ToppersTab() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Card>
         <div className="p-6 space-y-4">
           <h2 className="text-xl font-semibold">Topper Badge Applications</h2>
-          <p className="text-sm text-red-600">{error}</p>
-          <Button onClick={() => void loadTopperApplications()}>Retry</Button>
+          <p className="text-sm text-red-600">
+            Unable to load topper applications.
+          </p>
+          <Button onClick={() => void refetch()}>Retry</Button>
         </div>
       </Card>
     );
@@ -213,9 +158,10 @@ export default function ToppersTab() {
             </TableHeader>
             <TableBody>
               {filteredToppers.map((application) => {
-                const isPendingStatus = Boolean(
-                  pendingStatusIds[application._id],
-                );
+                const isPendingStatus =
+                  updateApplication.isPending &&
+                  updateApplication.variables?.applicationId ===
+                    application._id;
                 const errorMessage = rowErrors[application._id];
 
                 return (
