@@ -31,51 +31,9 @@ import {
   Star,
 } from "lucide-react";
 
-interface PopulatedUser {
-  _id: string;
-  name: string;
-  role: "student" | "teacher" | "admin";
-}
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: "student" | "teacher" | "admin";
-  accountStatus: "active" | "suspended";
-  institutionName?: string;
-  idProofUrl?: string;
-  verificationStatus?: "pending" | "verified" | "rejected";
-}
-
-interface Material {
-  _id: string;
-  title: string;
-  description: string;
-  fileUrl: string;
-  uploadDate: string;
-  status: "pending" | "approved" | "rejected";
-  userId: PopulatedUser;
-  topicId: string;
-  isBestMaterial: boolean;
-  isTopperMaterial: boolean;
-  isAIPicked: boolean;
-  ratingsAverage: number;
-  ratingsQuantity: number;
-}
-
-interface TopperBadge {
-  _id: string;
-  userId: string;
-  userName: string;
-  subject: string;
-  exam: string;
-  branch: string;
-  year: number;
-  cgpa: number;
-  markSheetUrl: string;
-  status: "pending" | "approved" | "rejected";
-}
+import { User } from "@/lib/user-types";
+import { Material } from "@/lib/material-types";
+import { TopperBadge } from "@/lib/topper-badge-types";
 
 const getStatusIcon = (status: string) => {
   const tooltipTexts: Record<string, string> = {
@@ -219,18 +177,19 @@ export default function UserProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold">{user.name}</h1>
-                {user.role === "teacher" && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <GraduationCap className="h-6 w-6 text-blue-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Teacher</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                {user.role === "teacher" &&
+                  user.verificationStatus === "verified" && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <GraduationCap className="h-6 w-6 text-blue-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Teacher</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
               </div>
               <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>

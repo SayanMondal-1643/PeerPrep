@@ -66,9 +66,10 @@ export default function MaterialViewerPage() {
                   {material.userId.name}
                 </Link>
               </span>
-              {material.userId.role === "teacher" && (
-                <GraduationCap className="h-4 w-4 text-blue-500" />
-              )}
+              {material.userId.role === "teacher" &&
+                material.userId.verificationStatus === "verified" && (
+                  <GraduationCap className="h-4 w-4 text-blue-500" />
+                )}
             </div>
           </div>
         </div>

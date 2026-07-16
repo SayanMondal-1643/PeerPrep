@@ -201,9 +201,10 @@ export default function UsersTab() {
                         className="inline-flex items-center gap-1.5 hover:underline"
                       >
                         <span>{user.name}</span>
-                        {user.role === "teacher" && (
-                          <GraduationCap className="h-4 w-4 text-blue-500" />
-                        )}
+                        {user.role === "teacher" &&
+                          user.verificationStatus === "verified" && (
+                            <GraduationCap className="h-4 w-4 text-blue-500" />
+                          )}
                         {user.role === "admin" && (
                           <Shield className="h-4 w-4 text-amber-500" />
                         )}

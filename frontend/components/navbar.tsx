@@ -93,16 +93,17 @@ export const Navbar = function NavbarComponent() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="gap-2">
                     <span>{user?.role === "admin" ? "Admin" : user?.name}</span>
-                    {user?.role === "teacher" && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <GraduationCap className="h-4 w-4 text-blue-500" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Teacher</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
+                    {user?.role === "teacher" &&
+                      user?.verificationStatus === "verified" && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <GraduationCap className="h-4 w-4 text-blue-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Teacher</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>

@@ -144,7 +144,9 @@ export default function ProfilePage() {
   }
 
   const handleBadgeApplicationSubmit = () => {
-    queryClient.invalidateQueries({ queryKey: ["topperBadges", "user", user._id] });
+    queryClient.invalidateQueries({
+      queryKey: ["topperBadges", "user", user._id],
+    });
   };
 
   const handleDeleteAccount = async () => {
@@ -172,18 +174,19 @@ export default function ProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold">{user.name}</h1>
-                {user.role === "teacher" && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <GraduationCap className="h-6 w-6 text-blue-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Teacher</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                {user.role === "teacher" &&
+                  user.verificationStatus === "verified" && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <GraduationCap className="h-6 w-6 text-blue-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Teacher</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
               </div>
               <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
