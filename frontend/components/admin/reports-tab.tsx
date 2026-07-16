@@ -128,7 +128,9 @@ export default function ReportsTab() {
                 <TableRow key={report._id}>
                   <TableCell className="font-medium text-sm">
                     <Link
-                      href={`/materials/${report.materialId}`}
+                      href={report.materialFileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="block truncate text-primary hover:underline"
                       title={report.materialTitle}
                     >

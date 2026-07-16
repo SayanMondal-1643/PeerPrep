@@ -9,6 +9,7 @@ export interface Report {
   _id: string;
   materialId: string;
   materialTitle: string;
+  materialFileUrl: string;
   reporterId: ReportReporterInfo;
   reportReason: string;
   comment?: string;

@@ -196,9 +196,10 @@ export default function MaterialsTab() {
                   <TableRow key={material._id}>
                     <TableCell className="max-w-xs py-3">
                       <Link
-                        href={`/materials/${material._id}`}
+                        href={`${material.fileUrl}`}
                         className="block truncate font-medium text-primary hover:underline"
                         title={material.title}
+                        target="_blank"
                       >
                         {material.title}
                       </Link>

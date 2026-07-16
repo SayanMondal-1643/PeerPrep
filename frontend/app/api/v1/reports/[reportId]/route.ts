@@ -25,7 +25,7 @@ export const PATCH = catchAsync(
     }
 
     report = await report.populate([
-      { path: "materialId", select: "title" },
+      { path: "materialId", select: "title fileUrl" },
       { path: "reporterId", select: USER_REF_SELECT },
     ]);
 

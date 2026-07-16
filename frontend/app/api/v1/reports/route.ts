@@ -11,7 +11,7 @@ export const GET = catchAsync(async (req: NextRequest) => {
   requireRole(user, "admin");
 
   const reports = await Report.find()
-    .populate("materialId", "title")
+    .populate("materialId", "title fileUrl")
     .populate("reporterId", USER_REF_SELECT)
     .sort({ reportDate: -1 });
 

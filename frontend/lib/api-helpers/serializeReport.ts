@@ -3,6 +3,7 @@ import { IReport } from "@/lib/models/Report";
 interface PopulatedMaterial {
   _id: unknown;
   title: string;
+  fileUrl: string;
 }
 
 interface PopulatedReporter {
@@ -21,6 +22,7 @@ export function serializeReport(report: IReport) {
     _id: plain._id,
     materialId: material?._id ?? plain.materialId,
     materialTitle: material?.title,
+    materialFileUrl: material?.fileUrl,
     reporterId: reporter,
     reportReason: plain.reportReason,
     comment: plain.comment,
