@@ -1,127 +1,231 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useEffect, useState, type ChangeEvent } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
+import { fetchBranches, fetchExams, fetchSubjects } from "@/lib/hierarchy-api";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { useCreateTopperBadgeApplication } from "@/lib/hooks/use-topper-badges";
+import type { HierarchyOption } from "@/lib/hierarchy-types";
 
 interface ApplyTopperBadgeModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (data: TopperBadgeApplicationData) => void
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: TopperBadgeApplicationData) => void;
+  userId: string;
 }
 
 export interface TopperBadgeApplicationData {
-  exam: string
-  branch: string
-  subject: string
-  year: string
-  cgpa: string
-  marksheet: File | null
-}
-
-const examOptions = ['GATE', 'MAKAUT', 'Jadavpur University', 'University of Kalyani', 'University of Calcutta']
-
-const branchOptions: Record<string, string[]> = {
-  MAKAUT: ['CSE', 'IT', 'ECE', 'AEIE', 'CE', 'ME', 'BME'],
-  GATE: ['CSE', 'ECE', 'ME', 'CE', 'EE', 'IN'],
-  'Jadavpur University': ['CSE', 'ECE', 'ME', 'CE'],
-  'University of Kalyani': ['CSE', 'IT', 'Physics', 'Chemistry'],
-  'University of Calcutta': ['CSE', 'IT', 'Science', 'Commerce'],
-}
-
-const subjectOptions: Record<string, string[]> = {
-  CSE: ['DSA', 'DBMS', 'OS', 'OOPs', 'Networks', 'AI/ML'],
-  IT: ['DBMS', 'Web Development', 'CA', 'Network Security', 'Cloud Computing'],
-  ECE: ['Digital Logic', 'Signals & Systems', 'Analog Electronics', 'Electromagnetics', 'Microprocessors'],
-  ME: ['Thermodynamics', 'Fluid Mechanics', 'Machine Design', 'Manufacturing'],
-  CE: ['Structural Analysis', 'Hydraulics', 'Geotechnical Engineering'],
-  AEIE: ['Control Systems', 'Power Electronics', 'Electrical Machines'],
-  BME: ['Biomedical Instrumentation', 'Physiology', 'Biomechanics'],
-  EE: ['Power Systems', 'Electrical Machines', 'Control Systems'],
-  IN: ['Data Structures', 'Databases', 'Systems'],
-  Physics: ['Mechanics', 'Thermodynamics', 'Optics'],
-  Chemistry: ['Organic Chemistry', 'Inorganic Chemistry'],
-  Science: ['Physics', 'Chemistry', 'Biology'],
-  Commerce: ['Accounting', 'Economics', 'Business Studies'],
+  exam: string;
+  branch: string;
+  subject: string;
+  year: string;
+  cgpa: string;
+  markSheetUrl: string;
 }
 
 export default function ApplyTopperBadgeModal({
   isOpen,
   onClose,
   onSubmit,
+  userId,
 }: ApplyTopperBadgeModalProps) {
   const [formData, setFormData] = useState<TopperBadgeApplicationData>({
-    exam: '',
-    branch: '',
-    subject: '',
-    year: '',
-    cgpa: '',
-    marksheet: null,
-  })
+    exam: "",
+    branch: "",
+    subject: "",
+    year: "",
+    cgpa: "",
+    markSheetUrl: "",
+  });
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [exams, setExams] = useState<HierarchyOption[]>([]);
+  const [branches, setBranches] = useState<HierarchyOption[]>([]);
+  const [subjects, setSubjects] = useState<HierarchyOption[]>([]);
+  const [selectedExamId, setSelectedExamId] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState("");
+  const [isLoadingExams, setIsLoadingExams] = useState(false);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+  const [isUploadingMarksheet, setIsUploadingMarksheet] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const createApplication = useCreateTopperBadgeApplication();
 
-  const handleExamChange = (value: string) => {
-    setFormData({ ...formData, exam: value, branch: '', subject: '' })
-  }
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const handleBranchChange = (value: string) => {
-    setFormData({ ...formData, branch: value, subject: '' })
-  }
+    const loadExams = async () => {
+      setIsLoadingExams(true);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
-      if (!validTypes.includes(file.type)) {
-        setErrors({ ...errors, marksheet: 'Only PDF and image files are allowed' })
-        return
+      try {
+        const fetchedExams = await fetchExams();
+        setExams(fetchedExams);
+      } catch (error) {
+        console.error("Failed to fetch exams:", error);
+        setExams([]);
+      } finally {
+        setIsLoadingExams(false);
       }
-      setFormData({ ...formData, marksheet: file })
-      setErrors({ ...errors, marksheet: '' })
+    };
+
+    loadExams();
+  }, [isOpen]);
+
+  const handleExamChange = async (examId: string) => {
+    const examName = exams.find((exam) => exam._id === examId)?.name || "";
+    setFormData((prev) => ({
+      ...prev,
+      exam: examName,
+      branch: "",
+      subject: "",
+    }));
+    setSelectedExamId(examId);
+    setSelectedBranchId("");
+    setBranches([]);
+    setSubjects([]);
+
+    setIsLoadingBranches(true);
+
+    try {
+      const fetchedBranches = await fetchBranches(examId);
+      setBranches(fetchedBranches);
+    } catch (error) {
+      console.error("Failed to fetch branches:", error);
+      setBranches([]);
+    } finally {
+      setIsLoadingBranches(false);
     }
-  }
+  };
+
+  const handleBranchChange = async (branchId: string) => {
+    const branchName =
+      branches.find((branch) => branch._id === branchId)?.name || "";
+    setFormData((prev) => ({ ...prev, branch: branchName, subject: "" }));
+    setSelectedBranchId(branchId);
+    setSubjects([]);
+
+    setIsLoadingSubjects(true);
+
+    try {
+      const fetchedSubjects = await fetchSubjects(branchId);
+      setSubjects(fetchedSubjects);
+    } catch (error) {
+      console.error("Failed to fetch subjects:", error);
+      setSubjects([]);
+    } finally {
+      setIsLoadingSubjects(false);
+    }
+  };
+
+  const handleSubjectChange = (subjectId: string) => {
+    const subjectName =
+      subjects.find((subject) => subject._id === subjectId)?.name || "";
+    setFormData((prev) => ({ ...prev, subject: subjectName }));
+  };
+
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+    if (!validTypes.includes(file.type)) {
+      setUploadError("Only PDF and image files are allowed");
+      setErrors((prev) => ({
+        ...prev,
+        marksheet: "Only PDF and image files are allowed",
+      }));
+      return;
+    }
+
+    setIsUploadingMarksheet(true);
+    setUploadError("");
+    setErrors((prev) => ({ ...prev, marksheet: "" }));
+
+    try {
+      const uploadedUrl = await uploadToCloudinary(file);
+      setFormData((prev) => ({ ...prev, markSheetUrl: uploadedUrl }));
+    } catch (error) {
+      console.error("Failed to upload marksheet:", error);
+      setUploadError("Failed to upload marksheet. Please try again.");
+      setFormData((prev) => ({ ...prev, markSheetUrl: "" }));
+    } finally {
+      setIsUploadingMarksheet(false);
+    }
+  };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-    if (!formData.exam) newErrors.exam = 'Exam is required'
-    if (!formData.branch) newErrors.branch = 'Branch is required'
-    if (!formData.subject) newErrors.subject = 'Subject is required'
-    if (!formData.year) newErrors.year = 'Year is required'
-    if (!formData.cgpa) newErrors.cgpa = 'CGPA is required'
-    if (!formData.marksheet) newErrors.marksheet = 'Marksheet is required'
-    return newErrors
-  }
+    const newErrors: Record<string, string> = {};
+    if (!formData.exam) newErrors.exam = "Exam is required";
+    if (!formData.branch) newErrors.branch = "Branch is required";
+    if (!formData.subject) newErrors.subject = "Subject is required";
+    if (!formData.year) newErrors.year = "Year is required";
+    if (!formData.cgpa) newErrors.cgpa = "CGPA is required";
+    if (!formData.markSheetUrl)
+      newErrors.marksheet = "Marksheet upload is required";
+    return newErrors;
+  };
 
-  const handleSubmit = () => {
-    const newErrors = validateForm()
+  const handleSubmit = async () => {
+    const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
+      setErrors(newErrors);
+      return;
     }
-    onSubmit(formData)
-    setFormData({ exam: '', branch: '', subject: '', year: '', cgpa: '', marksheet: null })
-    setErrors({})
-    onClose()
-  }
 
-  const availableBranches = formData.exam ? branchOptions[formData.exam] || [] : []
-  const availableSubjects = formData.branch ? subjectOptions[formData.branch] || [] : []
+    try {
+      await createApplication.mutateAsync({
+        userId,
+        exam: formData.exam,
+        branch: formData.branch,
+        subject: formData.subject,
+        year: Number(formData.year),
+        cgpa: Number(formData.cgpa),
+        markSheetUrl: formData.markSheetUrl,
+      });
+    } catch (err) {
+      console.error("Failed to submit topper badge application", err);
+      setErrors({ ...errors, submit: "Failed to submit application" });
+      return;
+    }
+
+    onSubmit(formData);
+    setFormData({
+      exam: "",
+      branch: "",
+      subject: "",
+      year: "",
+      cgpa: "",
+      markSheetUrl: "",
+    });
+    setSelectedExamId("");
+    setSelectedBranchId("");
+    setBranches([]);
+    setSubjects([]);
+    setErrors({});
+    setUploadError("");
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -137,55 +241,88 @@ export default function ApplyTopperBadgeModal({
           {/* Exam */}
           <div className="space-y-2">
             <Label htmlFor="exam">Exam *</Label>
-            <Select value={formData.exam} onValueChange={handleExamChange}>
+            <Select
+              value={selectedExamId}
+              onValueChange={handleExamChange}
+              disabled={isLoadingExams}
+            >
               <SelectTrigger id="exam">
-                <SelectValue placeholder="Select exam" />
+                {isLoadingExams ? (
+                  <span>Loading...</span>
+                ) : (
+                  <SelectValue placeholder="Select exam" />
+                )}
               </SelectTrigger>
               <SelectContent>
-                {examOptions.map((exam) => (
-                  <SelectItem key={exam} value={exam}>
-                    {exam}
+                {exams.map((exam) => (
+                  <SelectItem key={exam._id} value={exam._id}>
+                    {exam.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.exam && <p className="text-sm text-red-500">{errors.exam}</p>}
+            {errors.exam && (
+              <p className="text-sm text-red-500">{errors.exam}</p>
+            )}
           </div>
 
           {/* Branch */}
           <div className="space-y-2">
             <Label htmlFor="branch">Branch *</Label>
-            <Select value={formData.branch} onValueChange={handleBranchChange} disabled={!formData.exam}>
+            <Select
+              value={selectedBranchId}
+              onValueChange={handleBranchChange}
+              disabled={!formData.exam || isLoadingBranches}
+            >
               <SelectTrigger id="branch">
-                <SelectValue placeholder="Select branch" />
+                {isLoadingBranches ? (
+                  <span>Loading...</span>
+                ) : (
+                  <SelectValue placeholder="Select branch" />
+                )}
               </SelectTrigger>
               <SelectContent>
-                {availableBranches.map((branch) => (
-                  <SelectItem key={branch} value={branch}>
-                    {branch}
+                {branches.map((branch) => (
+                  <SelectItem key={branch._id} value={branch._id}>
+                    {branch.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.branch && <p className="text-sm text-red-500">{errors.branch}</p>}
+            {errors.branch && (
+              <p className="text-sm text-red-500">{errors.branch}</p>
+            )}
           </div>
 
           {/* Subject */}
           <div className="space-y-2">
             <Label htmlFor="subject">Subject *</Label>
-            <Select value={formData.subject} onValueChange={(value) => setFormData({ ...formData, subject: value })} disabled={!formData.branch}>
+            <Select
+              value={
+                subjects.find((subject) => subject.name === formData.subject)
+                  ?._id || ""
+              }
+              onValueChange={handleSubjectChange}
+              disabled={!formData.branch || isLoadingSubjects}
+            >
               <SelectTrigger id="subject">
-                <SelectValue placeholder="Select subject" />
+                {isLoadingSubjects ? (
+                  <span>Loading...</span>
+                ) : (
+                  <SelectValue placeholder="Select subject" />
+                )}
               </SelectTrigger>
               <SelectContent>
-                {availableSubjects.map((subject) => (
-                  <SelectItem key={subject} value={subject}>
-                    {subject}
+                {subjects.map((subject) => (
+                  <SelectItem key={subject._id} value={subject._id}>
+                    {subject.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.subject && <p className="text-sm text-red-500">{errors.subject}</p>}
+            {errors.subject && (
+              <p className="text-sm text-red-500">{errors.subject}</p>
+            )}
           </div>
 
           {/* Year */}
@@ -198,9 +335,13 @@ export default function ApplyTopperBadgeModal({
               max="2100"
               placeholder="Enter year"
               value={formData.year}
-              onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, year: e.target.value })
+              }
             />
-            {errors.year && <p className="text-sm text-red-500">{errors.year}</p>}
+            {errors.year && (
+              <p className="text-sm text-red-500">{errors.year}</p>
+            )}
           </div>
 
           {/* CGPA */}
@@ -214,9 +355,13 @@ export default function ApplyTopperBadgeModal({
               step="0.1"
               placeholder="Enter CGPA (0-10)"
               value={formData.cgpa}
-              onChange={(e) => setFormData({ ...formData, cgpa: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, cgpa: e.target.value })
+              }
             />
-            {errors.cgpa && <p className="text-sm text-red-500">{errors.cgpa}</p>}
+            {errors.cgpa && (
+              <p className="text-sm text-red-500">{errors.cgpa}</p>
+            )}
           </div>
 
           {/* Marksheet Upload */}
@@ -234,10 +379,20 @@ export default function ApplyTopperBadgeModal({
                 file:bg-primary file:text-primary-foreground
                 hover:file:bg-primary/90"
             />
-            {formData.marksheet && (
-              <p className="text-sm text-green-600">File selected: {formData.marksheet.name}</p>
+            {isUploadingMarksheet && (
+              <p className="text-sm text-muted-foreground">Uploading...</p>
             )}
-            {errors.marksheet && <p className="text-sm text-red-500">{errors.marksheet}</p>}
+            {formData.markSheetUrl && !isUploadingMarksheet && (
+              <p className="text-sm text-green-600">
+                Marksheet uploaded successfully
+              </p>
+            )}
+            {uploadError && (
+              <p className="text-sm text-red-500">{uploadError}</p>
+            )}
+            {errors.marksheet && (
+              <p className="text-sm text-red-500">{errors.marksheet}</p>
+            )}
           </div>
         </div>
 
@@ -245,11 +400,11 @@ export default function ApplyTopperBadgeModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={isUploadingMarksheet}>
             Submit Application
           </Button>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

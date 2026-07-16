@@ -1,35 +1,14 @@
-'use client'
+"use client"
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Breadcrumbs } from "@/components/breadcrumbs"
-
-// Mock data for universities
-const universities = [
-  {
-    id: "makaut",
-    name: "Maulana Abul Kalam Azad University of Technology (MAKAUT)",
-    description: "Prepare for MAKAUT semester and final exams across all branches",
-  },
-  {
-    id: "jadavpur",
-    name: "Jadavpur University",
-    description: "Study materials for Jadavpur University examinations",
-  },
-  {
-    id: "calcutta",
-    name: "University of Calcutta",
-    description: "Comprehensive study resources for Calcutta University",
-  },
-  {
-    id: "kalyani",
-    name: "University of Kalyani",
-    description: "Materials tailored for Kalyani University curriculum",
-  },
-]
+import { useExams } from "@/lib/hooks/use-exams"
 
 export default function UniversitiesPage() {
+  const { data: universities, isLoading, isError } = useExams()
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -37,7 +16,7 @@ export default function UniversitiesPage() {
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
-            { label: "Dashboard", href: "/dashboard" },
+            { label: "Dashboard", href: "/exams" },
             { label: "University Examinations", href: "/universities" },
           ]}
         />
@@ -50,10 +29,16 @@ export default function UniversitiesPage() {
           </p>
         </div>
 
+        {isLoading && <p className="text-muted-foreground">Loading universities...</p>}
+        {isError && <p className="text-destructive">Failed to load universities.</p>}
+        {!isLoading && !isError && universities?.length === 0 && (
+          <p className="text-muted-foreground">No universities found.</p>
+        )}
+
         {/* Universities Grid */}
         <div className="grid md:grid-cols-2 gap-6">
-          {universities.map((university) => (
-            <Link key={university.id} href={`/universities/${university.id}`}>
+          {universities?.map((university) => (
+            <Link key={university._id} href={`/exams/${university._id}/branches`}>
               <Card className="p-8 h-full cursor-pointer group hover:shadow-lg hover:border-primary/50 transition-all duration-300">
                 <div className="flex flex-col h-full">
                   <div className="flex-1">

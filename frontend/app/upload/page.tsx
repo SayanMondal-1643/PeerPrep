@@ -1,210 +1,264 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { BookOpen, Upload, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Upload, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  fetchBranches,
+  fetchExams,
+  fetchSubjects,
+  fetchTopics,
+} from "@/lib/hierarchy-api";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useCreateMaterial } from "@/lib/hooks/use-materials";
 
-// Mock data - will be replaced with database queries
-const exams = [
-  { id: "gate", name: "GATE" },
-  { id: "university", name: "College / University Exams" },
-]
-
-const universities = [
-  { id: "makaut", name: "Maulana Abul Kalam Azad University of Technology (MAKAUT)" },
-  { id: "jadavpur", name: "Jadavpur University" },
-  { id: "calcutta", name: "University of Calcutta" },
-  { id: "kalyani", name: "University of Kalyani" },
-]
-
-const branchesByExamAndUniversity: { [key: string]: Array<{ id: string; name: string }> } = {
-  // GATE branches
-  "gate": [
-    { id: "gate-cse", name: "Computer Science & IT" },
-    { id: "gate-ece", name: "Electronics & Communication" },
-    { id: "gate-civil", name: "Civil Engineering" },
-    { id: "gate-mech", name: "Mechanical Engineering" },
-    { id: "gate-electrical", name: "Electrical Engineering" },
-    { id: "gate-chemical", name: "Chemical Engineering" },
-  ],
-  // University branches (same for all universities)
-  "makaut": [
-    { id: "uni-cse", name: "Computer Science and Engineering" },
-    { id: "uni-it", name: "Information Technology" },
-    { id: "uni-ece", name: "Electronics and Communication Engineering" },
-    { id: "uni-mech", name: "Mechanical Engineering" },
-    { id: "uni-civil", name: "Civil Engineering" },
-    { id: "uni-electrical", name: "Electrical Engineering" },
-    { id: "uni-chemical", name: "Chemical Engineering" },
-  ],
-  "jadavpur": [
-    { id: "uni-cse", name: "Computer Science and Engineering" },
-    { id: "uni-it", name: "Information Technology" },
-    { id: "uni-ece", name: "Electronics and Communication Engineering" },
-    { id: "uni-mech", name: "Mechanical Engineering" },
-    { id: "uni-civil", name: "Civil Engineering" },
-    { id: "uni-electrical", name: "Electrical Engineering" },
-    { id: "uni-chemical", name: "Chemical Engineering" },
-  ],
-  "calcutta": [
-    { id: "uni-cse", name: "Computer Science and Engineering" },
-    { id: "uni-it", name: "Information Technology" },
-    { id: "uni-ece", name: "Electronics and Communication Engineering" },
-    { id: "uni-mech", name: "Mechanical Engineering" },
-    { id: "uni-civil", name: "Civil Engineering" },
-    { id: "uni-electrical", name: "Electrical Engineering" },
-    { id: "uni-chemical", name: "Chemical Engineering" },
-  ],
-  "kalyani": [
-    { id: "uni-cse", name: "Computer Science and Engineering" },
-    { id: "uni-it", name: "Information Technology" },
-    { id: "uni-ece", name: "Electronics and Communication Engineering" },
-    { id: "uni-mech", name: "Mechanical Engineering" },
-    { id: "uni-civil", name: "Civil Engineering" },
-    { id: "uni-electrical", name: "Electrical Engineering" },
-    { id: "uni-chemical", name: "Chemical Engineering" },
-  ],
-}
-
-const subjectsByBranch: { [key: string]: Array<{ id: string; name: string }> } = {
-  // GATE branches
-  "gate-cse": [
-    { id: "s1", name: "Data Structures" },
-    { id: "s2", name: "Algorithms" },
-    { id: "s3", name: "Database Management Systems" },
-    { id: "s4", name: "Operating Systems" },
-    { id: "s5", name: "Computer Networks" },
-  ],
-  "gate-ece": [
-    { id: "s6", name: "Digital Electronics" },
-    { id: "s7", name: "Analog Electronics" },
-    { id: "s8", name: "Signals and Systems" },
-  ],
-  "gate-civil": [
-    { id: "s9", name: "Structural Analysis" },
-    { id: "s10", name: "Concrete Technology" },
-  ],
-  // University branches
-  "uni-cse": [
-    { id: "s1", name: "Data Structures & Algorithms" },
-    { id: "s3", name: "Database Management Systems" },
-    { id: "s4", name: "Operating Systems" },
-    { id: "s5", name: "Computer Networks" },
-    { id: "s15", name: "Object-Oriented Programming" },
-  ],
-  "uni-it": [
-    { id: "s11", name: "Web Development" },
-    { id: "s12", name: "Mobile Development" },
-    { id: "s13", name: "Cloud Computing" },
-  ],
-  "uni-ece": [
-    { id: "s6", name: "Digital Electronics" },
-    { id: "s7", name: "Analog Electronics" },
-    { id: "s14", name: "Microcontrollers" },
-  ],
-}
-
-const topicsBySubject: { [key: string]: Array<{ id: string; name: string }> } = {
-  s1: [
-    { id: "t1", name: "Arrays" },
-    { id: "t2", name: "Linked Lists" },
-    { id: "t14", name: "Stacks" },
-    { id: "t15", name: "Queues" },
-    { id: "t3", name: "Trees" },
-    { id: "t16", name: "Graphs" },
-    { id: "t17", name: "Hash Tables" },
-    { id: "t18", name: "Heaps" },
-    { id: "t19", name: "Searching Algorithms" },
-    { id: "t20", name: "Sorting Algorithms" },
-  ],
-  s3: [
-    { id: "t7", name: "Relational Model" },
-    { id: "t8", name: "SQL Queries" },
-  ],
-  s4: [
-    { id: "t9", name: "Process Management" },
-    { id: "t10", name: "Memory Management" },
-  ],
-  s5: [
-    { id: "t21", name: "Protocols" },
-    { id: "t22", name: "Routing" },
-  ],
-  s15: [
-    { id: "t23", name: "Classes and Objects" },
-    { id: "t24", name: "Inheritance and Polymorphism" },
-  ],
-  s6: [
-    { id: "t11", name: "Logic Gates" },
-    { id: "t12", name: "Combinational Circuits" },
-  ],
-}
+import type { HierarchyOption } from "@/lib/hierarchy-types";
 
 export default function UploadPage() {
-  const [selectedExam, setSelectedExam] = useState("")
-  const [selectedUniversity, setSelectedUniversity] = useState("")
-  const [selectedBranch, setSelectedBranch] = useState("")
-  const [selectedSubject, setSelectedSubject] = useState("")
-  const [selectedTopic, setSelectedTopic] = useState("")
-  const [fileName, setFileName] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [exams, setExams] = useState<HierarchyOption[]>([]);
+  const [branches, setBranches] = useState<HierarchyOption[]>([]);
+  const [subjects, setSubjects] = useState<HierarchyOption[]>([]);
+  const [topics, setTopics] = useState<HierarchyOption[]>([]);
+  const [selectedExamId, setSelectedExamId] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState("");
+  const [selectedTopicId, setSelectedTopicId] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingExams, setIsLoadingExams] = useState(false);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
+  const [isLoadingTopics, setIsLoadingTopics] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const isUniversityExam = selectedExam === "university"
-  
-  // Determine which key to use for branches lookup
-  const branchesKey = isUniversityExam ? selectedUniversity : selectedExam
-  const branches = branchesKey ? branchesByExamAndUniversity[branchesKey] || [] : []
-  const subjects = selectedBranch ? subjectsByBranch[selectedBranch] || [] : []
-  const topics = selectedSubject ? topicsBySubject[selectedSubject] || [] : []
+  useRequireAuth();
+  const createMaterial = useCreateMaterial();
 
-  // Reset dependent fields when exam changes
+  useEffect(() => {
+    const loadExams = async () => {
+      setIsLoadingExams(true);
+      setErrorMessage("");
+
+      try {
+        const exams = await fetchExams();
+        setExams(exams);
+      } catch (error) {
+        console.error("Failed to fetch exams:", error);
+        setErrorMessage("Unable to load exams right now.");
+      } finally {
+        setIsLoadingExams(false);
+      }
+    };
+
+    loadExams();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedExamId) {
+      setBranches([]);
+      setSelectedBranchId("");
+      setSelectedSubjectId("");
+      setSelectedTopicId("");
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadBranches = async () => {
+      setIsLoadingBranches(true);
+      setErrorMessage("");
+
+      try {
+        const branches = await fetchBranches(selectedExamId);
+
+        if (!isCancelled) {
+          setBranches(branches);
+        }
+      } catch (error) {
+        console.error("Failed to fetch branches:", error);
+        if (!isCancelled) {
+          setBranches([]);
+          setErrorMessage("Unable to load branches right now.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingBranches(false);
+        }
+      }
+    };
+
+    loadBranches();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedExamId]);
+
+  useEffect(() => {
+    if (!selectedBranchId) {
+      setSubjects([]);
+      setSelectedSubjectId("");
+      setSelectedTopicId("");
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadSubjects = async () => {
+      setIsLoadingSubjects(true);
+      setErrorMessage("");
+
+      try {
+        const subjects = await fetchSubjects(selectedBranchId);
+
+        if (!isCancelled) {
+          setSubjects(subjects);
+        }
+      } catch (error) {
+        console.error("Failed to fetch subjects:", error);
+        if (!isCancelled) {
+          setSubjects([]);
+          setErrorMessage("Unable to load subjects right now.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingSubjects(false);
+        }
+      }
+    };
+
+    loadSubjects();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedBranchId]);
+
+  useEffect(() => {
+    if (!selectedSubjectId) {
+      setTopics([]);
+      setSelectedTopicId("");
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadTopics = async () => {
+      setIsLoadingTopics(true);
+      setErrorMessage("");
+
+      try {
+        const topics = await fetchTopics(selectedSubjectId);
+
+        if (!isCancelled) {
+          setTopics(topics);
+        }
+      } catch (error) {
+        console.error("Failed to fetch topics:", error);
+        if (!isCancelled) {
+          setTopics([]);
+          setErrorMessage("Unable to load topics right now.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingTopics(false);
+        }
+      }
+    };
+
+    loadTopics();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedSubjectId]);
+
   const handleExamChange = (examId: string) => {
-    setSelectedExam(examId)
-    setSelectedUniversity("")
-    setSelectedBranch("")
-    setSelectedSubject("")
-    setSelectedTopic("")
-  }
+    setSelectedExamId(examId);
+    setSelectedBranchId("");
+    setSelectedSubjectId("");
+    setSelectedTopicId("");
+  };
 
-  // Reset dependent fields when university changes
-  const handleUniversityChange = (universityId: string) => {
-    setSelectedUniversity(universityId)
-    setSelectedBranch("")
-    setSelectedSubject("")
-    setSelectedTopic("")
-  }
-
-  // Reset dependent fields when branch changes
   const handleBranchChange = (branchId: string) => {
-    setSelectedBranch(branchId)
-    setSelectedSubject("")
-    setSelectedTopic("")
-  }
+    setSelectedBranchId(branchId);
+    setSelectedSubjectId("");
+    setSelectedTopicId("");
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setFileName(file.name)
+      setSelectedFile(file);
+      setFileName(file.name);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
 
-    // Simulate upload
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    if (!selectedTopicId) {
+      setErrorMessage("Please select an exam, branch, subject, and topic.");
+      return;
+    }
 
-    alert("Material uploaded successfully!")
-    setIsSubmitting(false)
-  }
+    if (!selectedFile) {
+      setErrorMessage("Please choose a file to upload.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      const fileUrl = await uploadToCloudinary(selectedFile);
+
+      await createMaterial.mutateAsync({
+        topicId: selectedTopicId,
+        title,
+        description,
+        fileUrl,
+      });
+
+      alert("Material uploaded successfully!");
+
+      setTitle("");
+      setDescription("");
+      setSelectedFile(null);
+      setFileName("");
+      setSelectedExamId("");
+      setSelectedBranchId("");
+      setSelectedSubjectId("");
+      setSelectedTopicId("");
+    } catch (error) {
+      console.error("Failed to submit material:", error);
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -212,65 +266,65 @@ export default function UploadPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Upload Study Material</h1>
           <p className="text-muted-foreground">
-            Share your study materials with the community. Help fellow students prepare for their exams.
+            Share your study materials with the community. Help fellow students
+            prepare for their exams.
           </p>
         </div>
 
         <Card className="p-6 lg:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errorMessage ? (
+              <p className="text-sm text-destructive">{errorMessage}</p>
+            ) : null}
+
             {/* Exam Selection */}
             <div className="space-y-2">
               <Label htmlFor="exam">Exam *</Label>
-              <Select value={selectedExam} onValueChange={handleExamChange}>
+              <Select value={selectedExamId} onValueChange={handleExamChange}>
                 <SelectTrigger id="exam">
                   <SelectValue placeholder="Select exam" />
                 </SelectTrigger>
                 <SelectContent>
-                  {exams.map((exam) => (
-                    <SelectItem key={exam.id} value={exam.id}>
-                      {exam.name}
+                  {isLoadingExams ? (
+                    <SelectItem value="loading-exams" disabled>
+                      Loading exams...
                     </SelectItem>
-                  ))}
+                  ) : (
+                    exams.map((exam) => (
+                      <SelectItem key={exam._id} value={exam._id}>
+                        {exam.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Conditional University Selection */}
-            {isUniversityExam && (
-              <div className="space-y-2">
-                <Label htmlFor="university">College / University Name *</Label>
-                <Select value={selectedUniversity} onValueChange={handleUniversityChange}>
-                  <SelectTrigger id="university">
-                    <SelectValue placeholder="Select university" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {universities.map((uni) => (
-                      <SelectItem key={uni.id} value={uni.id}>
-                        {uni.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
 
             {/* Branch Selection */}
             <div className="space-y-2">
               <Label htmlFor="branch">Branch *</Label>
               <Select
-                value={selectedBranch}
+                value={selectedBranchId}
                 onValueChange={handleBranchChange}
-                disabled={!selectedExam || (isUniversityExam && !selectedUniversity) || branches.length === 0}
+                disabled={
+                  !selectedExamId || isLoadingBranches || branches.length === 0
+                }
               >
                 <SelectTrigger id="branch">
                   <SelectValue placeholder="Select branch" />
                 </SelectTrigger>
                 <SelectContent>
-                  {branches.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id}>
-                      {branch.name}
+                  {isLoadingBranches ? (
+                    <SelectItem value="loading-branches" disabled>
+                      Loading branches...
                     </SelectItem>
-                  ))}
+                  ) : (
+                    branches.map((branch) => (
+                      <SelectItem key={branch._id} value={branch._id}>
+                        {branch.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -279,22 +333,32 @@ export default function UploadPage() {
             <div className="space-y-2">
               <Label htmlFor="subject">Subject *</Label>
               <Select
-                value={selectedSubject}
+                value={selectedSubjectId}
                 onValueChange={(subjectId) => {
-                  setSelectedSubject(subjectId)
-                  setSelectedTopic("")
+                  setSelectedSubjectId(subjectId);
+                  setSelectedTopicId("");
                 }}
-                disabled={!selectedBranch || subjects.length === 0}
+                disabled={
+                  !selectedBranchId ||
+                  isLoadingSubjects ||
+                  subjects.length === 0
+                }
               >
                 <SelectTrigger id="subject">
                   <SelectValue placeholder="Select subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id}>
-                      {subject.name}
+                  {isLoadingSubjects ? (
+                    <SelectItem value="loading-subjects" disabled>
+                      Loading subjects...
                     </SelectItem>
-                  ))}
+                  ) : (
+                    subjects.map((subject) => (
+                      <SelectItem key={subject._id} value={subject._id}>
+                        {subject.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -303,19 +367,27 @@ export default function UploadPage() {
             <div className="space-y-2">
               <Label htmlFor="topic">Topic *</Label>
               <Select
-                value={selectedTopic}
-                onValueChange={setSelectedTopic}
-                disabled={!selectedSubject || topics.length === 0}
+                value={selectedTopicId}
+                onValueChange={setSelectedTopicId}
+                disabled={
+                  !selectedSubjectId || isLoadingTopics || topics.length === 0
+                }
               >
                 <SelectTrigger id="topic">
                   <SelectValue placeholder="Select topic" />
                 </SelectTrigger>
                 <SelectContent>
-                  {topics.map((topic) => (
-                    <SelectItem key={topic.id} value={topic.id}>
-                      {topic.name}
+                  {isLoadingTopics ? (
+                    <SelectItem value="loading-topics" disabled>
+                      Loading topics...
                     </SelectItem>
-                  ))}
+                  ) : (
+                    topics.map((topic) => (
+                      <SelectItem key={topic._id} value={topic._id}>
+                        {topic.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -325,7 +397,13 @@ export default function UploadPage() {
             {/* Material Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Material Title *</Label>
-              <Input id="title" placeholder="e.g., Complete Array Problems Guide" required />
+              <Input
+                id="title"
+                placeholder="e.g., Complete Array Problems Guide"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </div>
 
             {/* Material Description */}
@@ -336,6 +414,8 @@ export default function UploadPage() {
                 placeholder="Describe what this material covers, key topics, and who it's best for..."
                 rows={4}
                 required
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
 
@@ -349,7 +429,10 @@ export default function UploadPage() {
                     <span className="text-sm font-medium">{fileName}</span>
                     <button
                       type="button"
-                      onClick={() => setFileName("")}
+                      onClick={() => {
+                        setFileName("");
+                        setSelectedFile(null);
+                      }}
                       className="text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />
@@ -360,7 +443,9 @@ export default function UploadPage() {
                     <p className="text-sm text-muted-foreground mb-2">
                       Drag and drop your file here, or click to browse
                     </p>
-                    <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, PPT, PPTX (Max 50MB)</p>
+                    <p className="text-xs text-muted-foreground">
+                      PDF, DOC, DOCX, PPT, PPTX (Max 50MB)
+                    </p>
                   </>
                 )}
                 <Input
@@ -393,12 +478,12 @@ export default function UploadPage() {
                 {isSubmitting ? "Uploading..." : "Upload Material"}
               </Button>
               <Button type="button" variant="outline" asChild>
-                <Link href="/dashboard">Cancel</Link>
+                <Link href="/exams">Cancel</Link>
               </Button>
             </div>
           </form>
         </Card>
       </div>
     </div>
-  )
+  );
 }
