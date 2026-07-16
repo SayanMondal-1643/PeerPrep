@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReportMaterial } from "@/lib/hooks/use-reports";
 
@@ -16,11 +17,15 @@ export function ReportComponent({
   const [reportReason, setReportReason] = useState("");
   const [reportComment, setReportComment] = useState("");
   const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const reportMaterial = useReportMaterial();
 
   const handleSubmitReport = async () => {
+    setIsSubmitting(true);
+
     if (!reportReason) {
       alert("Please select a reason for the report");
+      setIsSubmitting(false);
       return;
     }
 
@@ -32,6 +37,8 @@ export function ReportComponent({
       });
     } catch {
       return;
+    } finally {
+      setIsSubmitting(false);
     }
 
     setReportSubmitted(true);
@@ -83,9 +90,17 @@ export function ReportComponent({
         {/* Submit Report Button */}
         <Button
           onClick={handleSubmitReport}
-          className="w-full bg-destructive hover:bg-destructive/90 text-white"
+          disabled={isSubmitting}
+          className="w-full bg-destructive text-white cursor-pointer hover:bg-destructive/90 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          Submit Report
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Report"
+          )}
         </Button>
       </div>
     )

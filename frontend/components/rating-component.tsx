@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRateMaterial } from "@/lib/hooks/use-ratings";
 
@@ -19,6 +19,7 @@ export function RatingComponent({
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(currentRating);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const rateMaterial = useRateMaterial();
 
   const handleRating = (rating: number) => {
@@ -26,10 +27,17 @@ export function RatingComponent({
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
+
     try {
-      await rateMaterial.mutateAsync({ materialId, ratingValue: selectedRating });
+      await rateMaterial.mutateAsync({
+        materialId,
+        ratingValue: selectedRating,
+      });
     } catch {
       return;
+    } finally {
+      setIsSubmitting(false);
     }
 
     onSubmit?.(selectedRating);
@@ -69,8 +77,20 @@ export function RatingComponent({
         </span>
       </div>
       {selectedRating > 0 && (
-        <Button onClick={handleSubmit} size="sm">
-          Submit Rating
+        <Button
+          onClick={handleSubmit}
+          size="sm"
+          disabled={isSubmitting || selectedRating <= 0}
+          className="cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Rating"
+          )}
         </Button>
       )}
       {isSubmitted && (
