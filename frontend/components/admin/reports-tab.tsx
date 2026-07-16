@@ -101,8 +101,7 @@ export default function ReportsTab() {
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
-            <option value="resolved">Resolved</option>
-            <option value="rejected">Rejected</option>
+            <option value="reviewed">Reviewed</option>
           </select>
         </div>
       </div>
@@ -188,83 +187,47 @@ export default function ReportsTab() {
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex flex-col items-center justify-center gap-1">
-                      {report.status === "pending" ? (
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-3 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:cursor-pointer"
-                            disabled={isPendingStatus}
-                            onClick={() =>
-                              void updateStatus(report, "resolved")
-                            }
-                          >
-                            Resolve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-3 border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:cursor-pointer"
-                            disabled={isPendingStatus}
-                            onClick={() =>
-                              void updateStatus(report, "rejected")
-                            }
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-1">
-                          <Badge
-                            variant="outline"
-                            className={
-                              report.status === "resolved"
-                                ? "border-green-200 bg-green-100 text-green-700"
-                                : "border-red-200 bg-red-100 text-red-700"
-                            }
-                          >
-                            {report.status === "resolved"
-                              ? "Resolved"
-                              : "Rejected"}
-                          </Badge>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-6 w-6"
-                                disabled={isPendingStatus}
-                                aria-label={`Change status for ${report.reporterId.name}`}
-                              >
-                                <ChevronDown className="h-3 w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onSelect={() =>
-                                  void updateStatus(report, "pending")
-                                }
-                              >
-                                Pending
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onSelect={() =>
-                                  void updateStatus(report, "resolved")
-                                }
-                              >
-                                Resolved
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onSelect={() =>
-                                  void updateStatus(report, "rejected")
-                                }
-                              >
-                                Rejected
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      )}
+                      <div className="flex items-center justify-center gap-1">
+                        <Badge
+                          variant="outline"
+                          className={
+                            report.status === "pending"
+                              ? "border-amber-200 bg-amber-50 text-amber-700"
+                              : "border-green-200 bg-green-100 text-green-700"
+                          }
+                        >
+                          {report.status === "pending" ? "Pending" : "Reviewed"}
+                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              disabled={isPendingStatus}
+                              aria-label={`Change status for ${report.reporterId.name}`}
+                            >
+                              <ChevronDown className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                void updateStatus(report, "pending")
+                              }
+                            >
+                              Pending
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                void updateStatus(report, "reviewed")
+                              }
+                            >
+                              Reviewed
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                       {errorMessage ? (
                         <p className="text-xs text-red-600">{errorMessage}</p>
                       ) : null}

@@ -13,7 +13,7 @@ export interface Report {
   reportReason: string;
   comment?: string;
   reportDate: string;
-  status: "pending" | "resolved" | "rejected";
+  status: "pending" | "reviewed";
 }
 
 export interface ApiReportsResponse {
