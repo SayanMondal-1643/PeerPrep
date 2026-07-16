@@ -9,7 +9,9 @@ export const GET = catchAsync(async (req: NextRequest) => {
   const page = Number(searchParams.get("page") || 1);
   const limit = Number(searchParams.get("limit") || 0);
 
-  let query = Material.find().populate("userId", USER_REF_SELECT).sort({ uploadDate: -1 });
+  let query = Material.find()
+    .populate("userId", USER_REF_SELECT)
+    .sort({ uploadDate: -1 });
 
   if (limit > 0) {
     query = query.skip((page - 1) * limit).limit(limit);

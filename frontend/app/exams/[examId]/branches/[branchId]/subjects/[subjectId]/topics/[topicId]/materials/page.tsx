@@ -31,7 +31,7 @@ export default function MaterialsPage() {
 
   const { data, isLoading, isError } = useMaterialsByTopic(topicId);
 
-  const materials = data?.data ?? [];
+  const materials = (data?.data ?? []).filter((m) => m.status === "approved");
   const exam = data?.exam ?? "Exam";
   const branch = data?.branch ?? "Branch";
   const subject = data?.subject ?? "Subject";
