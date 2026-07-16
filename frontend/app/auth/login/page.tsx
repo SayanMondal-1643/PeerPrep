@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
+import { ApiClientError } from "@/lib/api-client";
 
 function LoginForm() {
   const router = useRouter();
@@ -38,7 +39,11 @@ function LoginForm() {
       setRedirectTo(null);
       router.push(destination);
     } catch (err) {
-      setError("Login failed. Please try again.");
+      setError(
+        err instanceof ApiClientError
+          ? err.message
+          : "Login failed. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }

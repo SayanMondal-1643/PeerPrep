@@ -18,9 +18,14 @@ export interface IUser extends Document {
   verificationStatus?: "pending" | "verified" | "rejected";
   createdAt: Date;
 
+  isEmailVerified: boolean;
+  emailVerificationOTP?: string;
+  emailVerificationOTPExpires?: Date;
+
   correctPassword(candidatePassword: string): Promise<boolean>;
   changedPasswordAfter(jwtTimestamp: number): boolean;
   createPasswordResetToken(): string;
+  createEmailVerificationOTP(): string;
 }
 
 const userSchema = new Schema<IUser>({
@@ -59,6 +64,10 @@ const userSchema = new Schema<IUser>({
     enum: ["pending", "verified", "rejected"],
   },
   createdAt: { type: Date, default: Date.now },
+
+  isEmailVerified: { type: Boolean, default: false },
+  emailVerificationOTP: { type: String, select: false },
+  emailVerificationOTPExpires: { type: Date, select: false },
 });
 
 userSchema.pre("save", async function () {
@@ -98,12 +107,23 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 
+userSchema.methods.createEmailVerificationOTP = function () {
+  const otp = crypto.randomInt(100000, 1000000).toString();
+
+  this.emailVerificationOTP = crypto.createHash("sha256").update(otp).digest("hex");
+  this.emailVerificationOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+  return otp;
+};
+
 userSchema.set("toJSON", {
   transform: (_doc, ret: any) => {
     delete ret.password;
     delete ret.passwordChangedAt;
     delete ret.passwordResetToken;
     delete ret.passwordResetExpires;
+    delete ret.emailVerificationOTP;
+    delete ret.emailVerificationOTPExpires;
     delete ret.__v;
     delete ret.createdAt;
 

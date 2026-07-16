@@ -11,12 +11,13 @@ import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/lib/auth-context";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { ApiClientError } from "@/lib/api-client";
 import type { UserRole } from "@/lib/user-types";
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signup, redirectTo, setRedirectTo } = useAuth();
+  const { signup, verifyOtp, resendOtp, redirectTo, setRedirectTo } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [role, setRole] = useState<UserRole>("student");
@@ -33,6 +34,14 @@ function SignupForm() {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     // Check for redirect URL in query params
@@ -127,7 +136,7 @@ function SignupForm() {
         return;
       }
 
-      await signup({
+      const result = await signup({
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -136,16 +145,128 @@ function SignupForm() {
         idProofUrl: formData.idProofUrl,
       });
 
+      setPendingEmail(result.email);
+      setStep("otp");
+    } catch (err) {
+      setError(
+        err instanceof ApiClientError
+          ? err.message
+          : "Signup failed. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setOtpError("");
+
+    if (!otp.trim()) {
+      setOtpError("Please enter the verification code");
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      await verifyOtp(pendingEmail, otp.trim());
+
       const destination =
         redirectTo || (searchParams.get("redirect") ?? "/exams");
       setRedirectTo(null);
       router.push(destination);
     } catch (err) {
-      setError("Signup failed. Please try again.");
+      setOtpError(
+        err instanceof ApiClientError
+          ? err.message
+          : "Verification failed. Please try again.",
+      );
     } finally {
-      setIsLoading(false);
+      setIsVerifying(false);
     }
   };
+
+  const handleResendOtp = async () => {
+    setOtpError("");
+    setResendMessage("");
+    setIsResending(true);
+
+    try {
+      await resendOtp(pendingEmail);
+      setResendMessage("A new code has been sent to your email.");
+    } catch (err) {
+      setOtpError(
+        err instanceof ApiClientError
+          ? err.message
+          : "Unable to resend the code right now.",
+      );
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  if (step === "otp") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+        <Card className="w-full max-w-md border-border">
+          <div className="p-8">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Verify your email
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                We sent a 6-digit code to <strong>{pendingEmail}</strong>. Enter it
+                below to activate your account.
+              </p>
+            </div>
+
+            <form onSubmit={handleVerifyOtp} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="otp">Verification Code</Label>
+                <Input
+                  id="otp"
+                  name="otp"
+                  inputMode="numeric"
+                  placeholder="123456"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="bg-card border-border focus:ring-primary text-center text-lg tracking-widest"
+                  maxLength={6}
+                />
+              </div>
+
+              {otpError && (
+                <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                  {otpError}
+                </div>
+              )}
+
+              {resendMessage && (
+                <div className="p-3 rounded-md bg-green-50 border border-green-200 text-green-700 text-sm">
+                  {resendMessage}
+                </div>
+              )}
+
+              <Button type="submit" className="w-full" disabled={isVerifying}>
+                {isVerifying ? "Verifying..." : "Verify Account"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleResendOtp}
+                disabled={isResending}
+              >
+                {isResending ? "Sending..." : "Resend Code"}
+              </Button>
+            </form>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">

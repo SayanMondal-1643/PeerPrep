@@ -3,14 +3,23 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
-import { User, SignupData, ApiAuthResponse, MeResponse } from "./user-types";
+import {
+  User,
+  SignupData,
+  ApiAuthResponse,
+  MeResponse,
+  SignupResponse,
+  MessageResponse,
+} from "./user-types";
 
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (data: SignupData) => Promise<void>;
+  signup: (data: SignupData) => Promise<{ email: string }>;
+  verifyOtp: (email: string, otp: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   redirectTo: string | null;
   setRedirectTo: (path: string | null) => void;
@@ -49,12 +58,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signup = async (data: SignupData) => {
-    const responseData = await apiFetch<ApiAuthResponse>("/users/signup", {
+    const responseData = await apiFetch<SignupResponse>("/users/signup", {
       method: "POST",
       body: data,
     });
 
-    queryClient.setQueryData(["currentUser"], responseData.data);
+    return responseData.data;
+  };
+
+  const verifyOtp = async (email: string, otp: string) => {
+    const data = await apiFetch<ApiAuthResponse>("/users/verifyOtp", {
+      method: "POST",
+      body: { email, otp },
+    });
+
+    queryClient.setQueryData(["currentUser"], data.data);
+  };
+
+  const resendOtp = async (email: string) => {
+    await apiFetch<MessageResponse>("/users/resendOtp", {
+      method: "POST",
+      body: { email },
+    });
   };
 
   const logout = async () => {
@@ -72,6 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         signup,
+        verifyOtp,
+        resendOtp,
         logout,
         redirectTo,
         setRedirectTo,

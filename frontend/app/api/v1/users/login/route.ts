@@ -19,6 +19,10 @@ export const POST = catchAsync(async (req: NextRequest) => {
     throw new AppError("Incorrect email or password.", 401);
   }
 
+  if (!user.isEmailVerified) {
+    throw new AppError("Please verify your email before logging in.", 403);
+  }
+
   if (user.accountStatus === "suspended") {
     throw new AppError("Your account has been suspended.", 403);
   }

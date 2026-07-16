@@ -28,3 +28,14 @@ export interface MeResponse {
   status: string;
   data: User;
 }
+
+export interface SignupResponse {
+  status: string;
+  message: string;
+  data: { email: string };
+}
+
+export interface MessageResponse {
+  status: string;
+  message: string;
+}
